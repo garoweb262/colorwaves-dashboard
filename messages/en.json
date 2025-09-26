@@ -1,0 +1,374 @@
+{
+    "company": {
+        "name": "AmalTech",
+        "tagline": "Enabling Digital Industries",
+        "description": "Leading manufacturer of smart devices, IoT solutions, and industrial automation products"
+    },
+    "newsletter": {
+        "title": "Subscribe to AmalTech Updates",
+        "description": "Stay updated with our latest innovations, product launches, and industry insights",
+        "button": "Subscribe"
+    },
+    "navigation": {
+        "store": "Visit Store",
+        "getQuote": "Get Quotation",
+        "exploreProducts": "Explore Products",
+        "search": "Search Products"
+    },
+    "home": {
+        "label": "Home",
+        "title": "AmalTech - Enabling Digital Industries",
+        "description": "Leading manufacturer of smart devices, IoT solutions, and industrial automation products",
+        "headline": "Enabling Digital Industries",
+        "subline": "AmalTech is a leading manufacturer of smart devices, IoT solutions, and industrial automation products. We specialize in PCB design, embedded systems, and innovative technology solutions that power the future.",
+        "hero": {
+            "title": "WE ARE BUILDING THE FUTURE OF STEEL",
+            "subtitle": "Leading the transformation of steel manufacturing through innovative technology solutions",
+            "description": "From smart meters to industrial automation, we're building the technology that powers tomorrow's steel industries with cutting-edge IoT solutions and advanced manufacturing capabilities.",
+            "tagline": "Founded in 1995",
+            "cta": {
+                "text": "LEARN MORE",
+                "href": "/about",
+                "variant": "primary"
+            },
+            "secondaryCta": {
+                "text": "Explore Solutions",
+                "href": "/solutions",
+                "variant": "outline"
+            },
+            "background": {
+                "type": "gradient",
+                "gradient": "bg-gradient-to-br from-orange-400 via-red-500 to-orange-600",
+                "overlay": false
+            },
+            "stats": {
+                "innovation": {
+                    "value": "25+",
+                    "label": "Years of Innovation"
+                },
+                "projects": {
+                    "value": "100+",
+                    "label": "Steel Projects"
+                },
+                "countries": {
+                    "value": "15+",
+                    "label": "Countries Served"
+                },
+                "certification": {
+                    "value": "ISO",
+                    "label": "Quality Certified"
+                }
+            }
+        },
+        "stats": {
+            "title": "Our Impact",
+            "years": "15+ Years",
+            "products": "50+ Products",
+            "countries": "25+ Countries",
+            "certifications": "ISO Certified"
+        },
+        "sections": {
+            "featuredProducts": "Featured Products",
+            "capabilities": "Manufacturing Capabilities",
+            "partners": "Partners & Certifications",
+            "rd": "R&D Highlights",
+            "latestNews": "Latest Updates"
+        }
+    },
+    "solutions": {
+        "label": "Business Solutions",
+        "title": "Industry Solutions",
+        "description": "AmalTech as an enabler of digital industries",
+        "overview": {
+            "title": "Enabling Digital Industries",
+            "description": "We provide comprehensive solutions that enable businesses to thrive in the digital age"
+        },
+        "industries": {
+            "title": "Industries We Serve",
+            "healthcare": "Healthcare",
+            "industrial": "Industrial Automation",
+            "communications": "Communications",
+            "dataInfrastructure": "Data Infrastructure",
+            "consumerDevices": "Consumer Devices",
+            "consumer": "Consumer Electronics",
+            "infrastructure": "Infrastructure",
+            "sensors": "Sensors",
+            "transportation": "Transportation"
+        },
+        "cta": "Get Quotation"
+    },
+    "products": {
+        "label": "Consumer Products",
+        "title": "Our Products",
+        "description": "Explore AmalTech's comprehensive range of smart devices and IoT solutions",
+        "categories": {
+            "consumer": "Consumer Electronics",
+            "industrial": "Industrial Products",
+            "smart": "Smart Devices & IoT",
+            "medical": "Medical Devices",
+            "utility": "Utility Accessories"
+        },
+        "featured": {
+            "amalAerio": "Amal Aerio",
+            "smartMeters": "Smart Energy & Water Meters",
+            "posSystems": "POS Systems",
+            "gasMonitoring": "Gas Monitoring",
+            "fireAlarm": "Fire Alarm Panels",
+            "chargers": "Chargers",
+            "smartValves": "Smart Valves"
+        },
+        "search": {
+            "title": "Product Search",
+            "description": "Already know what you need? Easily find your perfect product using these convenient filters.",
+            "filters": {
+                "productType": "Product Type",
+                "voltageType": "Voltage Type",
+                "torque": "Torque",
+                "voltage": "Voltage",
+                "power": "Power",
+                "accessoryType": "Accessory Type",
+                "outputOrientation": "Output Orientation",
+                "gearboxType": "Gearbox Type",
+                "reductionRatio": "Reduction Ratio",
+                "continuousTorque": "Continuous Torque"
+            },
+            "options": {
+                "motorOnly": "Motor only",
+                "gearedMotor": "Geared motor",
+                "gearboxOnly": "Gearbox only",
+                "accessories": "Accessories",
+                "pmdc": "PMDC",
+                "bldc": "BLDC",
+                "ac": "AC",
+                "acdc": "ACDC",
+                "rightAngle": "Right-angle",
+                "inline": "In-line",
+                "planetary": "Planetary",
+                "spur": "Spur",
+                "wormWheel": "Worm wheel"
+            }
+        }
+    },
+    "services": {
+        "label": "Services",
+        "title": "Our Services",
+        "description": "Comprehensive R&D, engineering, and manufacturing services",
+        "rd": {
+            "title": "R&D Services",
+            "description": "Innovation-driven research and development for next-generation products"
+        },
+        "hardware": {
+            "title": "Hardware Engineering",
+            "description": "Expert hardware design and engineering solutions"
+        },
+        "pcb": {
+            "title": "PCB Design & Manufacturing",
+            "description": "Advanced PCB design and manufacturing capabilities"
+        },
+        "embedded": {
+            "title": "Embedded Software Development",
+            "description": "Custom embedded software solutions for IoT and automation"
+        }
+    },
+    "expertise": {
+        "label": "Expertise",
+        "title": "Our Expertise",
+        "description": "Specialized knowledge and capabilities in technology innovation",
+        "npi": {
+            "title": "NPI Process",
+            "description": "New Product Introduction process visualization"
+        },
+        "certifications": {
+            "title": "Certifications",
+            "description": "ISO, CE, SON and other quality certifications"
+        },
+        "quality": {
+            "title": "Quality & Lifecycle",
+            "description": "Assurance workflows and quality management"
+        }
+    },
+    "capabilities": {
+        "label": "Capabilities",
+        "title": "Manufacturing Capabilities",
+        "description": "Our comprehensive manufacturing and engineering capabilities",
+        "manufacturing": {
+            "title": "Manufacturing Infrastructure",
+            "description": "SMT, PCB, Mechanical Engineering capabilities"
+        },
+        "testing": {
+            "title": "Testing & QA",
+            "description": "Clean, technical section with facility images"
+        },
+        "supplyChain": {
+            "title": "Supply Chain",
+            "description": "Process visualization showing logistics and speed-to-market"
+        },
+        "supply": {
+            "title": "Supply Chain Management",
+            "description": "Comprehensive supply chain management and logistics solutions"
+        }
+    },
+    "about": {
+        "label": "About Us",
+        "title": "About AmalTech",
+        "description": "Learn about AmalTech's mission, vision, and commitment to innovation",
+        "overview": {
+            "title": "Company Overview",
+            "description": "AmalTech is a leading technology company specializing in smart devices, IoT solutions, and industrial automation. Founded with a vision to enable digital transformation across industries, we have grown into a trusted partner for businesses worldwide."
+        },
+        "mission": {
+            "title": "Mission & Vision",
+            "mission": "To enable digital industries through innovative technology solutions that drive efficiency, sustainability, and growth.",
+            "vision": "To be the global leader in smart device manufacturing and IoT solutions, empowering industries to thrive in the digital age."
+        },
+        "leadership": {
+            "title": "Leadership Team",
+            "description": "Meet the executives and board members driving AmalTech's success"
+        },
+        "csr": {
+            "title": "CSR & Sustainability",
+            "description": "Our commitment to social responsibility and environmental sustainability"
+        },
+        "timeline": {
+            "title": "Company Milestones",
+            "description": "Key moments in AmalTech's journey of innovation and growth"
+        }
+    },
+    "newsroom": {
+        "label": "Newsroom",
+        "title": "Latest News & Updates",
+        "description": "Stay updated with AmalTech's latest news, insights, and announcements",
+        "filters": {
+            "all": "All News",
+            "press": "Press Releases",
+            "events": "Events",
+            "insights": "Insights",
+            "whitePapers": "White Papers"
+        },
+        "media": {
+            "title": "Media Resources",
+            "description": "Download press kits, images, and media resources"
+        }
+    },
+    "careers": {
+        "label": "Careers",
+        "title": "Join Our Team",
+        "description": "Build your career with AmalTech and help shape the future of technology",
+        "life": {
+            "title": "Life at AmalTech",
+            "description": "Discover our culture, values, and work environment"
+        },
+        "positions": {
+            "title": "Open Positions",
+            "description": "Explore opportunities to join our team"
+        },
+        "internships": {
+            "title": "Internships",
+            "description": "Gain valuable experience with our internship programs"
+        },
+        "openRoles": {
+            "title": "Open Positions",
+            "description": "Explore opportunities to join our team"
+        },
+        "lifeAtAmalTech": {
+            "title": "Life at AmalTech",
+            "description": "Discover our culture, values, and work environment"
+        },
+        "applyNow": "Apply Now"
+    },
+    "contact": {
+        "label": "Contact",
+        "title": "Get in Touch",
+        "description": "Contact AmalTech for sales, support, or partnership inquiries",
+        "form": {
+            "title": "Contact Form",
+            "description": "Multi-purpose form for sales, support, and partnership inquiries",
+            "name": "Name",
+            "email": "Email",
+            "company": "Company",
+            "inquiry": "Inquiry Type",
+            "message": "Message",
+            "submit": "Send Message"
+        },
+        "inquiryTypes": {
+            "sales": "Sales Inquiry",
+            "support": "Technical Support",
+            "partnership": "Partnership",
+            "general": "General Inquiry"
+        },
+        "offices": {
+            "title": "Our Offices",
+            "description": "Find our office locations and contact information"
+        },
+        "socials": {
+            "title": "Follow Us",
+            "description": "Connect with us on social media"
+        }
+    },
+    "partners": {
+        "label": "Partners",
+        "title": "Partner with AmalTech",
+        "description": "Join our global network of partners and distributors",
+        "distributor": {
+            "title": "Distributor Program",
+            "description": "Become an authorized distributor of AmalTech products"
+        },
+        "reseller": {
+            "title": "Reseller Program",
+            "description": "Resell AmalTech solutions in your market"
+        },
+        "support": {
+            "title": "Support Partner",
+            "description": "Provide technical support and services"
+        },
+        "programs": {
+            "title": "Partner Programs",
+            "description": "Choose the partnership program that best fits your business"
+        },
+        "tiers": {
+            "title": "Partner Tiers",
+            "description": "Our tiered partnership structure rewards performance"
+        },
+        "success": {
+            "title": "Partner Success Stories",
+            "description": "See how our partners are achieving remarkable results"
+        }
+    },
+    "support": {
+        "label": "Support",
+        "title": "Technical Support",
+        "description": "Get help with AmalTech products and solutions",
+        "quality": "Quality Assurance",
+        "regulatory": "Regulatory Compliance",
+        "technical": "Technical Support",
+        "training": {
+            "title": "Training Programs",
+            "description": "Comprehensive training on products and solutions"
+        },
+        "documentation": {
+            "title": "Documentation",
+            "description": "Product manuals, datasheets, and technical guides"
+        },
+        "contact": "Contact Support"
+    },
+    "legal": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Use",
+        "cookies": "Cookie Policy",
+        "accessibility": "Accessibility",
+        "sitemap": "Sitemap"
+    },
+    "footer": {
+        "quickLinks": "Quick Links",
+        "company": "Company",
+        "legal": "Legal",
+        "social": "Social Media",
+        "newsletter": "Newsletter"
+    },
+    "social": {
+        "linkedin": "LinkedIn",
+        "twitter": "Twitter",
+        "facebook": "Facebook",
+        "youtube": "YouTube"
+    }
+}
