@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { RouteGuard } from "@/components";
+import { DashboardRouteGuard } from "@/components";
 import { Header } from "@/components/Header";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
@@ -87,7 +87,7 @@ export default async function LocaleLayout({
     <html lang={params.locale}>
       <body suppressHydrationWarning={true}>
         <NextIntlClientProvider messages={messages}>
-          <RouteGuard>
+          <DashboardRouteGuard>
             <div className="min-h-screen flex flex-col w-screen">
               <Header locale={params.locale} />
 
@@ -97,7 +97,7 @@ export default async function LocaleLayout({
               {/* Main content with layout wrapper */}
               <main className="flex-1 relative z-10">{children}</main>
             </div>
-          </RouteGuard>
+          </DashboardRouteGuard>
         </NextIntlClientProvider>
       </body>
     </html>

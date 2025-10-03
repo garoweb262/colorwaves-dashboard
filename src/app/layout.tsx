@@ -1,18 +1,31 @@
 import { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { Maven_Pro } from "next/font/google";
 import { baseURL } from "@/app/resources/config";
 import { UserProvider } from "@/contexts/UserContext";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const mavenPro = Maven_Pro({
+  subsets: ["latin"],
+  variable: "--font-maven-pro",
+});
 
 export const metadata: Metadata = {
   title: {
-    default: "AmalTech CMS",
-    template: `%s | AmalTech CMS`,
+    default: "ColorWaves Dashboard",
+    template: `%s | ColorWaves Dashboard`,
   },
-  description: "Modern content management system for Amal Technologies",
-  keywords: ["CMS", "Content Management", "AmalTech", "Technology"],
-  authors: [{ name: "AmalTech" }],
-  creator: "AmalTech",
-  publisher: "AmalTech",
+  description: "Modern dashboard and content management system for ColorWaves",
+  keywords: ["Dashboard", "Content Management", "ColorWaves", "Design System"],
+  authors: [{ name: "ColorWaves" }],
+  creator: "ColorWaves",
+  publisher: "ColorWaves",
   robots: {
     index: true,
     follow: true,
@@ -28,24 +41,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en",
     url: baseURL,
-    title: "AmalTech CMS",
-    description: "Modern content management system for Amal Technologies",
-    siteName: "AmalTech CMS",
+    title: "ColorWaves Dashboard",
+    description: "Modern dashboard and content management system for ColorWaves",
+    siteName: "ColorWaves Dashboard",
     images: [
       {
-        url: `${baseURL}/og-image.jpg`,
+        url: `${baseURL}/images/logo/ColorWaves_Logo Horizontal White.png`,
         width: 1200,
         height: 630,
-        alt: "AmalTech CMS",
+        alt: "ColorWaves Dashboard",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AmalTech CMS",
-    description: "Modern content management system for Amal Technologies",
-    images: [`${baseURL}/og-image.jpg`],
-    creator: "@amaltech",
+    title: "ColorWaves Dashboard",
+    description: "Modern dashboard and content management system for ColorWaves",
+    images: [`${baseURL}/images/logo/ColorWaves_Logo Horizontal White.png`],
+    creator: "@colorwaves",
   },
   icons: {
     icon: "/favicon.ico",
@@ -65,10 +78,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true}>
-        <UserProvider>
-          {children}
-        </UserProvider>
+      <body className={`${inter.variable} ${mavenPro.variable} font-sans antialiased`} suppressHydrationWarning={true}>
+        <QueryProvider>
+          <UserProvider>
+            {children}
+          </UserProvider>
+        </QueryProvider>
       </body>
     </html>
   );

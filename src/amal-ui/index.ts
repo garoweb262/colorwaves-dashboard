@@ -9,9 +9,13 @@ export type { ResponsiveValue } from "./types";
 
 // Component Exports
 export * from "./components/layout";
-export * from "./components/forms";
 export * from "./components/navigation";
 export * from "./components/overlay";
+export * from "./components/data";
+export * from "./components";
+
+// CRUD System
+export * from "./crud";
 
 // Re-export commonly used utilities
 export {
@@ -31,9 +35,9 @@ export {
 
 // Export design system configuration
 export const designSystem = {
-  name: "Amal UI",
+  name: "ColorWaves UI",
   version: "1.0.0",
-  description: "Modern design system for Amal Technologies",
+  description: "Modern design system for ColorWaves",
   tokens: {
     colors: {
       primary: "#3b82f6",
@@ -124,8 +128,9 @@ export const componentCategories = {
   forms: ["Input", "Select", "Button", "Form", "FormField"],
   feedback: ["Alert", "Toast", "Progress", "Spinner", "Badge"],
   overlay: ["Modal", "Sheet", "Popover", "Tooltip", "Dropdown"],
-  data: ["Table", "Card", "Avatar", "Image", "Icon"],
+  data: ["Table", "Card", "Avatar", "Image", "Icon", "DataTable", "SearchFilter", "Sorting", "Pagination"],
   typography: ["Text", "Heading", "Link"],
+  crud: ["CRUDTable", "CRUDFormModal", "CRUDViewModal", "CRUDDeleteModal", "StatusUpdateModal"],
 } as const;
 
 // Export animation categories
@@ -175,5 +180,20 @@ export const utilityCategories = {
     "setSessionStorage",
     "getSessionStorage",
     "removeSessionStorage",
+  ],
+  crud: [
+    "createColumn",
+    "createTextFilter",
+    "createSelectFilter",
+    "createBooleanFilter",
+    "createFormField",
+    "createStatusOptions",
+    "getStatusColor",
+    "getStatusLabel",
+    "generateId",
+    "deepClone",
+    "deepMerge",
+    "getNestedValue",
+    "setNestedValue",
   ],
 } as const;

@@ -26,28 +26,29 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const { handleMouseMove, background } = useMotionGradient({
       radius: 100,
-      color: "#f97316", // Orange accent color
+      color: "#70369D", // ColorWaves violet
     });
     const { visible, setVisible } = useMotionState();
 
     const baseClasses =
-      "inline-flex items-center justify-between font-medium uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg";
+      "inline-flex items-center justify-center font-medium uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg";
 
+      
     const variantClasses = {
       primary:
-        "bg-amaltech-blue text-white hover:bg-amaltech-orange focus:ring-amaltech-blue active:bg-amaltech-orange/90",
+        "bg-palette-violet text-white hover:bg-palette-indigo focus:ring-palette-violet active:bg-palette-indigo/90",
       secondary:
-        "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500 active:bg-orange-700",
+        "bg-palette-indigo text-white hover:bg-palette-violet focus:ring-palette-indigo active:bg-palette-violet/90",
       accent:
-        "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500 active:bg-orange-700",
+        "bg-palette-blue text-white hover:bg-palette-sky focus:ring-palette-blue active:bg-palette-sky/90",
       ghost:
         "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 active:bg-gray-200",
       outline:
-        "border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-gray-500 active:bg-gray-100",
+        "border border-palette-violet text-palette-violet hover:bg-palette-violet hover:text-white focus:ring-palette-violet active:bg-palette-violet/90",
       destructive:
-        "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 active:bg-red-800",
+        "bg-palette-red text-white hover:bg-palette-red/90 focus:ring-palette-red active:bg-palette-red/80",
       anchor:
-        "bg-transparent text-amaltech-blue hover:text-amaltech-orange focus:ring-amaltech-blue",
+        "bg-transparent text-palette-violet hover:text-palette-indigo focus:ring-palette-violet",
     };
 
     const sizeClasses = {
@@ -67,8 +68,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const BottomGradient = () => {
       return (
         <>
-          <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
-          <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
+          <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-palette-blue to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+          <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-palette-violet to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
         </>
       );
     };
@@ -80,7 +81,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <motion.button
             ref={ref}
             className={cn(
-              "inline-flex items-center justify-between font-medium uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed",
+              "inline-flex items-center justify-center font-medium uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed",
               variantClasses[variant],
               anchorSizeClasses[size],
               widthClass,
@@ -112,7 +113,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
           {/* Animated hover line with shimmer effect */}
           <motion.div
-            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amaltech-orange to-transparent opacity-0"
+            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-palette-violet to-transparent opacity-0"
             initial={{ opacity: 0, scaleX: 0 }}
             whileHover={{
               opacity: 1,

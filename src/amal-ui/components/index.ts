@@ -7,8 +7,10 @@ export {
   CardDescription,
   CardContent,
 } from "./Card";
+export { Table } from "./Table";
+export { Badge } from "./Badge";
 export { Tooltip } from "./Tooltip";
-export { Input, Select, Checkbox, Textarea } from "./forms";
+export { Input, Select, Checkbox, Textarea, Switch } from "./forms";
 
 // Layout Components
 export { BackgroundGridLines } from "./BackgroundGridLines";
@@ -27,7 +29,6 @@ export { ToastProvider, useToast } from "./ToastProvider";
 // Interactive Components
 export { Dropdown } from "./Dropdown";
 export { Alert } from "./Alert";
-export { Badge } from "./Badge";
 export { Spinner } from "./Spinner";
 export { Avatar } from "./Avatar";
 export { Progress } from "./Progress";
@@ -35,8 +36,10 @@ export { Accordion } from "./Accordion";
 export { Tabs } from "./Tabs";
 
 // Data Display Components
-export { Table } from "./Table";
 export { Popover } from "./Popover";
+
+// Data Components
+export * from "./data";
 
 // Content Components
 export { Text } from "./Text";

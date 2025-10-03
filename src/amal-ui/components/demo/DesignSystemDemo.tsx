@@ -350,11 +350,8 @@ export const DesignSystemDemo = () => {
               </Button>
             </div>
             <Drawer
-              isOpen={isDrawerOpen}
-              onClose={() => setIsDrawerOpen(false)}
-              title="Example Drawer"
-              side="right"
-              size="md"
+              open={isDrawerOpen}
+              onOpenChange={setIsDrawerOpen}
             >
               <p className="text-gray-600 mb-4">
                 This is an example drawer that slides in from the side.

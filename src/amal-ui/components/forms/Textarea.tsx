@@ -93,13 +93,13 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               ref={ref}
               rows={rows}
               className={cn(
-                "shadow-input dark:placeholder-text-neutral-600 flex w-full border-none bg-white text-sm text-black transition duration-400 group-hover/textarea:shadow-none file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:shadow-[0px_0px_1px_1px_#404040] dark:focus-visible:ring-orange-600 resize-none border border-gray-200",
+                "flex w-full border border-gray-300 bg-white text-sm text-black transition duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus:border-palette-violet focus:outline-none focus:ring-1 focus:ring-palette-violet disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:border-gray-600 dark:focus:border-palette-violet dark:focus:ring-palette-violet resize-none",
                 sizeClasses[size],
                 widthClass,
                 leftIcon ? "pl-10" : "",
                 rightIcon ? "pr-10" : "",
                 error &&
-                  "border-red-300 focus-visible:ring-red-400 dark:focus-visible:ring-red-600"
+                  "border-palette-red focus:border-palette-red focus:ring-palette-red dark:focus:border-palette-red dark:focus:ring-palette-red"
               )}
               {...props}
             />

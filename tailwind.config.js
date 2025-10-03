@@ -263,22 +263,45 @@ module.exports = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-  		fontFamily: {
-  			sans: [
-  				'Brandon Grotesque',
-  				'system-ui',
-  				'sans-serif'
-  			],
-  			heading: [
-  				'Sofia Pro',
-  				'system-ui',
-  				'sans-serif'
-  			],
-  			mono: [
-  				'Source Code Pro',
-  				'monospace'
-  			]
-  		},
+		fontFamily: {
+			sans: [
+				'var(--font-inter)',
+				'Inter',
+				'system-ui',
+				'-apple-system',
+				'BlinkMacSystemFont',
+				'Segoe UI',
+				'Roboto',
+				'Helvetica Neue',
+				'Arial',
+				'sans-serif'
+			],
+			heading: [
+				'var(--font-maven-pro)',
+				'Maven Pro',
+				'var(--font-inter)',
+				'Inter',
+				'system-ui',
+				'sans-serif'
+			],
+			display: [
+				'var(--font-maven-pro)',
+				'Maven Pro',
+				'var(--font-inter)',
+				'Inter',
+				'system-ui',
+				'sans-serif'
+			],
+			mono: [
+				'ui-monospace',
+				'SFMono-Regular',
+				'SF Mono',
+				'Consolas',
+				'Liberation Mono',
+				'Menlo',
+				'monospace'
+			]
+		},
   		keyframes: {
   			'accordion-down': {
   				from: {

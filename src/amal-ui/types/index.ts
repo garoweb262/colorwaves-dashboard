@@ -271,15 +271,7 @@ export interface TableColumn {
   render?: (value: any, row: any) => ReactNode;
 }
 
-// Pagination Types
-export interface PaginationProps extends BaseComponentProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  showFirstLast?: boolean;
-  showPrevNext?: boolean;
-  size?: "sm" | "md" | "lg";
-}
+// Pagination Types - moved to components/data/Pagination.tsx to avoid conflicts
 
 // Breadcrumb Types
 export interface BreadcrumbProps extends BaseComponentProps {

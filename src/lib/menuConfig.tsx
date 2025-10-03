@@ -1,3 +1,5 @@
+"use client";
+import React from "react";
 import {
   LayoutDashboard,
   FileText,
@@ -13,6 +15,8 @@ import {
   Palette,
   HelpCircle,
   ChevronRight,
+  Newspaper,
+  BookOpen,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -32,9 +36,14 @@ export interface Role {
 
 export const roles: Role[] = [
   {
-    id: "admin",
+    id: "super-admin",
     name: "Super Administrator",
     description: "Full access to all features and settings"
+  },
+  {
+    id: "admin",
+    name: "Administrator",
+    description: "Administrative access to most features"
   },
   {
     id: "brand",
@@ -45,6 +54,11 @@ export const roles: Role[] = [
     id: "sales",
     name: "Sales Manager",
     description: "Manage sales, orders, and customer relationships"
+  },
+  {
+    id: "support",
+    name: "Support",
+    description: "Customer support and basic content management"
   }
 ];
 
@@ -53,87 +67,95 @@ export const menuItems: MenuItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
-    roles: ["admin", "brand", "sales"]
+    roles: ["super-admin", "admin", "brand", "sales", "support"]
   },
   {
-    title: "Website Content",
-    href: "/content",
+    title: "Users",
+    href: "/users",
+    icon: <Users className="h-5 w-5" />,
+    roles: ["super-admin", "admin"]
+  },
+  {
+    title: "Services",
+    href: "/services",
+    icon: <Settings className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "Website Contents",
+    href: "/website-contents",
     icon: <FileText className="h-5 w-5" />,
     children: [
-      { title: "Pages", href: "/content/pages", icon: <FileText className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Posts", href: "/content/posts", icon: <FileText className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Media", href: "/content/media", icon: <Image className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Templates", href: "/content/templates", icon: <FileText className="h-4 w-4" />, roles: ["admin"] },
+      { title: "Projects", href: "/projects", icon: <FileText className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
+     { title: "Team", href: "/team", icon: <Users className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
     ],
-    roles: ["admin", "brand"]
+    roles: ["super-admin", "admin", "brand"]
   },
   {
-    title: "E-commerce",
-    href: "/ecommerce",
-    icon: <ShoppingCart className="h-5 w-5" />,
-    children: [
-      { title: "Products", href: "/ecommerce/products", icon: <ShoppingCart className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Orders", href: "/ecommerce/orders", icon: <FileText className="h-4 w-4" />, roles: ["admin", "sales"] },
-      { title: "Inventory", href: "/ecommerce/inventory", icon: <Database className="h-4 w-4" />, roles: ["admin", "sales"] },
-      { title: "Analytics", href: "/ecommerce/analytics", icon: <BarChart3 className="h-4 w-4" />, roles: ["admin", "sales"] },
-    ],
-    roles: ["admin", "brand", "sales"]
+    title: "Project Requests",
+    href: "/project-requests",
+    icon: <FileText className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
   },
   {
-    title: "Partners",
-    href: "/partners",
+    title: "Contact Messages",
+    href: "/contact-messages",
+    icon: <MessageSquare className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "Partnership Requests",
+    href: "/partnership-requests",
     icon: <Users className="h-5 w-5" />,
-    children: [
-      { title: "Partner List", href: "/partners/list", icon: <Users className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Applications", href: "/partners/applications", icon: <FileText className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "Analytics", href: "/partners/analytics", icon: <BarChart3 className="h-4 w-4" />, roles: ["admin", "brand"] },
-    ],
-    roles: ["admin", "brand"]
+    roles: ["super-admin", "admin", "brand"]
   },
   {
-    title: "Users & Security",
-    href: "/users",
-    icon: <Shield className="h-5 w-5" />,
-    children: [
-      { title: "User Management", href: "/users/management", icon: <Users className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Roles & Permissions", href: "/users/roles", icon: <Shield className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Security Settings", href: "/users/security", icon: <Shield className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Audit Logs", href: "/users/audit", icon: <FileText className="h-4 w-4" />, roles: ["admin"] },
-    ],
-    roles: ["admin"]
+    title: "Careers",
+    href: "/careers",
+    icon: <Users className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
   },
   {
-    title: "Analytics",
-    href: "/analytics",
-    icon: <BarChart3 className="h-5 w-5" />,
-    children: [
-      { title: "Website Analytics", href: "/analytics/website", icon: <BarChart3 className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "User Analytics", href: "/analytics/users", icon: <Users className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Content Analytics", href: "/analytics/content", icon: <FileText className="h-4 w-4" />, roles: ["admin", "brand"] },
-      { title: "E-commerce Analytics", href: "/analytics/ecommerce", icon: <ShoppingCart className="h-4 w-4" />, roles: ["admin", "sales"] },
-    ],
-    roles: ["admin", "brand", "sales"]
+    title: "Departments",
+    href: "/departments",
+    icon: <Database className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
   },
   {
-    title: "Settings",
-    href: "/settings",
-    icon: <Settings className="h-5 w-5" />,
-    children: [
-      { title: "General Settings", href: "/settings/general", icon: <Settings className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Appearance", href: "/settings/appearance", icon: <Palette className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Integrations", href: "/settings/integrations", icon: <Database className="h-4 w-4" />, roles: ["admin"] },
-      { title: "Backup & Restore", href: "/settings/backup", icon: <Database className="h-4 w-4" />, roles: ["admin"] },
-    ],
-    roles: ["admin"]
-  }
+    title: "Applications",
+    href: "/applications",
+    icon: <FileText className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "News",
+    href: "/news",
+    icon: <Newspaper className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "Blog",
+    href: "/blog",
+    icon: <BookOpen className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "Products",
+    href: "/products",
+    icon: <ShoppingCart className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand", "sales"]
+  },
+  { title: "Testimonies", href: "/testimonies", icon: <MessageSquare className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
+  { title: "FAQs", href: "/faqs", icon: <HelpCircle className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
+
 ];
 
 export function getMenuItemsForRole(userRole: string): MenuItem[] {
   return menuItems.filter(item => 
-    item.roles.includes(userRole) || item.roles.includes("admin")
+    item.roles.includes(userRole) || item.roles.includes("super-admin")
   );
 }
 
 export function hasAccess(userRole: string, requiredRoles: string[]): boolean {
-  return requiredRoles.includes(userRole) || requiredRoles.includes("admin");
+  return requiredRoles.includes(userRole) || requiredRoles.includes("super-admin");
 }

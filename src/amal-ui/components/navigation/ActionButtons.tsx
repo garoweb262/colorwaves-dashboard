@@ -30,7 +30,7 @@ export function ActionButtons({
   return (
     <div className="flex items-center space-x-2">
       {/* Search Button */}
-      <Tooltip content="Search" position="bottom">
+      <Tooltip content="Search">
         <Button
           variant="anchor"
           size="sm"
@@ -42,7 +42,7 @@ export function ActionButtons({
       </Tooltip>
 
       {/* Basket Button */}
-      <Tooltip content="Shopping Cart" position="bottom">
+      <Tooltip content="Shopping Cart">
         <Button
           variant="anchor"
           size="sm"
@@ -57,7 +57,7 @@ export function ActionButtons({
       </Tooltip>
 
       {/* User Button */}
-      <Tooltip content="User Account" position="bottom">
+      <Tooltip content="User Account">
         <Button
           variant="anchor"
           size="sm"

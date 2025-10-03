@@ -7,6 +7,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { BackgroundGridLines } from "@/amal-ui/components/BackgroundGridLines";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +63,7 @@ export default function LoginPage() {
       <BackgroundGridLines />
       
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-orange-50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-palette-violet/5 via-white to-palette-blue/5" />
       
       {/* Login Card */}
       <motion.div
@@ -73,41 +74,21 @@ export default function LoginPage() {
       >
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8">
           {/* Logo and Header */}
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent mb-2"
-            >
-              AmalTech
-            </motion.div>
-            <p className="text-gray-600 text-sm">Content Management System</p>
+          <div className="flex justify-center items-center  mb-8">
+            <Image alt="colorwaves-logo" width={120} height={120} src="/images/logo/ColorWaves_Logo Vertical Black.png" priority />
           </div>
 
           {/* Demo Accounts Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5 }}
-            className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200"
-          >
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Accounts:</h3>
-            <div className="text-xs text-blue-700 space-y-1">
-              <div>• Super Admin: admin@mail.com / 1234</div>
-              <div>• Brand Manager: brand@mail.com / 1234</div>
-              <div>• Sales Manager: sales@mail.com / 1234</div>
-            </div>
-          </motion.div>
+         
 
           {/* Error Message */}
           {errorMessage && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+              className="mb-4 p-3 bg-palette-red/10 border border-palette-red/20 rounded-lg"
             >
-              <p className="text-sm text-red-700">{errorMessage}</p>
+              <p className="text-sm text-palette-red">{errorMessage}</p>
             </motion.div>
           )}
 
@@ -165,13 +146,13 @@ export default function LoginPage() {
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-palette-violet focus:ring-palette-violet"
                 />
                 <span className="text-gray-600">Remember me</span>
               </label>
               <a
                 href="#"
-                className="text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-palette-violet hover:text-palette-indigo transition-colors"
               >
                 Forgot password?
               </a>
@@ -188,7 +169,7 @@ export default function LoginPage() {
                 size="lg"
                 fullWidth
                 loading={isLoading}
-                rightIcon={<ArrowRight className="h-4 w-4" />}
+              
                 className="group"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -196,23 +177,7 @@ export default function LoginPage() {
             </motion.div>
           </form>
 
-          {/* Footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            className="mt-8 text-center text-sm text-gray-500"
-          >
-            <p>
-              Don't have an account?{" "}
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                Contact administrator
-              </a>
-            </p>
-          </motion.div>
+         
         </div>
       </motion.div>
 
@@ -227,7 +192,7 @@ export default function LoginPage() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full opacity-60"
+        className="absolute top-20 left-20 w-2 h-2 bg-palette-blue rounded-full opacity-60"
       />
       <motion.div
         animate={{
@@ -239,7 +204,7 @@ export default function LoginPage() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute bottom-20 right-20 w-3 h-3 bg-orange-400 rounded-full opacity-60"
+        className="absolute bottom-20 right-20 w-3 h-3 bg-palette-violet rounded-full opacity-60"
       />
     </div>
   );

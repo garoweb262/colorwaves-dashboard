@@ -250,7 +250,7 @@ const ToastComponent = React.forwardRef<HTMLDivElement, Toast>(
           className
         )}
         whileHover={{ scale: 1.02 }}
-        {...props}
+        {...(props as any)}
       >
         <div className="flex items-start">
           <div className={cn("flex-shrink-0", iconClasses[variant])}>

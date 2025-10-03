@@ -9,6 +9,7 @@ import { ChevronRight, ChevronLeft, LogOut } from "lucide-react";
 import { getMenuItemsForRole, type MenuItem } from "@/lib/menuConfig";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -61,10 +62,7 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
             transition={{ delay: 0.1 }}
             className="flex items-center space-x-2"
           >
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">A</span>
-            </div>
-            <span className="text-lg font-semibold text-gray-900">AmalTech</span>
+         <Image src="/images/logo/ColorWaves_Logo Horizontal Black.png" alt="ColorWaves Logo" width={150} height={50} />
           </motion.div>
         )}
         

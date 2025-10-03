@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { DashboardRouteGuard } from "@/components/DashboardRouteGuard";
 import { Button } from "@/components/ui/button";
-import { DataTable, type Column, type TableAction } from "@/components/ui/DataTable";
+import { DataTable, DataTableColumn, DataTableAction, FilterOption } from "@/amal-ui";
 import { Modal, ConfirmModal, FormModal } from "@/components/ui/Modal";
 import { TableOptions, type ColumnOption } from "@/components/ui/TableOptions";
 import { Input } from "@/amal-ui";
@@ -97,58 +97,50 @@ export default function TableDemoPage() {
     category: "",
     price: "",
     rating: "",
-    status: "in-stock" as const,
+    status: "in-stock" as "in-stock" | "out-of-stock" | "discontinued",
   });
 
   // Columns definition
-  const columns: Column<Product>[] = [
+  const columns: DataTableColumn[] = [
     {
       key: "name",
-      header: "Product Name",
-      accessor: (product) => (
+      title: "Product Name",
+      render: (product: Product) => (
         <div className="font-medium text-gray-900">{product.name}</div>
-      ),
-      sortable: true,
-      filterable: true,
+      )
     },
     {
       key: "category",
-      header: "Category",
-      accessor: (product) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+      title: "Category",
+      render: (product: Product) => (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
           {product.category}
         </span>
-      ),
-      sortable: true,
-      filterable: true,
+      )
     },
     {
       key: "price",
-      header: "Price",
-      accessor: (product) => (
+      title: "Price",
+      render: (product: Product) => (
         <div className="text-gray-900 font-medium">
           ${product.price.toFixed(2)}
         </div>
-      ),
-      sortable: true,
-      filterable: true,
+      )
     },
     {
       key: "rating",
-      header: "Rating",
-      accessor: (product) => (
+      title: "Rating",
+      render: (product: Product) => (
         <div className="flex items-center space-x-1">
-          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+          <Star className="h-4 w-4 text-palette-gold-500 fill-current" />
           <span className="text-gray-900">{product.rating}</span>
         </div>
-      ),
-      sortable: true,
-      filterable: true,
+      )
     },
     {
       key: "status",
-      header: "Status",
-      accessor: (product) => {
+      title: "Status",
+      render: (product: Product) => {
         const statusConfig = {
           "in-stock": { bg: "bg-green-100", text: "text-green-800", dot: "bg-green-400" },
           "out-of-stock": { bg: "bg-red-100", text: "text-red-800", dot: "bg-red-400" },
@@ -164,37 +156,35 @@ export default function TableDemoPage() {
             </span>
           </div>
         );
-      },
-      sortable: true,
-      filterable: true,
+      }
     },
     {
       key: "createdAt",
-      header: "Created",
-      accessor: (product) => (
+      title: "Created",
+      render: (product: Product) => (
         <span className="text-gray-500 text-sm">{product.createdAt}</span>
-      ),
-      sortable: true,
-      filterable: false,
-    },
+      )
+    }
   ];
 
   // Actions
-  const actions: TableAction<Product>[] = [
+  const actions: DataTableAction[] = [
     {
+      key: "view",
       label: "View",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (product) => {
+      onClick: (product: Product) => {
         setCurrentProduct(product);
-        // You could open a view modal here
         console.log("Viewing product:", product);
       },
       variant: "ghost",
+      className: "text-palette-gold-600 hover:text-palette-gold-700"
     },
     {
+      key: "edit",
       label: "Edit",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (product) => {
+      onClick: (product: Product) => {
         setCurrentProduct(product);
         setFormData({
           name: product.name,
@@ -206,31 +196,35 @@ export default function TableDemoPage() {
         setIsEditModalOpen(true);
       },
       variant: "ghost",
+      className: "text-palette-gold-600 hover:text-palette-gold-700"
     },
     {
+      key: "delete",
       label: "Delete",
       icon: <Trash2 className="h-4 w-4" />,
-      onClick: (product) => {
+      onClick: (product: Product) => {
         setCurrentProduct(product);
         setIsDeleteModalOpen(true);
       },
       variant: "ghost",
-      className: "text-red-600 hover:text-red-700",
-    },
+      className: "text-destructive hover:text-destructive-600"
+    }
   ];
 
   // Bulk actions
-  const bulkActions: TableAction<Product[]>[] = [
+  const bulkActions: DataTableAction[] = [
     {
+      key: "delete",
       label: "Delete Selected",
       icon: <Trash2 className="h-4 w-4" />,
       onClick: (selectedProducts) => {
         setSelectedProducts(selectedProducts);
         setIsDeleteModalOpen(true);
       },
-      variant: "destructive",
+      variant: "danger",
     },
     {
+      key: "export",
       label: "Export Selected",
       icon: <Download className="h-4 w-4" />,
       onClick: (selectedProducts) => {
@@ -255,7 +249,7 @@ export default function TableDemoPage() {
     };
     setProducts([...products, newProduct]);
     setIsAddModalOpen(false);
-    setFormData({ name: "", category: "", price: "", rating: "", status: "in-stock" });
+    setFormData({ name: "", category: "", price: "", rating: "", status: "in-stock" as "in-stock" | "out-of-stock" | "discontinued" });
   };
 
   const handleEditProduct = (e: React.FormEvent) => {
@@ -277,7 +271,7 @@ export default function TableDemoPage() {
     setProducts(updatedProducts);
     setIsEditModalOpen(false);
     setCurrentProduct(null);
-    setFormData({ name: "", category: "", price: "", rating: "", status: "in-stock" });
+    setFormData({ name: "", category: "", price: "", rating: "", status: "in-stock" as "in-stock" | "out-of-stock" | "discontinued" });
   };
 
   const handleDeleteProduct = () => {
@@ -379,21 +373,56 @@ export default function TableDemoPage() {
           {/* Data Table */}
           <DataTable
             data={products}
-            columns={columns.filter(col => columnOptions.find(opt => opt.key === col.key)?.visible)}
+            columns={columns}
             actions={actions}
-            searchable={true}
-            filterable={true}
-            sortable={true}
-            pagination={true}
+            searchTerm=""
+            onSearchChange={() => {}}
+            filters={{}}
+            onFilterChange={() => {}}
+            sortBy=""
+            onSortChange={() => {}}
+            sortOrder="asc"
+            currentPage={1}
+            onPageChange={() => {}}
+            totalPages={1}
+            totalItems={products.length}
             pageSize={3}
-            selectable={true}
-            onSelectionChange={setSelectedProducts}
-            bulkActions={bulkActions}
-            caption="Interactive product table with all features enabled"
-            onRowClick={(product) => {
-              setCurrentProduct(product);
-              console.log("Clicked product:", product);
-            }}
+            onPageSizeChange={() => {}}
+            searchPlaceholder="Search products..."
+            sortOptions={[
+              { key: 'name', label: 'Name' },
+              { key: 'category', label: 'Category' },
+              { key: 'price', label: 'Price' },
+              { key: 'rating', label: 'Rating' },
+              { key: 'status', label: 'Status' },
+              { key: 'createdAt', label: 'Created Date' }
+            ]}
+            filterOptions={[
+              {
+                key: 'category',
+                label: 'Category',
+                type: 'select',
+                options: [
+                  { value: 'Electronics', label: 'Electronics' },
+                  { value: 'Tools', label: 'Tools' }
+                ]
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                type: 'select',
+                options: [
+                  { value: 'in-stock', label: 'In Stock' },
+                  { value: 'out-of-stock', label: 'Out of Stock' },
+                  { value: 'discontinued', label: 'Discontinued' }
+                ]
+              }
+            ]}
+            showBulkActions={true}
+            showExport={true}
+            showImport={true}
+            entityName="products"
+            emptyMessage="No products found"
           />
 
           {/* Add Product Modal */}

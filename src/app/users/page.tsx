@@ -1,609 +1,642 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { Button, Checkbox, Badge } from "@/amal-ui";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
+import { Plus, Edit, Trash2, Eye, UserPlus, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { DashboardRouteGuard } from "@/components/DashboardRouteGuard";
-import { Button } from "@/components/ui/button";
-import { DataTable, type Column, type TableAction } from "@/components/ui/DataTable";
-import { Modal, ConfirmModal, FormModal } from "@/components/ui/Modal";
-import { TableOptions, type ColumnOption } from "@/components/ui/TableOptions";
-import { Input } from "@/amal-ui";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
-  Mail,
-  Phone,
-  Calendar,
-  User,
-  Shield,
-  MoreHorizontal,
-} from "lucide-react";
+import { UserViewModal } from "@/components/users/UserViewModal";
+import { UserFormModal } from "@/components/users/UserFormModal";
+import { UserStatusModal } from "@/components/users/UserStatusModal";
+import { DeleteConfirmModal } from "@/components/users/DeleteConfirmModal";
 
-// Mock user data
 interface User {
   id: string;
-  name: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
   role: string;
-  status: "active" | "inactive" | "pending";
-  lastLogin: string;
+  isActive: boolean;
   createdAt: string;
-  avatar?: string;
+  lastLogin?: string;
 }
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Admin",
-    status: "active",
-    lastLogin: "2024-01-15",
-    createdAt: "2023-06-01",
-    avatar: "JD",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    role: "Content Manager",
-    status: "active",
-    lastLogin: "2024-01-14",
-    createdAt: "2023-07-15",
-    avatar: "JS",
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob.johnson@example.com",
-    role: "Editor",
-    status: "inactive",
-    lastLogin: "2024-01-10",
-    createdAt: "2023-08-20",
-    avatar: "BJ",
-  },
-  {
-    id: "4",
-    name: "Alice Brown",
-    email: "alice.brown@example.com",
-    role: "Viewer",
-    status: "pending",
-    lastLogin: "Never",
-    createdAt: "2024-01-05",
-    avatar: "AB",
-  },
-  {
-    id: "5",
-    name: "Charlie Wilson",
-    email: "charlie.wilson@example.com",
-    role: "Admin",
-    status: "active",
-    lastLogin: "2024-01-13",
-    createdAt: "2023-05-10",
-    avatar: "CW",
-  },
-  {
-    id: "6",
-    name: "Diana Davis",
-    email: "diana.davis@example.com",
-    role: "Content Manager",
-    status: "active",
-    lastLogin: "2024-01-12",
-    createdAt: "2023-09-01",
-    avatar: "DD",
-  },
-  {
-    id: "7",
-    name: "Eve Miller",
-    email: "eve.miller@example.com",
-    role: "Editor",
-    status: "active",
-    lastLogin: "2024-01-11",
-    createdAt: "2023-10-15",
-    avatar: "EM",
-  },
-  {
-    id: "8",
-    name: "Frank Garcia",
-    email: "frank.garcia@example.com",
-    role: "Viewer",
-    status: "inactive",
-    lastLogin: "2024-01-08",
-    createdAt: "2023-11-20",
-    avatar: "FG",
-  },
-];
-
 export default function UsersPage() {
-  const breadcrumbs = [
-    { label: "Users & Security", href: "/users" },
-    { label: "User Management" }
-  ];
-
-  // State management
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [columnOptions, setColumnOptions] = useState<ColumnOption[]>([
-    { key: "name", label: "Name", visible: true, sortable: true, filterable: true },
-    { key: "email", label: "Email", visible: true, sortable: true, filterable: true },
-    { key: "role", label: "Role", visible: true, sortable: true, filterable: true },
-    { key: "status", label: "Status", visible: true, sortable: true, filterable: true },
-    { key: "lastLogin", label: "Last Login", visible: true, sortable: true, filterable: false },
-    { key: "createdAt", label: "Created", visible: false, sortable: true, filterable: false },
-  ]);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Filter visible columns
-  const visibleColumns = useMemo(() => {
-    const visible = columnOptions.filter(col => col.visible);
-    return columns.filter(col => visible.some(opt => opt.key === col.key));
-  }, [columnOptions]);
+  // Mock data - replace with actual API call
+  useEffect(() => {
+    const mockUsers: User[] = [
+      {
+        id: "1",
+        email: "admin@colorwaves.com",
+        firstName: "John",
+        lastName: "Doe",
+        phone: "+1 (555) 123-4567",
+        role: "SUPER_ADMIN",
+        isActive: true,
+        createdAt: "2024-01-15T10:30:00Z",
+        lastLogin: "2024-01-20T14:22:00Z"
+      },
+      {
+        id: "2",
+        email: "manager@colorwaves.com",
+        firstName: "Jane",
+        lastName: "Smith",
+        phone: "+1 (555) 234-5678",
+        role: "ADMIN",
+        isActive: true,
+        createdAt: "2024-01-16T09:15:00Z",
+        lastLogin: "2024-01-19T16:45:00Z"
+      },
+      {
+        id: "3",
+        email: "support@colorwaves.com",
+        firstName: "Mike",
+        lastName: "Johnson",
+        phone: "+1 (555) 345-6789",
+        role: "SUPPORT",
+        isActive: false,
+        createdAt: "2024-01-17T11:20:00Z"
+      }
+    ];
+    
+    setUsers(mockUsers);
+    setFilteredUsers(mockUsers);
+    setIsLoading(false);
+  }, []);
 
-  // Table columns definition
-  const columns: Column<User>[] = [
-    {
-      key: "name",
-      header: "Name",
-      accessor: (user) => (
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-            {user.avatar}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">{user.name}</div>
-          </div>
-        </div>
-      ),
-      sortable: true,
-      filterable: true,
-    },
-    {
-      key: "email",
-      header: "Email",
-      accessor: (user) => (
-        <div className="flex items-center space-x-2">
-          <Mail className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-900">{user.email}</span>
-        </div>
-      ),
-      sortable: true,
-      filterable: true,
-    },
-    {
-      key: "role",
-      header: "Role",
-      accessor: (user) => (
-        <div className="flex items-center space-x-2">
-          <Shield className="h-4 w-4 text-gray-400" />
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            {user.role}
+  // Filter and sort users
+  useEffect(() => {
+    // Filter out any undefined/null users first
+    let filtered = users.filter(user => user != null);
+
+    // Apply search
+    if (searchTerm) {
+      filtered = filtered.filter(user => {
+        if (!user) return false;
+        const firstName = (user.firstName || '').toLowerCase();
+        const lastName = (user.lastName || '').toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const searchLower = searchTerm.toLowerCase();
+        
+        return firstName.includes(searchLower) ||
+               lastName.includes(searchLower) ||
+               email.includes(searchLower);
+      });
+    }
+
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== 'all') {
+        filtered = filtered.filter(user => {
+          if (!user) return false;
+          if (key === 'role') return (user.role || '') === value;
+          if (key === 'status') return value === 'active' ? (user.isActive ?? false) : !(user.isActive ?? false);
+          return true;
+        });
+      }
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      if (!a || !b) return 0;
+      
+      const aValue = a[sortBy as keyof User] || '';
+      const bValue = b[sortBy as keyof User] || '';
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, filters, sortBy, sortOrder]);
+
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setIsFormModalOpen(true);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleUserSaved = (savedUser: User) => {
+    if (!savedUser) return;
+    
+    if (editingUser) {
+      setUsers(prev => prev.map(user => user && user.id === savedUser.id ? savedUser : user));
+    } else {
+      setUsers(prev => [...prev, savedUser]);
+    }
+    setIsFormModalOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleUserDeleted = (userId: string) => {
+    if (!userId) return;
+    
+    setUsers(prev => prev.filter(user => user && user.id !== userId));
+    setIsDeleteModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleUpdateStatus = (user: User) => {
+    if (!user) return;
+    
+    setSelectedUser(user);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleStatusUpdate = (userId: string, status: string) => {
+    setUsers(prev => prev.map(u => 
+      u && u.id === userId ? { ...u, isActive: status === 'active' } : u
+    ));
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case "SUPER_ADMIN": return "red";
+      case "ADMIN": return "blue";
+      case "SUPPORT": return "green";
+      case "CONTENT_MANAGER": return "purple";
+      default: return "gray";
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case "SUPER_ADMIN": return "Super Admin";
+      case "ADMIN": return "Admin";
+      case "SUPPORT": return "Support";
+      case "CONTENT_MANAGER": return "Content Manager";
+      default: return role;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  };
+
+  // Helper functions for rendering table cells
+  const renderUserCell = (user: User) => {
+    if (!user) return null;
+    
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    const email = user.email || '';
+    
+    const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+          <span className="text-white text-sm font-medium">
+            {initials || '??'}
           </span>
         </div>
-      ),
-      sortable: true,
-      filterable: true,
-    },
-    {
-      key: "status",
-      header: "Status",
-      accessor: (user) => {
-        const statusConfig = {
-          active: { bg: "bg-green-100", text: "text-green-800", dot: "bg-green-400" },
-          inactive: { bg: "bg-red-100", text: "text-red-800", dot: "bg-red-400" },
-          pending: { bg: "bg-yellow-100", text: "text-yellow-800", dot: "bg-yellow-400" },
-        };
-        const config = statusConfig[user.status];
-        
-        return (
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${config.dot}`} />
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-              {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-            </span>
+        <div>
+          <div className="font-medium text-gray-900">
+            {fullName || 'Unknown User'}
           </div>
-        );
-      },
-      sortable: true,
-      filterable: true,
-    },
-    {
-      key: "lastLogin",
-      header: "Last Login",
-      accessor: (user) => (
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-900">{user.lastLogin}</span>
+          <div className="text-sm text-gray-500">{email}</div>
         </div>
-      ),
-      sortable: true,
-      filterable: false,
-    },
-    {
-      key: "createdAt",
-      header: "Created",
-      accessor: (user) => (
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-900">{user.createdAt}</span>
-        </div>
-      ),
-      sortable: true,
-      filterable: false,
-    },
-  ];
-
-  // Table actions
-  const actions: TableAction<User>[] = [
-    {
-      label: "View",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (user) => {
-        setCurrentUser(user);
-        setIsViewModalOpen(true);
-      },
-      variant: "ghost",
-    },
-    {
-      label: "Edit",
-      icon: <Edit className="h-4 w-4" />,
-      onClick: (user) => {
-        setCurrentUser(user);
-        setIsEditModalOpen(true);
-      },
-      variant: "ghost",
-    },
-    {
-      label: "Delete",
-      icon: <Trash2 className="h-4 w-4" />,
-      onClick: (user) => {
-        setCurrentUser(user);
-        setIsDeleteModalOpen(true);
-      },
-      variant: "ghost",
-      className: "text-red-600 hover:text-red-700",
-    },
-  ];
-
-  // Bulk actions
-  const bulkActions: TableAction<User[]>[] = [
-    {
-      label: "Delete Selected",
-      icon: <Trash2 className="h-4 w-4" />,
-      onClick: (selectedUsers) => {
-        setSelectedUsers(selectedUsers);
-        setIsDeleteModalOpen(true);
-      },
-      variant: "destructive",
-    },
-    {
-      label: "Export Selected",
-      icon: <Download className="h-4 w-4" />,
-      onClick: (selectedUsers) => {
-        console.log("Exporting users:", selectedUsers);
-        // Handle export logic
-      },
-      variant: "outline",
-    },
-  ];
-
-  // Form state
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    role: "Viewer",
-    status: "pending" as const,
-  });
-
-  // Handlers
-  const handleAddUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newUser: User = {
-      id: Date.now().toString(),
-      ...formData,
-      lastLogin: "Never",
-      createdAt: new Date().toISOString().split('T')[0],
-      avatar: formData.name.split(' ').map(n => n[0]).join(''),
-    };
-    setUsers([...users, newUser]);
-    setIsAddModalOpen(false);
-    setFormData({ name: "", email: "", role: "Viewer", status: "pending" });
-  };
-
-  const handleEditUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    
-    const updatedUsers = users.map(user =>
-      user.id === currentUser.id
-        ? { ...user, ...formData, avatar: formData.name.split(' ').map(n => n[0]).join('') }
-        : user
+      </div>
     );
-    setUsers(updatedUsers);
-    setIsEditModalOpen(false);
-    setCurrentUser(null);
-    setFormData({ name: "", email: "", role: "Viewer", status: "pending" });
   };
 
-  const handleDeleteUser = () => {
-    if (currentUser) {
-      setUsers(users.filter(user => user.id !== currentUser.id));
-      setCurrentUser(null);
-    } else if (selectedUsers.length > 0) {
-      setUsers(users.filter(user => !selectedUsers.some(selected => selected.id === user.id)));
-      setSelectedUsers([]);
+  const renderRoleCell = (user: User) => {
+    if (!user) return null;
+    
+    const role = user.role || 'UNKNOWN';
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+        role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-800' :
+        role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
+        role === 'SUPPORT' ? 'bg-green-100 text-green-800' :
+        'bg-gray-100 text-gray-800'
+      }`}>
+        {getRoleDisplayName(role)}
+      </span>
+    );
+  };
+
+  const renderStatusCell = (user: User) => {
+    if (!user) return null;
+    
+    const isActive = user.isActive ?? false;
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+        isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+      }`}>
+        {isActive ? "Active" : "Inactive"}
+      </span>
+    );
+  };
+
+  const renderActionsCell = (user: User) => {
+    if (!user) return null;
+    
+    return (
+      <div className="flex items-center space-x-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleViewUser(user)}
+          className="text-palette-gold-600 hover:text-palette-gold-700"
+          title="View Details"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleEditUser(user)}
+          className="text-palette-gold-600 hover:text-palette-gold-700"
+          title="Edit User"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleUpdateStatus(user)}
+          className="text-palette-blue-600 hover:text-palette-blue-700"
+          title={user.isActive ? "Deactivate" : "Activate"}
+        >
+          {user.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleDeleteUser(user)}
+          className="text-destructive hover:text-destructive-600"
+          title="Delete User"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
+  // Sorting functionality
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
     }
-    setIsDeleteModalOpen(false);
   };
 
-  const handleExport = (format: "csv" | "excel" | "pdf") => {
-    console.log(`Exporting users as ${format}`);
-    // Handle export logic
+  const getSortIcon = (column: string) => {
+    if (sortBy !== column) {
+      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
+    }
+    return sortOrder === 'asc' ? 
+      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
+      <ChevronDown className="h-4 w-4 text-gray-600" />;
   };
 
-  const handleReset = () => {
-    setColumnOptions([
-      { key: "name", label: "Name", visible: true, sortable: true, filterable: true },
-      { key: "email", label: "Email", visible: true, sortable: true, filterable: true },
-      { key: "role", label: "Role", visible: true, sortable: true, filterable: true },
-      { key: "status", label: "Status", visible: true, sortable: true, filterable: true },
-      { key: "lastLogin", label: "Last Login", visible: true, sortable: true, filterable: false },
-      { key: "createdAt", label: "Created", visible: false, sortable: true, filterable: false },
-    ]);
+  // Pagination
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = filteredUsers.slice(startIndex, endIndex);
+
+  const handleSelectItem = (id: string) => {
+    setSelectedItems(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
   };
 
-  // Custom filters component
-  const customFilters = (
-    <div className="space-y-3">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Role Filter</label>
-        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">All Roles</option>
-          <option value="Admin">Admin</option>
-          <option value="Content Manager">Content Manager</option>
-          <option value="Editor">Editor</option>
-          <option value="Viewer">Viewer</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
-        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="pending">Pending</option>
-        </select>
-      </div>
-    </div>
-  );
+  const handleSelectAll = () => {
+    if (selectedItems.length === paginatedData.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(paginatedData.filter(user => user && user.id).map(user => user.id));
+    }
+  };
+
+  const handleBulkAction = (action: string, ids: string[]) => {
+    if (action === 'delete') {
+      if (confirm(`Are you sure you want to delete ${ids.length} users?`)) {
+        setUsers(prev => prev.filter(user => user && !ids.includes(user.id)));
+        setSelectedItems([]);
+      }
+    }
+  };
+
+  const handleExport = () => {
+    console.log('Exporting users...');
+    alert('Export functionality would be implemented here');
+  };
+
+  const handleImport = () => {
+    console.log('Importing users...');
+    alert('Import functionality would be implemented here');
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardRouteGuard>
-      <DashboardLayout breadcrumbs={breadcrumbs}>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-              <p className="text-gray-600 mt-2">
-                Manage user accounts, roles, and permissions across the system.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <TableOptions
-                columns={columnOptions}
-                onColumnsChange={setColumnOptions}
-                onExport={handleExport}
-                onReset={handleReset}
-                customFilters={customFilters}
-              />
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600">Manage system users and their permissions</p>
+          </div>
+          <Button
+            onClick={handleAddUser}
+            leftIcon={<UserPlus className="h-4 w-4" />}
+            className="bg-primary hover:bg-primary-600 text-primary-foreground"
+          >
+            Add User
+          </Button>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                />
+              </div>
               <Button
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2"
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2"
               >
-                <Plus className="h-4 w-4" />
-                Add User
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
               </Button>
             </div>
+          
           </div>
 
-          {/* Data Table */}
-          <DataTable
-            data={users}
-            columns={visibleColumns}
-            actions={actions}
-            searchable={true}
-            filterable={true}
-            sortable={true}
-            pagination={true}
-            pageSize={5}
-            selectable={true}
-            onSelectionChange={setSelectedUsers}
-            bulkActions={bulkActions}
-            caption="User management table with advanced features"
-            onRowClick={(user) => {
-              setCurrentUser(user);
-              setIsViewModalOpen(true);
-            }}
-          />
-
-          {/* Add User Modal */}
-          <FormModal
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-            title="Add New User"
-            onSubmit={handleAddUser}
-            submitText="Add User"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Full name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Email address"
-                  required
-                />
-              </div>
+          {/* Filters */}
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={filters.role || 'all'}
+                  onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value === 'all' ? null : e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
-                  <option value="Viewer">Viewer</option>
-                  <option value="Editor">Editor</option>
-                  <option value="Content Manager">Content Manager</option>
-                  <option value="Admin">Admin</option>
+                  <option value="all">All Roles</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="SUPPORT">Support</option>
+                  <option value="CONTENT_MANAGER">Content Manager</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={filters.status || 'all'}
+                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
-                  <option value="pending">Pending</option>
+                  <option value="all">All Status</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                >
+                  <option value={5}>5 per page</option>
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                </select>
+              </div>
             </div>
-          </FormModal>
+          )}
+        </div>
 
-          {/* Edit User Modal */}
-          <FormModal
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            title="Edit User"
-            onSubmit={handleEditUser}
-            submitText="Update User"
-          >
-            {currentUser && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <Input
-                    value={formData.name || currentUser.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Full name"
-                    required
+        {/* Custom Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto scrollbar-hide">
+            <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={selectedItems.length === paginatedData.length && paginatedData.length > 0}
+                    onChange={handleSelectAll}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <Input
-                    type="email"
-                    value={formData.email || currentUser.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="Email address"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                  <select
-                    value={formData.role || currentUser.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Viewer">Viewer</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Content Manager">Content Manager</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    value={formData.status || currentUser.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            )}
-          </FormModal>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('firstName')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Name</span>
+                    {getSortIcon('firstName')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('role')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Role</span>
+                    {getSortIcon('role')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('isActive')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Status</span>
+                    {getSortIcon('isActive')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('lastLogin')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Last Login</span>
+                    {getSortIcon('lastLogin')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Created</span>
+                    {getSortIcon('createdAt')}
+                  </div>
+                </TableHead>
+                <TableHead className="w-32">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedItems.includes(user.id)}
+                      onChange={() => handleSelectItem(user.id)}
+                    />
+                  </TableCell>
+                  <TableCell>{renderUserCell(user)}</TableCell>
+                  <TableCell>{renderRoleCell(user)}</TableCell>
+                  <TableCell>{renderStatusCell(user)}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600">
+                      {user.lastLogin ? formatDate(user.lastLogin) : "Never"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600">
+                      {user.createdAt ? formatDate(user.createdAt) : "Unknown"}
+                    </span>
+                  </TableCell>
+                  <TableCell>{renderActionsCell(user)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            </Table>
+          </div>
 
-          {/* View User Modal */}
-          <Modal
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
-            title="User Details"
-            size="md"
-          >
-            {currentUser && (
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {currentUser.avatar}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">{currentUser.name}</h3>
-                    <p className="text-gray-600">{currentUser.email}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Role</label>
-                    <p className="text-sm text-gray-900">{currentUser.role}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Status</label>
-                    <p className="text-sm text-gray-900 capitalize">{currentUser.status}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Last Login</label>
-                    <p className="text-sm text-gray-900">{currentUser.lastLogin}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Created</label>
-                    <p className="text-sm text-gray-900">{currentUser.createdAt}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Modal>
-
-          {/* Delete Confirmation Modal */}
-          <ConfirmModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={handleDeleteUser}
-            title="Delete User"
-            message={
-              currentUser
-                ? `Are you sure you want to delete ${currentUser.name}? This action cannot be undone.`
-                : `Are you sure you want to delete ${selectedUsers.length} selected users? This action cannot be undone.`
-            }
-            confirmText="Delete"
-            variant="destructive"
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            showInfo={true}
+            totalItems={filteredUsers.length}
+            pageSize={pageSize}
           />
         </div>
-      </DashboardLayout>
-    </DashboardRouteGuard>
+
+        {/* Bulk Actions */}
+        {selectedItems.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-700">
+                {selectedItems.length} user(s) selected
+              </span>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('delete', selectedItems)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Delete Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {selectedUser && (
+        <UserViewModal
+          user={selectedUser}
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+        />
+      )}
+
+      <UserFormModal
+        user={editingUser}
+        isOpen={isFormModalOpen}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setEditingUser(null);
+        }}
+        onSave={handleUserSaved}
+      />
+
+      {selectedUser && (
+        <DeleteConfirmModal
+          user={selectedUser}
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleUserDeleted}
+        />
+      )}
+
+      {selectedUser && (
+        <UserStatusModal
+          user={selectedUser}
+          isOpen={isStatusModalOpen}
+          onClose={() => setIsStatusModalOpen(false)}
+          onUpdateStatus={handleStatusUpdate}
+        />
+      )}
+    </DashboardLayout>
   );
 }

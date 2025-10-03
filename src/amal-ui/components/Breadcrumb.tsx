@@ -41,7 +41,6 @@ export const Breadcrumb = React.forwardRef<HTMLDivElement, BreadcrumbProps>(
         variants={breadcrumbVariants}
         initial="hidden"
         animate="visible"
-        {...props}
       >
         {items.map((item, index) => (
           <React.Fragment key={index}>

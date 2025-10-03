@@ -107,12 +107,12 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
               onClick={() => !disabled && setIsOpen(!isOpen)}
               disabled={disabled}
               className={cn(
-                "shadow-input dark:placeholder-text-neutral-600 flex w-full border-none bg-white px-3 py-2 text-sm text-black transition duration-400 group-hover/select:shadow-none focus-visible:ring-1 focus-visible:ring-orange-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:shadow-[0px_0px_1px_1px_#404040] dark:focus-visible:ring-orange-600 border border-gray-200",
+                "flex w-full border border-gray-300 bg-white px-3 py-2 text-sm text-black transition duration-200 focus:border-palette-violet focus:outline-none focus:ring-1 focus:ring-palette-violet disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:border-gray-600 dark:focus:border-palette-violet dark:focus:ring-palette-violet",
                 sizeClasses[size],
                 widthClass,
                 "pr-10",
                 error &&
-                  "border-red-300 focus-visible:ring-red-400 dark:focus-visible:ring-red-600",
+                  "border-palette-red focus:border-palette-red focus:ring-palette-red dark:focus:border-palette-red dark:focus:ring-palette-red",
                 className
               )}
             >

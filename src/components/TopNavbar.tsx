@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/amal-ui";
 import { Breadcrumb } from "./Breadcrumb";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
@@ -91,19 +90,7 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
         {/* Breadcrumbs */}
         <Breadcrumb items={breadcrumbs} />
 
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </form>
-        </div>
+        
 
         {/* Mobile search toggle */}
         <button
@@ -201,7 +188,7 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
               <span className="text-white text-sm font-medium">{user?.avatar || "U"}</span>
             </div>
             <span className="hidden md:block text-sm font-medium text-gray-700">
-              {user?.name || "User"}
+              {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User"}
             </span>
           </button>
 
@@ -216,7 +203,7 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
                 className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
               >
                 <div className="px-4 py-2 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">{user?.name || "User"}</p>
+                  <p className="text-sm font-medium text-gray-900">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User"}</p>
                   <p className="text-xs text-gray-500">{user?.email || "user@example.com"}</p>
                   <p className="text-xs text-blue-600 font-medium capitalize">{user?.role || "user"}</p>
                 </div>

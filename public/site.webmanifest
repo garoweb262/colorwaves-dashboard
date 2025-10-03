@@ -1,0 +1,27 @@
+{
+  "name": "ColorWaves Dashboard",
+  "short_name": "ColorWaves",
+  "description": "ColorWaves Dashboard - Modern design system and admin interface",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#70369D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/logo/Emblem_Full color.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo/Emblem - Monochrome.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

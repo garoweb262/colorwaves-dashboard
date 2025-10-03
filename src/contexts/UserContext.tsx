@@ -1,14 +1,27 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { roles, type Role } from "@/lib/menuConfig";
+import api from "@/lib/api";
 
 interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
   avatar?: string;
+}
+
+interface LoginResponse {
+  access_token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
 }
 
 interface UserContextType {
@@ -19,35 +32,8 @@ interface UserContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
+  isLoading: boolean;
 }
-
-// Predefined admin accounts
-const ADMIN_ACCOUNTS = [
-  {
-    id: "1",
-    name: "Super Admin",
-    email: "admin@mail.com",
-    password: "1234",
-    role: "admin",
-    avatar: "SA"
-  },
-  {
-    id: "2",
-    name: "Brand Manager",
-    email: "brand@mail.com",
-    password: "1234",
-    role: "brand",
-    avatar: "BM"
-  },
-  {
-    id: "3",
-    name: "Sales Manager",
-    email: "sales@mail.com",
-    password: "1234",
-    role: "sales",
-    avatar: "SM"
-  }
-];
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -57,6 +43,36 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for existing token on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const response = await api.get('/auth/profile');
+          if (response.data) {
+            const userData: User = {
+              id: response.data.id,
+              firstName: response.data.firstName,
+              lastName: response.data.lastName,
+              email: response.data.email,
+              role: response.data.role,
+              avatar: `${response.data.firstName[0]}${response.data.lastName[0]}`
+            };
+            setUser(userData);
+          }
+        } catch (error) {
+          // Token is invalid, remove it
+          localStorage.removeItem('authToken');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
 
   const currentRole = roles.find(role => role.id === user?.role);
 
@@ -69,31 +85,33 @@ export function UserProvider({ children }: UserProviderProps) {
   const isAuthenticated = !!user;
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Find matching account
-    const account = ADMIN_ACCOUNTS.find(acc => 
-      acc.email.toLowerCase() === email.toLowerCase() && acc.password === password
-    );
-    
-    if (account) {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const data: LoginResponse = response.data;
+      
+      // Store token
+      localStorage.setItem('authToken', data.access_token);
+      
+      // Set user data
       const userData: User = {
-        id: account.id,
-        name: account.name,
-        email: account.email,
-        role: account.role,
-        avatar: account.avatar
+        id: data.user.id,
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: `${data.user.firstName[0]}${data.user.lastName[0]}`
       };
       
       setUser(userData);
       return { success: true, message: "Login successful" };
-    } else {
-      return { success: false, message: "Invalid email or password" };
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Login failed";
+      return { success: false, message };
     }
   };
 
   const logout = () => {
+    localStorage.removeItem('authToken');
     setUser(null);
   };
 
@@ -104,7 +122,8 @@ export function UserProvider({ children }: UserProviderProps) {
     switchRole,
     isAuthenticated,
     login,
-    logout
+    logout,
+    isLoading
   };
 
   return (

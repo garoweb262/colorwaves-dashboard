@@ -61,7 +61,7 @@ export const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
         y: 0,
         x: 0,
         transition: {
-          type: "spring",
+          type: "spring" as const,
           stiffness: 300,
           damping: 30,
         },
@@ -72,7 +72,7 @@ export const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
         y: placement === "top" ? 10 : -10,
         x: placement === "left" ? 10 : placement === "right" ? -10 : 0,
         transition: {
-          type: "spring",
+          type: "spring" as const,
           stiffness: 300,
           damping: 30,
         },

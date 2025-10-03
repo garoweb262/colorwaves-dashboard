@@ -51,7 +51,7 @@ export const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
           repeat: Infinity,
           ease: "linear",
         }}
-        {...props}
+        {...(props as any)}
       />
     );
   }

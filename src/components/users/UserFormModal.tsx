@@ -1,0 +1,316 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Modal, Input, Select, Button } from "@/amal-ui";
+import { User, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react";
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  lastLogin?: string;
+}
+
+interface UserFormModalProps {
+  user: User | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (user: User) => void;
+}
+
+export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalProps) {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    role: "SUPPORT",
+    password: "",
+    confirmPassword: ""
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const isEditing = !!user;
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        role: user.role || "support",
+        password: "",
+        confirmPassword: ""
+      });
+    } else {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        role: "support",
+        password: "",
+        confirmPassword: ""
+      });
+    }
+    setErrors({});
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  }, [user, isOpen]);
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ""))) {
+      newErrors.phone = "Phone number is invalid";
+    }
+
+    if (!isEditing) {
+      if (!formData.password) {
+        newErrors.password = "Password is required";
+      } else if (formData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters";
+      }
+
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = "Please confirm your password";
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    
+    try {
+      const userData: User = {
+        id: user?.id || Date.now().toString(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        isActive: user?.isActive ?? true,
+        createdAt: user?.createdAt || new Date().toISOString(),
+        lastLogin: user?.lastLogin
+      };
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      onSave(userData);
+    } catch (error) {
+      console.error("Error saving user:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const roleOptions = [
+    { value: "super_admin", label: "Super Admin" },
+    { value: "admin", label: "Admin" },
+    { value: "support", label: "Support" },
+    { value: "content-manager", label: "Content Manager" },
+    { value: "brand", label: "Brand" },
+    { value: "sales", label: "Sales" }
+  ];
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      title={isEditing ? "Edit User" : "Add New User"}
+    >
+      <div className="max-h-[70vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="space-y-6 p-1">
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+              Personal Information
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="First Name"
+                placeholder="Enter first name"
+                leftIcon={<User className="h-4 w-4" />}
+                value={formData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                error={errors.firstName}
+                required
+                fullWidth
+              />
+
+              <Input
+                label="Last Name"
+                placeholder="Enter last name"
+                leftIcon={<User className="h-4 w-4" />}
+                value={formData.lastName}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                error={errors.lastName}
+                required
+                fullWidth
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="Enter email address"
+                leftIcon={<Mail className="h-4 w-4" />}
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                error={errors.email}
+                required
+                fullWidth
+              />
+
+              <Input
+                label="Phone Number"
+                type="tel"
+                placeholder="Enter phone number"
+                leftIcon={<Phone className="h-4 w-4" />}
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                error={errors.phone}
+                required
+                fullWidth
+              />
+            </div>
+          </div>
+
+          {/* Role Selection */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+              Role & Permissions
+            </h3>
+            
+            <Select
+              label="Role"
+              value={formData.role}
+              onChange={(value) => handleInputChange("role", value)}
+              options={roleOptions}
+              placeholder="Select a role"
+              fullWidth
+            />
+          </div>
+
+          {/* Password Section - Only for new users */}
+          {!isEditing && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+                Set Password
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  leftIcon={<Lock className="h-4 w-4" />}
+                  rightIcon={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  }
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  error={errors.password}
+                  required
+                  fullWidth
+                />
+
+                <Input
+                  label="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  leftIcon={<Lock className="h-4 w-4" />}
+                  rightIcon={
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  }
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  error={errors.confirmPassword}
+                  required
+                  fullWidth
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isLoading}
+              className="bg-palette-violet hover:bg-palette-violet/90 text-white"
+            >
+              {isLoading ? "Saving..." : isEditing ? "Update User" : "Create User"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
+}
