@@ -16,7 +16,7 @@ interface Service {
 }
 
 interface DeleteConfirmModalProps {
-  service: Service;
+  service: Service | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (serviceId: string) => void;
@@ -26,6 +26,8 @@ export function DeleteConfirmModal({ service, isOpen, onClose, onConfirm }: Dele
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    if (!service) return;
+    
     setIsDeleting(true);
 
     try {
@@ -71,19 +73,21 @@ export function DeleteConfirmModal({ service, isOpen, onClose, onConfirm }: Dele
           </div>
 
           {/* Service Info */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-gray-900 mb-2">{service.name}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{service.description}</p>
-            <div className="mt-3">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                service.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
-                Status: {service.isActive ? "Active" : "Inactive"}
-              </span>
+          {service && (
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-medium text-gray-900 mb-2">{service.name}</h3>
+              <p className="text-sm text-gray-600 line-clamp-2">{service.description}</p>
+              <div className="mt-3">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  service.isActive 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  Status: {service.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
@@ -98,7 +102,7 @@ export function DeleteConfirmModal({ service, isOpen, onClose, onConfirm }: Dele
             <Button
               onClick={handleDelete}
               loading={isDeleting}
-              disabled={isDeleting}
+              disabled={isDeleting || !service}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete Service

@@ -1,39 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Checkbox, Badge } from "@/amal-ui";
+import { Button, Checkbox, Badge, useToast } from "@/amal-ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
+import { EnhancedPagination } from "@/components/EnhancedPagination";
 import { Plus, Edit, Trash2, Eye, UserPlus, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { UserViewModal } from "@/components/users/UserViewModal";
 import { UserFormModal } from "@/components/users/UserFormModal";
 import { UserStatusModal } from "@/components/users/UserStatusModal";
 import { DeleteConfirmModal } from "@/components/users/DeleteConfirmModal";
+import { useCRUD } from "@/hooks/useCRUD";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
-  id: string;
+  _id?: string; // Backend uses _id
+  id: string; // Required for useCRUD
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
   role: string;
-  isActive: boolean;
-  createdAt: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
+  password?: string; // For form data
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { addToast } = useToast();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -41,95 +38,50 @@ export default function UsersPage() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  
+  const {
+    items: users,
+    isLoading,
+    error,
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    hasNextPage,
+    hasPrevPage,
+    searchTerm,
+    filters,
+    sortBy,
+    sortOrder,
+    queryParams,
+    fetchItems,
+    createItem,
+    updateItem,
+    deleteItem,
+    updateStatus,
+    bulkDelete,
+    setCurrentPage,
+    setPageSize,
+    setSearchTerm,
+    setFilters,
+    setSortBy,
+    setSortOrder,
+    setQueryParams,
+    setError,
+    goToNextPage,
+    goToPrevPage,
+    goToPage
+  } = useCRUD<User>({
+    endpoint: '/users',
+    pageSize: 10,
+    initialFilters: { role: 'all', status: 'all' }
+  });
+  
+  const { isAuthenticated } = useAuth();
 
-  // Mock data - replace with actual API call
-  useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        id: "1",
-        email: "admin@colorwaves.com",
-        firstName: "John",
-        lastName: "Doe",
-        phone: "+1 (555) 123-4567",
-        role: "SUPER_ADMIN",
-        isActive: true,
-        createdAt: "2024-01-15T10:30:00Z",
-        lastLogin: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        email: "manager@colorwaves.com",
-        firstName: "Jane",
-        lastName: "Smith",
-        phone: "+1 (555) 234-5678",
-        role: "ADMIN",
-        isActive: true,
-        createdAt: "2024-01-16T09:15:00Z",
-        lastLogin: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "3",
-        email: "support@colorwaves.com",
-        firstName: "Mike",
-        lastName: "Johnson",
-        phone: "+1 (555) 345-6789",
-        role: "SUPPORT",
-        isActive: false,
-        createdAt: "2024-01-17T11:20:00Z"
-      }
-    ];
-    
-    setUsers(mockUsers);
-    setFilteredUsers(mockUsers);
-    setIsLoading(false);
-  }, []);
+  // Use server-side filtering, so no client-side filtering needed
+  const filteredUsers = users;
 
-  // Filter and sort users
-  useEffect(() => {
-    // Filter out any undefined/null users first
-    let filtered = users.filter(user => user != null);
-
-    // Apply search
-    if (searchTerm) {
-      filtered = filtered.filter(user => {
-        if (!user) return false;
-        const firstName = (user.firstName || '').toLowerCase();
-        const lastName = (user.lastName || '').toLowerCase();
-        const email = (user.email || '').toLowerCase();
-        const searchLower = searchTerm.toLowerCase();
-        
-        return firstName.includes(searchLower) ||
-               lastName.includes(searchLower) ||
-               email.includes(searchLower);
-      });
-    }
-
-    // Apply filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== 'all') {
-        filtered = filtered.filter(user => {
-          if (!user) return false;
-          if (key === 'role') return (user.role || '') === value;
-          if (key === 'status') return value === 'active' ? (user.isActive ?? false) : !(user.isActive ?? false);
-          return true;
-        });
-      }
-    });
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      if (!a || !b) return 0;
-      
-      const aValue = a[sortBy as keyof User] || '';
-      const bValue = b[sortBy as keyof User] || '';
-      
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, filters, sortBy, sortOrder]);
 
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
@@ -151,24 +103,74 @@ export default function UsersPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleUserSaved = (savedUser: User) => {
+  const handleUserSaved = async (savedUser: User) => {
     if (!savedUser) return;
     
-    if (editingUser) {
-      setUsers(prev => prev.map(user => user && user.id === savedUser.id ? savedUser : user));
-    } else {
-      setUsers(prev => [...prev, savedUser]);
+    try {
+      if (editingUser) {
+        // Update existing user
+        const result = await updateItem(editingUser.id, savedUser);
+        if (result) {
+          setIsFormModalOpen(false);
+          setEditingUser(null);
+          addToast({
+            variant: "success",
+            title: "User Updated",
+            description: `User ${savedUser.firstName} ${savedUser.lastName} has been updated successfully.`,
+            duration: 4000
+          });
+        }
+      } else {
+        // Create new user - the form sends the correct payload format
+        const result = await createItem(savedUser);
+        if (result) {
+          setIsFormModalOpen(false);
+          setEditingUser(null);
+          addToast({
+            variant: "success",
+            title: "User Created",
+            description: `User ${savedUser.firstName} ${savedUser.lastName} has been created successfully.`,
+            duration: 4000
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error saving user:", error);
+      addToast({
+        variant: "error",
+        title: editingUser ? "Update Failed" : "Creation Failed",
+        description: editingUser 
+          ? "Failed to update user. Please try again."
+          : "Failed to create user. Please try again.",
+        duration: 5000
+      });
     }
-    setIsFormModalOpen(false);
-    setEditingUser(null);
   };
 
-  const handleUserDeleted = (userId: string) => {
+  const handleUserDeleted = async (userId: string) => {
     if (!userId) return;
     
-    setUsers(prev => prev.filter(user => user && user.id !== userId));
-    setIsDeleteModalOpen(false);
-    setSelectedUser(null);
+    try {
+      const success = await deleteItem(userId);
+      if (success) {
+        setIsDeleteModalOpen(false);
+        setSelectedUser(null);
+        addToast({
+          variant: "success",
+          title: "User Deleted",
+          description: "User has been deleted successfully.",
+          duration: 4000
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      addToast({
+        variant: "error",
+        title: "Delete Failed",
+        description: "Failed to delete user. Please try again.",
+        duration: 5000
+      });
+    }
   };
 
   const handleUpdateStatus = (user: User) => {
@@ -178,10 +180,26 @@ export default function UsersPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (userId: string, status: string) => {
-    setUsers(prev => prev.map(u => 
-      u && u.id === userId ? { ...u, isActive: status === 'active' } : u
-    ));
+  const handleStatusUpdate = async (userId: string, status: string) => {
+    try {
+      const success = await updateStatus(userId, status);
+      if (success) {
+        addToast({
+          variant: "success",
+          title: "Status Updated",
+          description: `User status has been updated to ${status}.`,
+          duration: 4000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      addToast({
+        variant: "error",
+        title: "Status Update Failed",
+        description: "Failed to update user status. Please try again.",
+        duration: 5000
+      });
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -259,7 +277,7 @@ export default function UsersPage() {
   const renderStatusCell = (user: User) => {
     if (!user) return null;
     
-    const isActive = user.isActive ?? false;
+    const isActive = user.status ?? 'active' ? 'inactive' : 'suspended';
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
         isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -297,9 +315,9 @@ export default function UsersPage() {
           size="sm"
           onClick={() => handleUpdateStatus(user)}
           className="text-palette-blue-600 hover:text-palette-blue-700"
-          title={user.isActive ? "Deactivate" : "Activate"}
+          title={user.status === 'active' ? "Deactivate" : "Activate"}
         >
-          {user.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+          {user.status === 'active' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
         </Button>
         <Button
           variant="ghost"
@@ -322,6 +340,7 @@ export default function UsersPage() {
       setSortBy(column);
       setSortOrder('asc');
     }
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   const getSortIcon = (column: string) => {
@@ -333,11 +352,8 @@ export default function UsersPage() {
       <ChevronDown className="h-4 w-4 text-gray-600" />;
   };
 
-  // Pagination
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedData = filteredUsers.slice(startIndex, endIndex);
+  // Use server-side pagination, so no client-side slicing needed
+  const paginatedData = filteredUsers;
 
   const handleSelectItem = (id: string) => {
     setSelectedItems(prev =>
@@ -349,15 +365,33 @@ export default function UsersPage() {
     if (selectedItems.length === paginatedData.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(paginatedData.filter(user => user && user.id).map(user => user.id));
+      setSelectedItems(paginatedData.filter(user => user && user.id).map(user => user.id!) as string[]);
     }
   };
 
-  const handleBulkAction = (action: string, ids: string[]) => {
+  const handleBulkAction = async (action: string, ids: string[]) => {
     if (action === 'delete') {
       if (confirm(`Are you sure you want to delete ${ids.length} users?`)) {
-        setUsers(prev => prev.filter(user => user && !ids.includes(user.id)));
-        setSelectedItems([]);
+        try {
+          const success = await bulkDelete(ids);
+          if (success) {
+            setSelectedItems([]);
+            addToast({
+              variant: "success",
+              title: "Bulk Delete Successful",
+              description: `${ids.length} users have been deleted successfully.`,
+              duration: 4000
+            });
+          }
+        } catch (error) {
+          console.error("Error bulk deleting users:", error);
+          addToast({
+            variant: "error",
+            title: "Bulk Delete Failed",
+            description: "Failed to delete selected users. Please try again.",
+            duration: 5000
+          });
+        }
       }
     }
   };
@@ -390,6 +424,11 @@ export default function UsersPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
             <p className="text-gray-600">Manage system users and their permissions</p>
+            {error && (
+              <div className="mt-2 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+                {error}
+              </div>
+            )}
           </div>
           <Button
             onClick={handleAddUser}
@@ -410,7 +449,10 @@ export default function UsersPage() {
                   type="text"
                   placeholder="Search users..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page when search changes
+                  }}
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
                 />
               </div>
@@ -433,7 +475,11 @@ export default function UsersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
                   value={filters.role || 'all'}
-                  onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value === 'all' ? null : e.target.value }))}
+                  onChange={(e) => {
+                    const value = e.target.value === 'all' ? null : e.target.value;
+                    setFilters((prev: Record<string, any>) => ({ ...prev, role: value }));
+                    setCurrentPage(1); // Reset to first page when filter changes
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
                   <option value="all">All Roles</option>
@@ -447,7 +493,11 @@ export default function UsersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
-                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
+                  onChange={(e) => {
+                    const value = e.target.value === 'all' ? null : e.target.value;
+                    setFilters((prev: Record<string, any>) => ({ ...prev, status: value }));
+                    setCurrentPage(1); // Reset to first page when filter changes
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
                   <option value="all">All Status</option>
@@ -459,7 +509,10 @@ export default function UsersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
                 <select
                   value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1); // Reset to first page when page size changes
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
                   <option value={5}>5 per page</option>
@@ -561,14 +614,20 @@ export default function UsersPage() {
             </Table>
           </div>
 
-          {/* Pagination */}
-          <Pagination
+          {/* Enhanced Pagination */}
+          <EnhancedPagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            showInfo={true}
-            totalItems={filteredUsers.length}
+            totalItems={totalItems}
             pageSize={pageSize}
+            hasNextPage={hasNextPage}
+            hasPrevPage={hasPrevPage}
+            onPageChange={goToPage}
+            onNextPage={goToNextPage}
+            onPrevPage={goToPrevPage}
+            showInfo={true}
+            showPageNumbers={true}
+            maxVisiblePages={5}
           />
         </div>
 

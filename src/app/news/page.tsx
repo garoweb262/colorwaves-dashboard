@@ -9,21 +9,22 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ImageUpload } from "@/components/ImageUpload";
 
 interface News {
+  _id?: string;
   id: string;
   title: string;
   slug: string;
   content: string;
   excerpt?: string;
   featuredImage?: string;
-  images: string[];
-  tags: string[];
-  status: 'draft' | 'published' | 'archived';
-  isFeatured: boolean;
-  viewCount: number;
+  images?: string[];
+  tags?: string[];
+  status?: 'draft' | 'published' | 'archived';
+  isFeatured?: boolean;
+  viewCount?: number;
   author?: string;
   publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function NewsPage() {
@@ -147,7 +148,7 @@ export default function NewsPage() {
       filtered = filtered.filter(newsItem => {
         const title = (newsItem.title || '').toLowerCase();
         const excerpt = (newsItem.excerpt || '').toLowerCase();
-        const tags = newsItem.tags.join(' ').toLowerCase();
+        const tags = (newsItem.tags || []).join(' ').toLowerCase();
         const author = (newsItem.author || '').toLowerCase();
         const searchLower = searchTerm.toLowerCase();
         
@@ -164,7 +165,7 @@ export default function NewsPage() {
         filtered = filtered.filter(newsItem => {
           if (key === 'status') return newsItem.status === value;
           if (key === 'featured') return newsItem.isFeatured === (value === 'featured');
-          if (key === 'tag') return newsItem.tags.includes(value);
+          if (key === 'tag') return (newsItem.tags || []).includes(value);
           return true;
         });
       }
@@ -205,12 +206,28 @@ export default function NewsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleNewsSaved = (savedNews: News) => {
+  const handleNewsSaved = async (savedNews: News) => {
     if (!savedNews) return;
     
     if (editingNews) {
+      // Update existing news
+      // TODO: Implement API call for update
       setNews(prev => prev.map(newsItem => newsItem.id === savedNews.id ? savedNews : newsItem));
     } else {
+      // Create new news - send only required fields
+      const newsData = {
+        title: savedNews.title,
+        content: savedNews.content,
+        excerpt: savedNews.excerpt,
+        featuredImage: savedNews.featuredImage,
+        images: savedNews.images,
+        tags: savedNews.tags,
+        status: savedNews.status || 'draft',
+        isFeatured: savedNews.isFeatured || false,
+        author: savedNews.author,
+        publishedAt: savedNews.publishedAt
+      };
+      // TODO: Implement API call for create
       setNews(prev => [...prev, savedNews]);
     }
     setIsFormModalOpen(false);
@@ -462,14 +479,14 @@ export default function NewsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {newsItem.tags.slice(0, 2).map((tag, index) => (
+                        {(newsItem.tags || []).slice(0, 2).map((tag, index) => (
                           <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                             {tag}
                           </span>
                         ))}
-                        {newsItem.tags.length > 2 && (
+                        {(newsItem.tags || []).length > 2 && (
                           <span className="text-xs text-gray-500">
-                            +{newsItem.tags.length - 2}
+                            +{(newsItem.tags || []).length - 2}
                           </span>
                         )}
                       </div>
@@ -481,8 +498,8 @@ export default function NewsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(newsItem.status)}`}>
-                        {newsItem.status}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(newsItem.status || 'draft')}`}>
+                        {newsItem.status || 'draft'}
                       </span>
                     </TableCell>
                     <TableCell>

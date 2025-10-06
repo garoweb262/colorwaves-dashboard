@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Button } from "@/amal-ui";
+import { Modal, Button, useToast } from "@/amal-ui";
 import { X, Paperclip } from "lucide-react";
 import { FileUpload } from "@/components/FileUpload";
+import { uploadAPI } from "@/lib/api";
 
 interface PartnershipRequest {
   id: string;
@@ -29,6 +30,7 @@ interface PartnershipRequestReplyModalProps {
 }
 
 export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply }: PartnershipRequestReplyModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     replyTitle: "",
     replyMessage: ""
@@ -36,6 +38,8 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
   const [attachments, setAttachments] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -44,12 +48,12 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
     }
   };
 
-  const handleFileUpload = (files: string[]) => {
-    if (files.length + attachments.length > 3) {
+  const handleFileUpload = (fileUrl: string, fileName: string) => {
+    if (attachments.length >= 3) {
       setErrors(prev => ({ ...prev, attachments: "Maximum 3 files allowed" }));
       return;
     }
-    setAttachments(prev => [...prev, ...files]);
+    setAttachments(prev => [...prev, fileUrl]);
     if (errors.attachments) {
       setErrors(prev => ({ ...prev, attachments: "" }));
     }
@@ -82,18 +86,60 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalAttachments = [...attachments];
+
+      // Upload files if there are new files
+      if (uploadedFiles.length > 0) {
+        setIsUploadingFiles(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadFiles(uploadedFiles, "partnership-attachments");
+          
+          if (uploadResponse.success && uploadResponse.data) {
+            const newFileUrls = uploadResponse.data.map(item => item.fileUrl);
+            finalAttachments = [...finalAttachments, ...newFileUrls];
+          } else {
+            throw new Error("Failed to upload files");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          addToast({
+            variant: "error",
+            title: "File Upload Failed",
+            description: "Failed to upload files. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingFiles(false);
+        }
+      }
 
       const replyData = {
         replyTitle: formData.replyTitle,
         replyMessage: formData.replyMessage,
-        replyAttachments: attachments
+        replyAttachments: finalAttachments
       };
 
       onReply(request.id, replyData);
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: "Reply Sent",
+        description: "Your reply has been sent successfully.",
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error sending reply:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: "Reply Failed",
+        description: "Failed to send reply. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -103,6 +149,7 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
     setFormData({ replyTitle: "", replyMessage: "" });
     setAttachments([]);
     setErrors({});
+    setUploadedFiles([]);
     onClose();
   };
 
@@ -167,9 +214,10 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
               Attachments (Max 3 files)
             </label>
             <FileUpload
-              onFileUpload={(fileUrl, fileName) => handleFileUpload([fileUrl])}
+              onFileUpload={(fileUrl, fileName) => handleFileUpload(fileUrl, fileName)}
               accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               maxSize={10}
+              folder="partnership-attachments"
               className="mb-4"
             />
             
@@ -211,11 +259,11 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
-              loading={isSubmitting}
+              disabled={isSubmitting || isUploadingFiles}
+              loading={isSubmitting || isUploadingFiles}
               className="bg-primary hover:bg-primary-600 text-primary-foreground"
             >
-              {isSubmitting ? "Sending..." : "Send Reply"}
+              {isUploadingFiles ? "Uploading Files..." : isSubmitting ? "Sending..." : "Send Reply"}
             </Button>
           </div>
         </form>

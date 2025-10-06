@@ -9,24 +9,25 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ImageUpload } from "@/components/ImageUpload";
 
 interface Blog {
+  _id?: string;
   id: string;
   title: string;
   slug: string;
   content: string;
   excerpt?: string;
   featuredImage?: string;
-  images: string[];
-  tags: string[];
-  categories: string[];
-  status: 'draft' | 'published' | 'archived';
-  isFeatured: boolean;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
+  images?: string[];
+  tags?: string[];
+  categories?: string[];
+  status?: 'draft' | 'published' | 'archived';
+  isFeatured?: boolean;
+  viewCount?: number;
+  likeCount?: number;
+  commentCount?: number;
   author?: string;
   publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function BlogPage() {
@@ -165,8 +166,8 @@ export default function BlogPage() {
       filtered = filtered.filter(blog => {
         const title = (blog.title || '').toLowerCase();
         const excerpt = (blog.excerpt || '').toLowerCase();
-        const tags = blog.tags.join(' ').toLowerCase();
-        const categories = blog.categories.join(' ').toLowerCase();
+        const tags = (blog.tags || []).join(' ').toLowerCase();
+        const categories = (blog.categories || []).join(' ').toLowerCase();
         const author = (blog.author || '').toLowerCase();
         const searchLower = searchTerm.toLowerCase();
         
@@ -184,8 +185,8 @@ export default function BlogPage() {
         filtered = filtered.filter(blog => {
           if (key === 'status') return blog.status === value;
           if (key === 'featured') return blog.isFeatured === (value === 'featured');
-          if (key === 'category') return blog.categories.includes(value);
-          if (key === 'tag') return blog.tags.includes(value);
+          if (key === 'category') return (blog.categories || []).includes(value);
+          if (key === 'tag') return (blog.tags || []).includes(value);
           return true;
         });
       }
@@ -226,12 +227,29 @@ export default function BlogPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleBlogSaved = (savedBlog: Blog) => {
+  const handleBlogSaved = async (savedBlog: Blog) => {
     if (!savedBlog) return;
     
     if (editingBlog) {
+      // Update existing blog
+      // TODO: Implement API call for update
       setBlogs(prev => prev.map(blog => blog.id === savedBlog.id ? savedBlog : blog));
     } else {
+      // Create new blog - send only required fields
+      const blogData = {
+        title: savedBlog.title,
+        content: savedBlog.content,
+        excerpt: savedBlog.excerpt,
+        featuredImage: savedBlog.featuredImage,
+        images: savedBlog.images,
+        tags: savedBlog.tags,
+        categories: savedBlog.categories,
+        status: savedBlog.status || 'draft',
+        isFeatured: savedBlog.isFeatured || false,
+        author: savedBlog.author,
+        publishedAt: savedBlog.publishedAt
+      };
+      // TODO: Implement API call for create
       setBlogs(prev => [...prev, savedBlog]);
     }
     setIsFormModalOpen(false);
@@ -513,14 +531,14 @@ export default function BlogPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {blog.categories.slice(0, 2).map((category, index) => (
+                        {(blog.categories || []).slice(0, 2).map((category, index) => (
                           <Badge key={index} color="blue" size="sm">
                             {category}
                           </Badge>
                         ))}
-                        {blog.categories.length > 2 && (
+                        {(blog.categories || []).length > 2 && (
                           <span className="text-xs text-gray-500">
-                            +{blog.categories.length - 2}
+                            +{(blog.categories || []).length - 2}
                           </span>
                         )}
                       </div>
@@ -532,8 +550,8 @@ export default function BlogPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(blog.status)}`}>
-                        {blog.status}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(blog.status || 'draft')}`}>
+                        {blog.status || 'draft'}
                       </span>
                     </TableCell>
                     <TableCell>

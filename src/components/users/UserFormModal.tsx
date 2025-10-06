@@ -2,19 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Modal, Input, Select, Button } from "@/amal-ui";
-import { User, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react";
+import { Modal, Input, Select, Button, useToast } from "@/amal-ui";
+import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 interface User {
-  id: string;
+  _id?: string; // Backend uses _id
+  id: string; // Required for useCRUD
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
   role: string;
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
+  password?: string; // For form data
 }
 
 interface UserFormModalProps {
@@ -25,12 +28,12 @@ interface UserFormModalProps {
 }
 
 export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
-    role: "SUPPORT",
+    role: "",
     password: "",
     confirmPassword: ""
   });
@@ -47,8 +50,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
-        phone: user.phone || "",
-        role: user.role || "support",
+        role: user.role || "content-manager",
         password: "",
         confirmPassword: ""
       });
@@ -57,8 +59,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
-        role: "support",
+        role: "content-manager",
         password: "",
         confirmPassword: ""
       });
@@ -68,8 +69,10 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
     setShowConfirmPassword(false);
   }, [user, isOpen]);
 
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
@@ -91,12 +94,6 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Phone number is invalid";
     }
 
     if (!isEditing) {
@@ -125,22 +122,46 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
     setIsLoading(true);
     
     try {
-      const userData: User = {
-        id: user?.id || Date.now().toString(),
+      // For creating new user, only send the required fields
+      const userData = isEditing ? {
+        // For editing, only send the fields allowed by UpdateUserDto
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
-        role: formData.role,
-        isActive: user?.isActive ?? true,
-        createdAt: user?.createdAt || new Date().toISOString(),
-        lastLogin: user?.lastLogin
+        role: formData.role
+      } : {
+        // For creating, only send the fields the API expects
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        role: formData.role
       };
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      onSave(userData);
+      // Call the onSave callback with the properly formatted data
+      onSave(userData as User);
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: isEditing ? "User Updated" : "User Created",
+        description: isEditing 
+          ? `User ${formData.firstName} ${formData.lastName} has been updated successfully.`
+          : `User ${formData.firstName} ${formData.lastName} has been created successfully.`,
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error saving user:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: isEditing ? "Update Failed" : "Creation Failed",
+        description: isEditing 
+          ? "Failed to update user. Please try again."
+          : "Failed to create user. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsLoading(false);
     }
@@ -194,31 +215,17 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="Enter email address"
-                leftIcon={<Mail className="h-4 w-4" />}
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                error={errors.email}
-                required
-                fullWidth
-              />
-
-              <Input
-                label="Phone Number"
-                type="tel"
-                placeholder="Enter phone number"
-                leftIcon={<Phone className="h-4 w-4" />}
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                error={errors.phone}
-                required
-                fullWidth
-              />
-            </div>
+            <Input
+              label="Email Address"
+              type="email"
+              placeholder="Enter email address"
+              leftIcon={<Mail className="h-4 w-4" />}
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              error={errors.email}
+              required
+              fullWidth
+            />
           </div>
 
           {/* Role Selection */}

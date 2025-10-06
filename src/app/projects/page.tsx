@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
-import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
+import React, { useState } from "react";
+import { Button, Checkbox, useToast } from "@/amal-ui";
+import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ProjectViewModal } from "@/components/projects/ProjectViewModal";
+import { PageTemplate } from "@/components/PageTemplate";
+import { useCRUD } from "@/hooks/useCRUD";
+import { useRouter } from "next/navigation";
 import { ProjectFormModal } from "@/components/projects/ProjectFormModal";
 import { ProjectStatusModal } from "@/components/projects/ProjectStatusModal";
 import { DeleteConfirmModal } from "@/components/projects/DeleteConfirmModal";
 
 interface Project {
+  _id?: string;
   id: string;
   title: string;
   slug: string;
@@ -27,121 +28,56 @@ interface Project {
 }
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [isLoading, setIsLoading] = useState(true);
+  const { addToast } = useToast();
+  const router = useRouter();
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data - replace with actual API call
-  useEffect(() => {
-    const mockProjects: Project[] = [
-      {
-        id: "1",
-        title: "Residential Housing Estate in Abuja",
-        slug: "residential-housing-estate-abuja",
-        client: "Abuja Development Corporation",
-        technologies: ["Architectural Design", "Construction Management", "Quality Control"],
-        imageUrls: ["/images/projects/housing-estate-1.jpg", "/images/projects/housing-estate-2.jpg"],
-        description: "A comprehensive residential development featuring modern housing units with premium finishes and sustainable design.",
-        startDate: "2023-01-15",
-        endDate: "2023-12-30",
-        isActive: true,
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        title: "Office Renovation for Corporate Client",
-        slug: "office-renovation-corporate-client",
-        client: "TechCorp Solutions",
-        technologies: ["Interior Design", "Space Planning", "Color Consultation"],
-        imageUrls: ["/images/projects/office-renovation-1.jpg", "/images/projects/office-renovation-2.jpg"],
-        description: "Complete office space transformation with modern design elements and professional color schemes.",
-        startDate: "2023-03-01",
-        endDate: "2023-06-15",
-        isActive: true,
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "3",
-        title: "Industrial Paint Supply for Local Manufacturers",
-        slug: "industrial-paint-supply-manufacturers",
-        client: "Manufacturing Alliance",
-        technologies: ["Industrial Coatings", "Supply Chain Management", "Quality Assurance"],
-        imageUrls: ["/images/projects/industrial-supply-1.jpg", "/images/projects/industrial-supply-2.jpg"],
-        description: "Specialized industrial coating solutions for manufacturing facilities with high-performance requirements.",
-        startDate: "2023-05-10",
-        endDate: "2023-08-20",
-        isActive: true,
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-18T10:30:00Z"
-      }
-    ];
-    
-    setProjects(mockProjects);
-    setFilteredProjects(mockProjects);
-    setIsLoading(false);
-  }, []);
-
-  // Filter and sort projects
-  useEffect(() => {
-    let filtered = projects.filter(project => project != null);
-
-    // Apply search
-    if (searchTerm) {
-      filtered = filtered.filter(project => {
-        const name = (project.title || '').toLowerCase();
-        const description = (project.description || '').toLowerCase();
-        const technologies = project.technologies.join(' ').toLowerCase();
-        const searchLower = searchTerm.toLowerCase();
-        
-        return name.includes(searchLower) || 
-               description.includes(searchLower) || 
-               technologies.includes(searchLower);
-      });
-    }
-
-    // Apply filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== 'all') {
-        filtered = filtered.filter(project => {
-          if (key === 'status') return value === 'active' ? project.isActive : !project.isActive;
-          return true;
-        });
-      }
-    });
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      if (!a || !b) return 0;
-      
-      const aValue = a[sortBy as keyof Project] || '';
-      const bValue = b[sortBy as keyof Project] || '';
-      
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    setFilteredProjects(filtered);
-  }, [projects, searchTerm, filters, sortBy, sortOrder]);
+  const {
+    items: projects,
+    isLoading,
+    error,
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    hasNextPage,
+    hasPrevPage,
+    searchTerm,
+    filters,
+    sortBy,
+    sortOrder,
+    queryParams,
+    fetchItems,
+    createItem,
+    updateItem,
+    deleteItem,
+    updateStatus,
+    bulkDelete,
+    setCurrentPage,
+    setPageSize,
+    setSearchTerm,
+    setFilters,
+    setSortBy,
+    setSortOrder,
+    setQueryParams,
+    setError,
+    goToNextPage,
+    goToPrevPage,
+    goToPage
+  } = useCRUD<Project>({
+    endpoint: '/projects',
+    pageSize: 10,
+    initialFilters: { status: 'all' }
+  });
 
   const handleViewProject = (project: Project) => {
-    setSelectedProject(project);
-    setIsViewModalOpen(true);
+    router.push(`/projects/${project.slug}`);
   };
 
   const handleEditProject = (project: Project) => {
@@ -159,24 +95,101 @@ export default function ProjectsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleProjectSaved = (savedProject: Project) => {
-    if (!savedProject) return;
-    
-    if (editingProject) {
-      setProjects(prev => prev.map(project => project.id === savedProject.id ? savedProject : project));
-    } else {
-      setProjects(prev => [...prev, savedProject]);
-    }
-    setIsFormModalOpen(false);
-    setEditingProject(null);
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
-  const handleProjectDeleted = (projectId: string) => {
+  const handleFilter = (key: string, value: any) => {
+    setFilters((prev: Record<string, any>) => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when page size changes
+  };
+
+  const isEmpty = projects.length === 0;
+
+  const handleProjectSaved = async (savedProject: Project) => {
+    if (!savedProject) return;
+    
+    try {
+      if (editingProject) {
+        // Update existing project
+        const result = await updateItem(editingProject.id, savedProject);
+        if (result) {
+          setIsFormModalOpen(false);
+          setEditingProject(null);
+          addToast({
+            variant: "success",
+            title: "Project Updated",
+            description: `Project "${savedProject.title}" has been updated successfully.`,
+            duration: 4000
+          });
+        }
+      } else {
+        // Create new project - send only required fields
+        const projectData = {
+          title: savedProject.title,
+          description: savedProject.description,
+          client: savedProject.client,
+          technologies: savedProject.technologies,
+          imageUrls: savedProject.imageUrls,
+          startDate: savedProject.startDate,
+          endDate: savedProject.endDate,
+          isActive: savedProject.isActive ?? true
+        };
+        const result = await createItem(projectData);
+        if (result) {
+          setIsFormModalOpen(false);
+          setEditingProject(null);
+          addToast({
+            variant: "success",
+            title: "Project Created",
+            description: `Project "${savedProject.title}" has been created successfully.`,
+            duration: 4000
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error saving project:", error);
+      addToast({
+        variant: "error",
+        title: editingProject ? "Update Failed" : "Creation Failed",
+        description: editingProject 
+          ? "Failed to update project. Please try again."
+          : "Failed to create project. Please try again.",
+        duration: 5000
+      });
+    }
+  };
+
+  const handleProjectDeleted = async (projectId: string) => {
     if (!projectId) return;
     
-    setProjects(prev => prev.filter(project => project.id !== projectId));
-    setIsDeleteModalOpen(false);
-    setSelectedProject(null);
+    try {
+      const success = await deleteItem(projectId);
+      if (success) {
+        setIsDeleteModalOpen(false);
+        setSelectedProject(null);
+        addToast({
+          variant: "success",
+          title: "Project Deleted",
+          description: "Project has been deleted successfully.",
+          duration: 4000
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      addToast({
+        variant: "error",
+        title: "Delete Failed",
+        description: "Failed to delete project. Please try again.",
+        duration: 5000
+      });
+    }
   };
 
   const handleUpdateStatus = (project: Project) => {
@@ -186,10 +199,51 @@ export default function ProjectsPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (projectId: string, status: string) => {
-    setProjects(prev => prev.map(p => 
-      p.id === projectId ? { ...p, isActive: status === 'active' } : p
-    ));
+  const handleStatusUpdate = async (projectId: string, status: string) => {
+    try {
+      const success = await updateStatus(projectId, status);
+      if (success) {
+        addToast({
+          variant: "success",
+          title: "Status Updated",
+          description: `Project status has been updated to ${status}.`,
+          duration: 4000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      addToast({
+        variant: "error",
+        title: "Status Update Failed",
+        description: "Failed to update project status. Please try again.",
+        duration: 5000
+      });
+    }
+  };
+
+  const handleSelectItem = (id: string) => {
+    setSelectedItems(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.length === projects.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(projects.map(project => project.id));
+    }
+  };
+
+  const handleBulkAction = async (action: string, ids: string[]) => {
+    if (action === 'delete') {
+      if (confirm(`Are you sure you want to delete ${ids.length} projects?`)) {
+        const success = await bulkDelete(ids);
+        if (success) {
+          setSelectedItems([]);
+        }
+      }
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -200,50 +254,45 @@ export default function ProjectsPage() {
     });
   };
 
-  // Sorting functionality
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
-  const getSortIcon = (column: string) => {
-    if (sortBy !== column) {
-      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? 
-      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
-      <ChevronDown className="h-4 w-4 text-gray-600" />;
-  };
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProjects.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedData = filteredProjects.slice(startIndex, endIndex);
-
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const filtersContent = (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select
+          value={filters.status || 'all'}
+          onChange={(e) => {
+            const value = e.target.value === 'all' ? null : e.target.value;
+            handleFilter('status', value);
+          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+        <select
+          value={pageSize}
+          onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+        >
+          <option value={5}>5 per page</option>
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+        </select>
+      </div>
+    </div>
+  );
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Project Showcases</h1>
-            <p className="text-gray-600">Manage featured projects and before/after galleries</p>
-          </div>
+      <PageTemplate
+        title="Project Management"
+        description="Manage your project showcases and galleries"
+        actionButton={
           <Button
             onClick={handleAddProject}
             leftIcon={<Plus className="h-4 w-4" />}
@@ -251,231 +300,192 @@ export default function ProjectsPage() {
           >
             Add Project
           </Button>
+        }
+        searchValue={searchTerm}
+        onSearchChange={handleSearch}
+        searchPlaceholder="Search projects..."
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        filtersContent={filtersContent}
+        isLoading={isLoading}
+        error={error}
+        isEmpty={isEmpty}
+        emptyMessage="No projects found"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+        onPageChange={goToPage}
+        onNextPage={goToNextPage}
+        onPrevPage={goToPrevPage}
+        onRefresh={fetchItems}
+      >
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {projects.map((project) => (
+            <div key={project.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              {/* Project Image */}
+              <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
+                {project.imageUrls && project.imageUrls.length > 0 ? (
+                  <img
+                    src={project.imageUrls[0]}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`${project.imageUrls && project.imageUrls.length > 0 ? 'hidden' : ''} absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20`}>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-2xl font-bold text-primary">
+                        {project.title.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500">No Image</p>
+                  </div>
+                </div>
+                
+                {/* Status Badge */}
+                <div className="absolute top-3 right-3">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {project.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+
+                {/* Selection Checkbox */}
+                <div className="absolute top-3 left-3">
+                  <Checkbox
+                    checked={selectedItems.includes(project.id)}
+                    onChange={() => handleSelectItem(project.id)}
+                  />
+                </div>
+
+                {/* Image Count Badge */}
+                {project.imageUrls && project.imageUrls.length > 0 && (
+                  <div className="absolute bottom-3 right-3">
+                    <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                      {project.imageUrls.length} images
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Project Content */}
+              <div className="p-4">
+                <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">
+                  {project.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {project.description}
+                </p>
+                
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-1">Client:</p>
+                  <p className="text-sm font-medium text-gray-700 line-clamp-1">
+                    {project.client}
+                  </p>
+                </div>
+
+                {/* Technologies */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-1">
+                    {project.technologies.slice(0, 2).map((technology, index) => (
+                      <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                        {technology}
+                      </span>
+                    ))}
+                    {project.technologies.length > 2 && (
+                      <span className="text-xs text-gray-500">
+                        +{project.technologies.length - 2} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-between">
+                  <Button
+                    onClick={() => handleViewProject(project)}
+                    className="flex-1 bg-primary hover:bg-primary-600 text-primary-foreground"
+                    size="sm"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                  
+                  <div className="flex items-center space-x-1 ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditProject(project)}
+                      className="text-palette-gold-600 hover:text-palette-gold-700"
+                      title="Edit Project"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUpdateStatus(project)}
+                      className="text-palette-blue-600 hover:text-palette-blue-700"
+                      title={project.isActive ? "Deactivate" : "Activate"}
+                    >
+                      {project.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteProject(project)}
+                      className="text-destructive hover:text-destructive-600"
+                      title="Delete Project"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search projects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
-                />
+        {/* Bulk Actions */}
+        {selectedItems.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-700">
+                {selectedItems.length} project(s) selected
+              </span>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('delete', selectedItems)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Delete Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                >
+                  Clear Selection
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
-              >
-                <Filter className="h-4 w-4" />
-                <span>Filters</span>
-              </Button>
             </div>
           </div>
-
-          {/* Filters */}
-          {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={filters.status || 'all'}
-                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-                >
-                  <option value={5}>5 per page</option>
-                  <option value={10}>10 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Projects Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto scrollbar-hide">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('name')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Project Name</span>
-                      {getSortIcon('name')}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('description')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Description</span>
-                      {getSortIcon('description')}
-                    </div>
-                  </TableHead>
-                  <TableHead>Features</TableHead>
-                  <TableHead>Images</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('isActive')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Status</span>
-                      {getSortIcon('isActive')}
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('createdAt')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Created</span>
-                      {getSortIcon('createdAt')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="w-32">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((project) => (
-                  <TableRow key={project.id}>
-                    <TableCell>
-                      <div className="max-w-md">
-                        <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                          {project.title}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-md">
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {project.description}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs">
-                        <div className="flex flex-wrap gap-1">
-                          {project.technologies.slice(0, 2).map((technology, index) => (
-                            <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                              {technology}
-                            </span>
-                          ))}
-                          {project.technologies.length > 2 && (
-                            <span className="text-xs text-gray-500">
-                              +{project.technologies.length - 2} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Badge color="blue" size="sm">
-                          {project.imageUrls.length} images
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {project.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-600">
-                        {formatDate(project.createdAt)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewProject(project)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditProject(project)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="Edit Project"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleUpdateStatus(project)}
-                          className="text-palette-blue-600 hover:text-palette-blue-700"
-                          title={project.isActive ? "Deactivate" : "Activate"}
-                        >
-                          {project.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteProject(project)}
-                          className="text-destructive hover:text-destructive-600"
-                          title="Delete Project"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            showInfo={true}
-            totalItems={filteredProjects.length}
-            pageSize={pageSize}
-          />
-        </div>
-      </div>
+        )}
+      </PageTemplate>
 
       {/* Modals */}
-      {selectedProject && (
-        <ProjectViewModal
-          project={selectedProject}
-          isOpen={isViewModalOpen}
-          onClose={() => setIsViewModalOpen(false)}
-        />
-      )}
-
       <ProjectFormModal
         project={editingProject}
         isOpen={isFormModalOpen}

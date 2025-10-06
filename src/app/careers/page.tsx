@@ -8,23 +8,25 @@ import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, Chevro
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 interface Career {
+  _id?: string;
   id: string;
   title: string;
   slug: string;
   departmentId: string;
-  departmentName: string;
+  departmentName?: string;
   description: string;
   requirements: string[];
   responsibilities: string[];
-  salaryRange: string;
+  salaryRange?: string;
   location: string;
   employmentType: 'Full-time' | 'Part-time' | 'Contract' | 'Internship';
-  experienceLevel: 'Entry' | 'Mid' | 'Senior' | 'Executive';
+  experienceLevel: 'Entry' | 'Mid' | 'Senior' | 'Executive' | 'Mid-level';
   applicationDeadline: string;
-  isActive: boolean;
-  isPublished: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  isPublished?: boolean;
+  benefits?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function CareersPage() {
@@ -278,12 +280,30 @@ export default function CareersPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleCareerSaved = (savedCareer: Career) => {
+  const handleCareerSaved = async (savedCareer: Career) => {
     if (!savedCareer) return;
     
     if (editingCareer) {
+      // Update existing career
+      // TODO: Implement API call for update
       setCareers(prev => prev.map(career => career.id === savedCareer.id ? savedCareer : career));
     } else {
+      // Create new career - send only required fields
+      const careerData = {
+        title: savedCareer.title,
+        departmentId: savedCareer.departmentId,
+        description: savedCareer.description,
+        requirements: savedCareer.requirements,
+        responsibilities: savedCareer.responsibilities,
+        location: savedCareer.location,
+        employmentType: savedCareer.employmentType,
+        experienceLevel: savedCareer.experienceLevel,
+        applicationDeadline: savedCareer.applicationDeadline,
+        isActive: savedCareer.isActive ?? true,
+        isPublished: savedCareer.isPublished ?? false,
+        benefits: savedCareer.benefits
+      };
+      // TODO: Implement API call for create
       setCareers(prev => [...prev, savedCareer]);
     }
     setIsFormModalOpen(false);
@@ -462,8 +482,8 @@ export default function CareersPage() {
                   <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                     {career.title}
                   </h3>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(career.isActive, career.isPublished)}`}>
-                    {!career.isActive ? "Inactive" : !career.isPublished ? "Draft" : "Published"}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(career.isActive || false, career.isPublished || false)}`}>
+                    {!(career.isActive || false) ? "Inactive" : !(career.isPublished || false) ? "Draft" : "Published"}
                   </span>
                 </div>
                 

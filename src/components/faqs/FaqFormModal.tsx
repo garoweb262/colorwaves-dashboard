@@ -72,16 +72,25 @@ export function FaqFormModal({ faq, isOpen, onClose, onSave }: FaqFormModalProps
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const savedFaq: Faq = {
-        id: faq?.id || Date.now().toString(),
-        question: formData.question,
-        answer: formData.answer,
-        status: "active", // Default to active
-        createdAt: faq?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      onSave(savedFaq);
+      if (faq) {
+        // For edit, only send the editable fields
+        const updateData = {
+          question: formData.question,
+          answer: formData.answer
+        };
+        onSave(updateData as Faq);
+      } else {
+        // For create, send all fields
+        const savedFaq: Faq = {
+          id: Date.now().toString(),
+          question: formData.question,
+          answer: formData.answer,
+          status: "active", // Default to active
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedFaq);
+      }
     } catch (error) {
       console.error("Error saving FAQ:", error);
     } finally {

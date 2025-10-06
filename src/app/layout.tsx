@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import { Maven_Pro } from "next/font/google";
 import { baseURL } from "@/app/resources/config";
 import { UserProvider } from "@/contexts/UserContext";
+import { LogoutProvider } from "@/contexts/LogoutContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { ToastProvider } from "@/amal-ui";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,7 +83,11 @@ export default function RootLayout({
       <body className={`${inter.variable} ${mavenPro.variable} font-sans antialiased`} suppressHydrationWarning={true}>
         <QueryProvider>
           <UserProvider>
-            {children}
+            <LogoutProvider>
+              <ToastProvider position="top-right" maxToasts={5}>
+                {children}
+              </ToastProvider>
+            </LogoutProvider>
           </UserProvider>
         </QueryProvider>
       </body>

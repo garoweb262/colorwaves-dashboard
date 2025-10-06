@@ -33,6 +33,9 @@ interface UserContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   isLoading: boolean;
+  token: string | null;
+  hasRole: (role: string) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -44,12 +47,14 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
   // Check for existing token on mount
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken) {
+        setToken(storedToken);
         try {
           const response = await api.get('/auth/profile');
           if (response.data) {
@@ -64,15 +69,56 @@ export function UserProvider({ children }: UserProviderProps) {
             setUser(userData);
           }
         } catch (error) {
-          // Token is invalid, remove it
+          // Token is invalid, remove it and logout
           localStorage.removeItem('authToken');
+          setToken(null);
+          setUser(null);
         }
+      } else {
+        // No token found, ensure user is logged out
+        setUser(null);
+        setToken(null);
       }
       setIsLoading(false);
     };
 
     checkAuth();
   }, []);
+
+  // Check for token on page visibility change (when user returns to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const storedToken = localStorage.getItem('authToken');
+        if (!storedToken && user) {
+          // Token was removed while tab was hidden, logout user
+          setUser(null);
+          setToken(null);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
+  // Listen for storage changes (when token is removed in another tab)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'authToken' && e.newValue === null && user) {
+        // Token was removed in another tab, logout user
+        setUser(null);
+        setToken(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user]);
 
   const currentRole = roles.find(role => role.id === user?.role);
 
@@ -86,11 +132,14 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
+      // console.log('Login attempt:', { email, baseURL: api.defaults.baseURL });
       const response = await api.post('/auth/login', { email, password });
+      // console.log('Login response:', response.data);
       const data: LoginResponse = response.data;
       
       // Store token
       localStorage.setItem('authToken', data.access_token);
+      setToken(data.access_token);
       
       // Set user data
       const userData: User = {
@@ -111,8 +160,21 @@ export function UserProvider({ children }: UserProviderProps) {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    // Clear all localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+    }
     setUser(null);
+    setToken(null);
+  };
+
+  // Role-based access control functions
+  const hasRole = (role: string): boolean => {
+    return user?.role === role;
+  };
+
+  const hasAnyRole = (roles: string[]): boolean => {
+    return user ? roles.includes(user.role) : false;
   };
 
   const value: UserContextType = {
@@ -123,7 +185,10 @@ export function UserProvider({ children }: UserProviderProps) {
     isAuthenticated,
     login,
     logout,
-    isLoading
+    isLoading,
+    token,
+    hasRole,
+    hasAnyRole
   };
 
   return (

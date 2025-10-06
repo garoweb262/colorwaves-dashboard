@@ -6,14 +6,18 @@ import { Modal, Button } from "@/amal-ui";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 
 interface User {
+  _id?: string;
   id: string;
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   role: string;
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
+  password?: string;
 }
 
 interface DeleteConfirmModalProps {

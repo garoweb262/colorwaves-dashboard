@@ -1,19 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, Select, Button } from "@/amal-ui";
+import { Modal, Select, Button, useToast } from "@/amal-ui";
 import { UserCheck, AlertTriangle } from "lucide-react";
+import { crudAPI } from "@/lib/api";
 
 interface User {
+  _id?: string;
   id: string;
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
   role: string;
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
+  password?: string;
 }
 
 interface UserStatusModalProps {
@@ -24,12 +29,14 @@ interface UserStatusModalProps {
 }
 
 export function UserStatusModal({ user, isOpen, onClose, onUpdateStatus }: UserStatusModalProps) {
+  const { addToast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setSelectedStatus(user.isActive ? "active" : "inactive");
+      // Use status field if available, otherwise fallback to isActive
+      setSelectedStatus(user.status || (user.isActive ? "active" : "inactive"));
     }
   }, [user, isOpen]);
 
@@ -41,11 +48,34 @@ export function UserStatusModal({ user, isOpen, onClose, onUpdateStatus }: UserS
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      onUpdateStatus(user.id, selectedStatus);
-      onClose();
+      // Call the actual API endpoint
+      const response = await crudAPI.updateStatus('/users', user.id, selectedStatus);
+      
+      if (response.success) {
+        // Call the parent component's update handler
+        onUpdateStatus(user.id, selectedStatus);
+        onClose();
+        
+        // Show success toast
+        addToast({
+          variant: "success",
+          title: "Status Updated",
+          description: `User status has been updated to ${selectedStatus}.`,
+          duration: 4000
+        });
+      } else {
+        throw new Error('Failed to update status');
+      }
     } catch (error) {
       console.error("Error updating user status:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: "Status Update Failed",
+        description: "Failed to update user status. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsLoading(false);
     }

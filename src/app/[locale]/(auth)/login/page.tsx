@@ -53,13 +53,19 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // console.log('Form submitted:', formData);
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // console.log('Form validation failed');
+      return;
+    }
 
     setIsLoading(true);
+    // console.log('Starting login process...');
     
     try {
       const result = await login(formData.email, formData.password);
+      // console.log('Login result:', result);
       
       if (result.success) {
         router.push("/dashboard");

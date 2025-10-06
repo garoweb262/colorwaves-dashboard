@@ -6,14 +6,18 @@ import { Modal, Badge, Button } from "@/amal-ui";
 import { X, Mail, Calendar, Shield, Clock, User } from "lucide-react";
 
 interface User {
+  _id?: string;
   id: string;
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   role: string;
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   lastLogin?: string;
+  password?: string;
 }
 
 interface UserViewModalProps {
@@ -108,7 +112,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
             <Calendar className="h-5 w-5 text-gray-500" />
             <div className="flex-1">
               <p className="text-sm text-gray-600">Created</p>
-              <p className="font-medium text-gray-900">{formatDate(user.createdAt)}</p>
+              <p className="font-medium text-gray-900">{formatDate(user.createdAt || new Date().toISOString())}</p>
             </div>
           </div>
 
@@ -117,7 +121,7 @@ export function UserViewModal({ user, isOpen, onClose }: UserViewModalProps) {
               <Clock className="h-5 w-5 text-gray-500" />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Last Login</p>
-                <p className="font-medium text-gray-900">{formatDate(user.lastLogin)}</p>
+                <p className="font-medium text-gray-900">{formatDate(user.lastLogin || new Date().toISOString())}</p>
               </div>
             </div>
           )}

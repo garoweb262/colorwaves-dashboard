@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
+import { crudAPI } from "@/lib/api";
 
 interface Project {
   id: string;
@@ -30,19 +31,38 @@ interface ProjectStatusModalProps {
 export function ProjectStatusModal({ project, isOpen, onClose, onUpdateStatus }: ProjectStatusModalProps) {
   const [selectedStatus, setSelectedStatus] = useState(project.isActive ? 'active' : 'inactive');
   const [isUpdating, setIsUpdating] = useState(false);
+  const { addToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdating(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call the actual API endpoint
+      const response = await crudAPI.updateStatus('/projects', project.id, selectedStatus);
       
-      onUpdateStatus(project.id, selectedStatus);
-      onClose();
+      if (response.success) {
+        onUpdateStatus(project.id, selectedStatus);
+        onClose();
+        
+        addToast({
+          variant: "success",
+          title: "Status Updated",
+          description: `Project status has been updated to ${selectedStatus}.`,
+          duration: 4000
+        });
+      } else {
+        throw new Error('Failed to update status');
+      }
     } catch (error) {
       console.error("Error updating project status:", error);
+      
+      addToast({
+        variant: "error",
+        title: "Status Update Failed",
+        description: "Failed to update project status. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsUpdating(false);
     }

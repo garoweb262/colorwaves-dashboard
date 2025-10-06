@@ -100,20 +100,33 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const savedTestimony: Testimony = {
-        id: testimony?.id || Date.now().toString(),
-        content: formData.content,
-        clientName: formData.clientName,
-        clientPosition: formData.clientPosition,
-        clientCompany: formData.clientCompany,
-        rating: formData.rating,
-        clientImage: formData.clientImage,
-        isActive: true, // Default to active
-        createdAt: testimony?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      onSave(savedTestimony);
+      if (testimony) {
+        // For edit, only send the editable fields
+        const updateData = {
+          content: formData.content,
+          clientName: formData.clientName,
+          clientPosition: formData.clientPosition,
+          clientCompany: formData.clientCompany,
+          rating: formData.rating,
+          clientImage: formData.clientImage
+        };
+        onSave(updateData as Testimony);
+      } else {
+        // For create, send all fields
+        const savedTestimony: Testimony = {
+          id: Date.now().toString(),
+          content: formData.content,
+          clientName: formData.clientName,
+          clientPosition: formData.clientPosition,
+          clientCompany: formData.clientCompany,
+          rating: formData.rating,
+          clientImage: formData.clientImage,
+          isActive: true, // Default to active
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedTestimony);
+      }
     } catch (error) {
       console.error("Error saving testimony:", error);
     } finally {

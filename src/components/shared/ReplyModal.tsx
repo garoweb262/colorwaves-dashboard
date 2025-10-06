@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { Modal } from "@/amal-ui";
 import { X, Paperclip } from "lucide-react";
+import { uploadAPI } from "@/lib/api";
 
 interface ReplyModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function ReplyModal({
   title = "Reply",
   isLoading = false 
 }: ReplyModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     replyTitle: "",
     replyMessage: ""
@@ -31,6 +33,8 @@ export function ReplyModal({
   const [attachments, setAttachments] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,6 +44,7 @@ export function ReplyModal({
       });
       setAttachments([]);
       setErrors({});
+      setUploadedFiles([]);
     }
   }, [isOpen]);
 
@@ -65,14 +70,60 @@ export function ReplyModal({
 
     setIsSubmitting(true);
     try {
+      let finalAttachments = [...attachments];
+
+      // Upload files if there are new files
+      if (uploadedFiles.length > 0) {
+        setIsUploadingFiles(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadFiles(uploadedFiles, "attachments");
+          
+          if (uploadResponse.success && uploadResponse.data) {
+            const newFileUrls = uploadResponse.data.map(item => item.fileUrl);
+            finalAttachments = [...finalAttachments, ...newFileUrls];
+          } else {
+            throw new Error("Failed to upload files");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          addToast({
+            variant: "error",
+            title: "File Upload Failed",
+            description: "Failed to upload files. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingFiles(false);
+        }
+      }
+
       await onReply({
         replyTitle: formData.replyTitle,
         replyMessage: formData.replyMessage,
-        replyAttachments: attachments
+        replyAttachments: finalAttachments
       });
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: "Reply Sent",
+        description: "Your reply has been sent successfully.",
+        duration: 4000
+      });
+      
       onClose();
     } catch (error) {
       console.error("Error sending reply:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: "Reply Failed",
+        description: "Failed to send reply. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -89,23 +140,24 @@ export function ReplyModal({
     const files = e.target.files;
     if (!files) return;
 
-    const newAttachments: string[] = [];
+    const newFiles: File[] = [];
     const maxFiles = 3;
     const currentCount = attachments.length;
 
     for (let i = 0; i < Math.min(files.length, maxFiles - currentCount); i++) {
       const file = files[i];
-      // In a real app, you would upload the file and get a URL
-      // For now, we'll create a mock URL
-      const mockUrl = URL.createObjectURL(file);
-      newAttachments.push(mockUrl);
+      newFiles.push(file);
+      // Create a preview URL for display
+      const previewUrl = URL.createObjectURL(file);
+      setAttachments(prev => [...prev, previewUrl]);
     }
 
-    setAttachments(prev => [...prev, ...newAttachments]);
+    setUploadedFiles(prev => [...prev, ...newFiles]);
   };
 
   const handleRemoveAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -231,11 +283,11 @@ export function ReplyModal({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || isLoading}
-              loading={isSubmitting || isLoading}
+              disabled={isSubmitting || isLoading || isUploadingFiles}
+              loading={isSubmitting || isLoading || isUploadingFiles}
               className="bg-primary hover:bg-primary-600 text-primary-foreground"
             >
-              {isSubmitting || isLoading ? "Sending..." : "Send Reply"}
+              {isUploadingFiles ? "Uploading Files..." : isSubmitting || isLoading ? "Sending..." : "Send Reply"}
             </Button>
           </div>
         </form>

@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
+import { ImageUpload } from "@/components/ImageUpload";
+import { uploadAPI } from "@/lib/api";
 
 interface Team {
   id: string;
@@ -29,6 +31,7 @@ interface TeamFormModalProps {
 }
 
 export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -42,6 +45,8 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     if (team) {
@@ -70,6 +75,7 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
       });
     }
     setErrors({});
+    setUploadedImageFile(null);
   }, [team, isOpen]);
 
   const validateForm = () => {
@@ -117,28 +123,89 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalImageUrl = formData.image;
 
-      const savedTeam: Team = {
-        id: team?.id || Date.now().toString(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        position: formData.position,
-        bio: formData.bio,
-        email: formData.email || undefined,
-        linkedin: formData.linkedin || undefined,
-        twitter: formData.twitter || undefined,
-        image: formData.image || undefined,
-        order: formData.order,
-        status: "ACTIVE", // Default status
-        createdAt: team?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Upload image if there's a new file
+      if (uploadedImageFile) {
+        setIsUploadingImage(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImage(uploadedImageFile, "teams");
+          
+          if (uploadResponse.success && uploadResponse.data.fileUrl) {
+            finalImageUrl = uploadResponse.data.fileUrl;
+          } else {
+            throw new Error("Failed to upload image");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Image Upload Failed",
+            description: "Failed to upload image. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
 
-      onSave(savedTeam);
+      if (team) {
+        // For edit, only send the editable fields
+        const updateData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          position: formData.position,
+          bio: formData.bio,
+          email: formData.email || undefined,
+          linkedin: formData.linkedin || undefined,
+          twitter: formData.twitter || undefined,
+          image: finalImageUrl || undefined,
+          order: formData.order
+        };
+        onSave(updateData as Team);
+      } else {
+        // For create, send all fields
+        const savedTeam: Team = {
+          id: Date.now().toString(),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          position: formData.position,
+          bio: formData.bio,
+          email: formData.email || undefined,
+          linkedin: formData.linkedin || undefined,
+          twitter: formData.twitter || undefined,
+          image: finalImageUrl || undefined,
+          order: formData.order,
+          status: "ACTIVE", // Default status
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedTeam);
+      }
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: team ? "Team Member Updated" : "Team Member Created",
+        description: team 
+          ? `Team member "${formData.firstName} ${formData.lastName}" has been updated successfully.`
+          : `Team member "${formData.firstName} ${formData.lastName}" has been created successfully.`,
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error saving team member:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: team ? "Update Failed" : "Creation Failed",
+        description: team 
+          ? "Failed to update team member. Please try again."
+          : "Failed to create team member. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -149,6 +216,18 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleImageSelect = (imageUrl: string, file?: File) => {
+    if (file) {
+      setUploadedImageFile(file);
+    }
+    handleInputChange("image", imageUrl);
+  };
+
+  const handleImageRemove = () => {
+    setUploadedImageFile(null);
+    handleInputChange("image", "");
   };
 
   return (
@@ -302,17 +381,15 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
             )}
           </div>
 
-          {/* Image */}
+          {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image URL
-            </label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => handleInputChange("image", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="Enter image URL"
+            <ImageUpload
+              label="Team Member Image"
+              description="Upload an image for this team member"
+              currentImage={formData.image}
+              onImageSelect={(imageUrl, file) => handleImageSelect(imageUrl, file)}
+              onImageRemove={handleImageRemove}
+              maxSize={5}
             />
           </div>
 
@@ -343,10 +420,10 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              loading={isSubmitting || isUploadingImage}
+              disabled={isSubmitting || isUploadingImage}
             >
-              {team ? "Update Team Member" : "Create Team Member"}
+              {isUploadingImage ? "Uploading Image..." : team ? "Update Team Member" : "Create Team Member"}
             </Button>
           </div>
         </form>

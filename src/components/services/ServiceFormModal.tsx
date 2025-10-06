@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
+import { uploadAPI } from "@/lib/api";
 
 interface Service {
   id: string;
@@ -25,6 +26,7 @@ interface ServiceFormModalProps {
 }
 
 export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -33,6 +35,8 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     if (service) {
@@ -51,6 +55,7 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
       });
     }
     setErrors({});
+    setUploadedImageFile(null);
   }, [service, isOpen]);
 
   const validateForm = () => {
@@ -64,7 +69,7 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
       newErrors.description = "Description is required";
     }
 
-    if (!formData.imageUrl.trim()) {
+    if (!formData.imageUrl.trim() && !uploadedImageFile) {
       newErrors.imageUrl = "Image is required";
     }
 
@@ -82,23 +87,79 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalImageUrl = formData.imageUrl;
 
-      const savedService: Service = {
-        id: service?.id || Date.now().toString(),
-        name: formData.name,
-        slug: service?.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
-        description: formData.description,
-        imageUrl: formData.imageUrl,
-        isActive: formData.isActive,
-        createdAt: service?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // If there's a new image file to upload, upload it first
+      if (uploadedImageFile) {
+        setIsUploadingImage(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImage(uploadedImageFile, "images");
+          
+          if (uploadResponse.success && uploadResponse.data.fileUrl) {
+            finalImageUrl = uploadResponse.data.fileUrl;
+          } else {
+            throw new Error("Failed to upload image");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Image Upload Failed",
+            description: "Failed to upload image. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
 
-      onSave(savedService);
+      if (service) {
+        // For edit, only send the editable fields
+        const updateData = {
+          name: formData.name,
+          description: formData.description,
+          imageUrl: finalImageUrl,
+          isActive: formData.isActive
+        };
+        onSave(updateData as Service);
+      } else {
+        // For create, send all fields
+        const savedService: Service = {
+          id: Date.now().toString(),
+          name: formData.name,
+          slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
+          description: formData.description,
+          imageUrl: finalImageUrl,
+          isActive: formData.isActive,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedService);
+      }
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: service ? "Service Updated" : "Service Created",
+        description: service 
+          ? `Service "${formData.name}" has been updated successfully.`
+          : `Service "${formData.name}" has been created successfully.`,
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error saving service:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: service ? "Update Failed" : "Creation Failed",
+        description: service 
+          ? "Failed to update service. Please try again."
+          : "Failed to create service. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -109,6 +170,18 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleImageSelect = (imageUrl: string, file?: File) => {
+    if (file) {
+      setUploadedImageFile(file);
+    }
+    handleInputChange("imageUrl", imageUrl);
+  };
+
+  const handleImageRemove = () => {
+    setUploadedImageFile(null);
+    handleInputChange("imageUrl", "");
   };
 
   return (
@@ -173,8 +246,8 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
               label="Service Image *"
               description="Upload an image for this service"
               currentImage={formData.imageUrl}
-              onImageSelect={(imageUrl) => handleInputChange("imageUrl", imageUrl)}
-              onImageRemove={() => handleInputChange("imageUrl", "")}
+              onImageSelect={(imageUrl, file) => handleImageSelect(imageUrl, file)}
+              onImageRemove={handleImageRemove}
               maxSize={5}
             />
             {errors.imageUrl && (
@@ -213,10 +286,10 @@ export function ServiceFormModal({ service, isOpen, onClose, onSave }: ServiceFo
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              loading={isSubmitting || isUploadingImage}
+              disabled={isSubmitting || isUploadingImage}
             >
-              {service ? "Update Service" : "Create Service"}
+              {isUploadingImage ? "Uploading Image..." : service ? "Update Service" : "Create Service"}
             </Button>
           </div>
         </form>

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
+import { uploadAPI } from "@/lib/api";
 
 interface Project {
   id: string;
@@ -29,6 +30,7 @@ interface ProjectFormModalProps {
 }
 
 export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -42,6 +44,8 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [technologyInput, setTechnologyInput] = useState("");
+  const [uploadedImageFiles, setUploadedImageFiles] = useState<File[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -69,6 +73,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
     }
     setErrors({});
     setTechnologyInput("");
+    setUploadedImageFiles([]);
   }, [project, isOpen]);
 
   const validateForm = () => {
@@ -90,7 +95,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
       newErrors.technologies = "At least one technology is required";
     }
 
-    if (formData.imageUrls.length === 0) {
+    if (formData.imageUrls.length === 0 && uploadedImageFiles.length === 0) {
       newErrors.imageUrls = "At least one image is required";
     }
 
@@ -108,27 +113,88 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalImageUrls = [...formData.imageUrls];
 
-      const savedProject: Project = {
-        id: project?.id || Date.now().toString(),
-        title: formData.title,
-        slug: project?.slug || formData.title.toLowerCase().replace(/\s+/g, '-'),
-        description: formData.description,
-        client: formData.client,
-        technologies: formData.technologies,
-        imageUrls: formData.imageUrls,
-        startDate: formData.startDate || undefined,
-        endDate: formData.endDate || undefined,
-        isActive: formData.isActive,
-        createdAt: project?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Upload multiple images if there are new files
+      if (uploadedImageFiles.length > 0) {
+        setIsUploadingImages(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImages(uploadedImageFiles, "projects");
+          
+          if (uploadResponse.success && uploadResponse.data) {
+            const newImageUrls = uploadResponse.data.map(item => item.fileUrl);
+            finalImageUrls = [...finalImageUrls, ...newImageUrls];
+          } else {
+            throw new Error("Failed to upload images");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading images:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Images Upload Failed",
+            description: "Failed to upload images. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImages(false);
+        }
+      }
 
-      onSave(savedProject);
+      if (project) {
+        // For edit, only send the editable fields
+        const updateData = {
+          title: formData.title,
+          description: formData.description,
+          client: formData.client,
+          technologies: formData.technologies,
+          imageUrls: finalImageUrls,
+          startDate: formData.startDate || undefined,
+          endDate: formData.endDate || undefined,
+          isActive: formData.isActive
+        };
+        onSave(updateData as Project);
+      } else {
+        // For create, send all fields
+        const savedProject: Project = {
+          id: Date.now().toString(),
+          title: formData.title,
+          slug: formData.title.toLowerCase().replace(/\s+/g, '-'),
+          description: formData.description,
+          client: formData.client,
+          technologies: formData.technologies,
+          imageUrls: finalImageUrls,
+          startDate: formData.startDate || undefined,
+          endDate: formData.endDate || undefined,
+          isActive: formData.isActive,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedProject);
+      }
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: project ? "Project Updated" : "Project Created",
+        description: project 
+          ? `Project "${formData.title}" has been updated successfully.`
+          : `Project "${formData.title}" has been created successfully.`,
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error saving project:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: project ? "Update Failed" : "Creation Failed",
+        description: project 
+          ? "Failed to update project. Please try again."
+          : "Failed to create project. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -139,6 +205,13 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleImagesSelect = (imageUrls: string[], files?: File[]) => {
+    if (files) {
+      setUploadedImageFiles(files);
+    }
+    handleInputChange("imageUrls", imageUrls);
   };
 
   const addTechnology = () => {
@@ -287,7 +360,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
               description="Upload images for this project"
               currentImages={formData.imageUrls}
               onImageSelect={() => {}}
-              onImagesSelect={(urls) => handleInputChange("imageUrls", urls)}
+              onImagesSelect={(urls, files) => handleImagesSelect(urls, files)}
               onImageRemove={() => {}}
               maxSize={10}
               multiple={true}
@@ -354,10 +427,10 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              loading={isSubmitting || isUploadingImages}
+              disabled={isSubmitting || isUploadingImages}
             >
-              {project ? "Update Project" : "Create Project"}
+              {isUploadingImages ? "Uploading Images..." : project ? "Update Project" : "Create Project"}
             </Button>
           </div>
         </form>

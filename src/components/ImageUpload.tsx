@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Upload, X, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { Button } from "@/amal-ui";
 import { cn } from "@/amal-ui";
 
 interface ImageUploadProps {
-  onImageSelect: (imageUrl: string) => void;
+  onImageSelect: (imageUrl: string, file?: File) => void;
   onImageRemove?: () => void;
   maxSize?: number; // in MB
   className?: string;
@@ -17,7 +17,7 @@ interface ImageUploadProps {
   description?: string;
   multiple?: boolean;
   maxImages?: number;
-  onImagesSelect?: (imageUrls: string[]) => void;
+  onImagesSelect?: (imageUrls: string[], files?: File[]) => void;
   currentImages?: string[];
 }
 
@@ -39,7 +39,19 @@ export function ImageUpload({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewImages, setPreviewImages] = useState<string[]>(currentImages);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update preview images when currentImages or currentImage changes
+  useEffect(() => {
+    if (multiple && currentImages) {
+      setPreviewImages(currentImages);
+    } else if (!multiple && currentImage) {
+      setPreviewImages([currentImage]);
+    } else {
+      setPreviewImages([]);
+    }
+  }, [currentImages, currentImage, multiple]);
 
   const handleImageSelect = (file: File) => {
     setUploadError(null);
@@ -63,16 +75,19 @@ export function ImageUpload({
     
     if (multiple) {
       const newImages = [...previewImages, previewUrl];
+      const newFiles = [...selectedFiles, file];
       if (newImages.length > maxImages) {
         setUploadError(`Maximum ${maxImages} images allowed`);
         setIsUploading(false);
         return;
       }
       setPreviewImages(newImages);
-      onImagesSelect?.(newImages);
+      setSelectedFiles(newFiles);
+      onImagesSelect?.(newImages, newFiles);
     } else {
       setPreviewImages([previewUrl]);
-      onImageSelect(previewUrl);
+      setSelectedFiles([file]);
+      onImageSelect(previewUrl, file);
     }
     
     setIsUploading(false);
@@ -125,10 +140,13 @@ export function ImageUpload({
     
     if (multiple && index !== undefined) {
       const newImages = previewImages.filter((_, i) => i !== index);
+      const newFiles = selectedFiles.filter((_, i) => i !== index);
       setPreviewImages(newImages);
-      onImagesSelect?.(newImages);
+      setSelectedFiles(newFiles);
+      onImagesSelect?.(newImages, newFiles);
     } else {
       setPreviewImages([]);
+      setSelectedFiles([]);
       onImageRemove?.();
     }
   };

@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
 import { FileUpload } from "@/components/FileUpload";
+import { uploadAPI } from "@/lib/api";
 
 interface Product {
   id: string;
@@ -32,6 +33,7 @@ const CATEGORIES = [
 ];
 
 export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -42,6 +44,10 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [uploadedImageFiles, setUploadedImageFiles] = useState<File[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -64,6 +70,8 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
       });
     }
     setErrors({});
+    setUploadedImageFile(null);
+    setUploadedImageFiles([]);
   }, [product, isOpen]);
 
   const validateForm = () => {
@@ -78,7 +86,7 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     }
 
     // Validate either imageUrls or imageUrl
-    if (formData.imageUrls.length === 0 && !formData.imageUrl) {
+    if (formData.imageUrls.length === 0 && !formData.imageUrl && !uploadedImageFile && uploadedImageFiles.length === 0) {
       newErrors.imageUrls = "At least one image is required";
     }
 
@@ -104,24 +112,110 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalImageUrl = formData.imageUrl;
+      let finalImageUrls = [...formData.imageUrls];
 
-      const savedProduct: Product = {
-        id: product?.id || Date.now().toString(),
-        name: formData.name,
-        description: formData.description,
-        imageUrls: formData.imageUrls,
-        imageUrl: formData.imageUrl,
-        category: formData.category,
-        isActive: formData.isActive,
-        createdAt: product?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Upload single image if there's a new file
+      if (uploadedImageFile) {
+        setIsUploadingImage(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImage(uploadedImageFile, "products");
+          
+          if (uploadResponse.success && uploadResponse.data.fileUrl) {
+            finalImageUrl = uploadResponse.data.fileUrl;
+          } else {
+            throw new Error("Failed to upload image");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Image Upload Failed",
+            description: "Failed to upload image. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
 
-      onSave(savedProduct);
+      // Upload multiple images if there are new files
+      if (uploadedImageFiles.length > 0) {
+        setIsUploadingImages(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImages(uploadedImageFiles, "products");
+          
+          if (uploadResponse.success && uploadResponse.data) {
+            const newImageUrls = uploadResponse.data.map(item => item.fileUrl);
+            finalImageUrls = [...finalImageUrls, ...newImageUrls];
+          } else {
+            throw new Error("Failed to upload images");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading images:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Images Upload Failed",
+            description: "Failed to upload images. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImages(false);
+        }
+      }
+
+      if (product) {
+        // For edit, only send the editable fields
+        const updateData = {
+          name: formData.name,
+          description: formData.description,
+          imageUrls: finalImageUrls,
+          imageUrl: finalImageUrl,
+          category: formData.category,
+          isActive: formData.isActive
+        };
+        onSave(updateData as Product);
+      } else {
+        // For create, send all fields
+        const savedProduct: Product = {
+          id: Date.now().toString(),
+          name: formData.name,
+          description: formData.description,
+          imageUrls: finalImageUrls,
+          imageUrl: finalImageUrl,
+          category: formData.category,
+          isActive: formData.isActive,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        onSave(savedProduct);
+      }
+      
+      // Show success toast
+      addToast({
+        variant: "success",
+        title: product ? "Product Updated" : "Product Created",
+        description: product 
+          ? `Product "${formData.name}" has been updated successfully.`
+          : `Product "${formData.name}" has been created successfully.`,
+        duration: 4000
+      });
     } catch (error) {
       console.error("Error saving product:", error);
+      
+      // Show error toast
+      addToast({
+        variant: "error",
+        title: product ? "Update Failed" : "Creation Failed",
+        description: product 
+          ? "Failed to update product. Please try again."
+          : "Failed to create product. Please try again.",
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +226,30 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleImageSelect = (imageUrl: string, file?: File) => {
+    if (file) {
+      setUploadedImageFile(file);
+    }
+    handleInputChange("imageUrl", imageUrl);
+  };
+
+  const handleImageRemove = () => {
+    setUploadedImageFile(null);
+    handleInputChange("imageUrl", "");
+  };
+
+  const handleImagesSelect = (imageUrls: string[], files?: File[]) => {
+    if (files) {
+      setUploadedImageFiles(files);
+    }
+    handleInputChange("imageUrls", imageUrls);
+  };
+
+  const handleImagesRemove = () => {
+    setUploadedImageFiles([]);
+    handleInputChange("imageUrls", []);
   };
 
   return (
@@ -212,7 +330,7 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
             )}
           </div>
 
-          {/* Image Upload - Multiple Images (Legacy) */}
+          {/* Image Upload - Multiple Images */}
           <div>
             <ImageUpload
               label="Product Images (Multiple)"
@@ -221,7 +339,7 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
               maxImages={5}
               currentImages={formData.imageUrls}
               onImageSelect={() => {}}
-              onImagesSelect={(imageUrls) => handleInputChange("imageUrls", imageUrls)}
+              onImagesSelect={(imageUrls, files) => handleImagesSelect(imageUrls, files)}
               maxSize={5}
             />
             {errors.imageUrls && (
@@ -229,22 +347,15 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
             )}
           </div>
 
-          {/* Single Image Upload (New API Integration) */}
+          {/* Single Image Upload */}
           <div>
-            <FileUpload
+            <ImageUpload
               label="Product Image (Single) *"
               description="Upload a single image for this product"
-              accept="image/*"
+              currentImage={formData.imageUrl}
+              onImageSelect={(imageUrl, file) => handleImageSelect(imageUrl, file)}
+              onImageRemove={handleImageRemove}
               maxSize={5}
-              folder="products"
-              showPreview={true}
-              currentFile={formData.imageUrl}
-              onFileUpload={(fileUrl, fileName) => {
-                handleInputChange("imageUrl", fileUrl);
-              }}
-              onFileRemove={() => {
-                handleInputChange("imageUrl", "");
-              }}
             />
             {errors.imageUrl && (
               <p className="mt-1 text-sm text-red-600">{errors.imageUrl}</p>
@@ -282,10 +393,10 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              loading={isSubmitting || isUploadingImage || isUploadingImages}
+              disabled={isSubmitting || isUploadingImage || isUploadingImages}
             >
-              {product ? "Update Product" : "Create Product"}
+              {isUploadingImage ? "Uploading Image..." : isUploadingImages ? "Uploading Images..." : product ? "Update Product" : "Create Product"}
             </Button>
           </div>
         </form>
