@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
-import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Star, Calendar, User, Image as ImageIcon, Heart, MessageCircle } from "lucide-react";
+import { Button, Badge, useToast } from "@/amal-ui";
+import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight, Star, User, Image as ImageIcon, Heart, MessageCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ImageUpload } from "@/components/ImageUpload";
+import { BlogFormModal } from "@/components/blogs/BlogFormModal";
+import { DeleteConfirmModal } from "@/components/blogs/DeleteConfirmModal";
+import { blogsAPI } from "@/lib/api";
 
 interface Blog {
   _id?: string;
@@ -15,7 +15,6 @@ interface Blog {
   slug: string;
   content: string;
   excerpt?: string;
-  featuredImage?: string;
   images?: string[];
   tags?: string[];
   categories?: string[];
@@ -31,14 +30,13 @@ interface Blog {
 }
 
 export default function BlogPage() {
+  const { addToast } = useToast();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -48,114 +46,41 @@ export default function BlogPage() {
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data
+  // Fetch blogs from API
   useEffect(() => {
-    const mockBlogs: Blog[] = [
-      {
-        id: "1",
-        title: "The Future of Sustainable Paint Technology",
-        slug: "future-of-sustainable-paint-technology",
-        content: "As environmental consciousness continues to grow, the paint industry is undergoing a significant transformation...",
-        excerpt: "Exploring innovative sustainable paint technologies that are revolutionizing the industry.",
-        featuredImage: "/images/blog/sustainable-paint.jpg",
-        images: ["/images/blog/sustainable-1.jpg", "/images/blog/sustainable-2.jpg"],
-        tags: ["sustainability", "technology", "innovation", "environment"],
-        categories: ["Technology", "Sustainability"],
-        status: "published",
-        isFeatured: true,
-        viewCount: 3200,
-        likeCount: 145,
-        commentCount: 23,
-        author: "Dr. Adebayo Johnson",
-        publishedAt: "2024-01-20T10:00:00Z",
-        createdAt: "2024-01-20T10:00:00Z",
-        updatedAt: "2024-01-20T10:00:00Z"
-      },
-      {
-        id: "2",
-        title: "Choosing the Right Paint for Your Home",
-        slug: "choosing-right-paint-for-your-home",
-        content: "Selecting the perfect paint for your home can be overwhelming with so many options available...",
-        excerpt: "A comprehensive guide to help homeowners choose the perfect paint for their living spaces.",
-        featuredImage: "/images/blog/home-paint-guide.jpg",
-        images: ["/images/blog/home-1.jpg", "/images/blog/home-2.jpg", "/images/blog/home-3.jpg"],
-        tags: ["home", "paint", "guide", "interior-design"],
-        categories: ["Home Improvement", "Guide"],
-        status: "published",
-        isFeatured: false,
-        viewCount: 2800,
-        likeCount: 98,
-        commentCount: 15,
-        author: "Sarah Okafor",
-        publishedAt: "2024-01-18T14:30:00Z",
-        createdAt: "2024-01-18T14:30:00Z",
-        updatedAt: "2024-01-18T14:30:00Z"
-      },
-      {
-        id: "3",
-        title: "Color Psychology in Interior Design",
-        slug: "color-psychology-in-interior-design",
-        content: "Colors have a profound impact on our emotions and behavior, making them a powerful tool in interior design...",
-        excerpt: "Understanding how colors affect mood and behavior in interior spaces.",
-        featuredImage: "/images/blog/color-psychology.jpg",
-        images: ["/images/blog/psychology-1.jpg", "/images/blog/psychology-2.jpg"],
-        tags: ["color", "psychology", "interior-design", "mood"],
-        categories: ["Design", "Psychology"],
-        status: "published",
-        isFeatured: true,
-        viewCount: 4500,
-        likeCount: 210,
-        commentCount: 31,
-        author: "Michael Chen",
-        publishedAt: "2024-01-15T09:00:00Z",
-        createdAt: "2024-01-15T09:00:00Z",
-        updatedAt: "2024-01-15T09:00:00Z"
-      },
-      {
-        id: "4",
-        title: "Industrial Paint Applications and Best Practices",
-        slug: "industrial-paint-applications-best-practices",
-        content: "Industrial painting requires specialized knowledge and techniques to ensure durability and performance...",
-        excerpt: "Essential guidelines for industrial paint applications and maintenance.",
-        featuredImage: "/images/blog/industrial-paint.jpg",
-        images: ["/images/blog/industrial-1.jpg"],
-        tags: ["industrial", "paint", "applications", "best-practices"],
-        categories: ["Industrial", "Best Practices"],
-        status: "draft",
-        isFeatured: false,
-        viewCount: 0,
-        likeCount: 0,
-        commentCount: 0,
-        author: "Fatima Ibrahim",
-        createdAt: "2024-01-22T16:45:00Z",
-        updatedAt: "2024-01-22T16:45:00Z"
-      },
-      {
-        id: "5",
-        title: "The Art of Color Mixing and Custom Shades",
-        slug: "art-of-color-mixing-custom-shades",
-        content: "Creating custom paint colors is both an art and a science, requiring understanding of color theory...",
-        excerpt: "Master the art of color mixing to create unique and personalized paint shades.",
-        featuredImage: "/images/blog/color-mixing.jpg",
-        images: ["/images/blog/mixing-1.jpg", "/images/blog/mixing-2.jpg"],
-        tags: ["color-mixing", "custom", "art", "color-theory"],
-        categories: ["Art", "Color Theory"],
-        status: "archived",
-        isFeatured: false,
-        viewCount: 1200,
-        likeCount: 67,
-        commentCount: 8,
-        author: "David Johnson",
-        publishedAt: "2024-01-10T11:20:00Z",
-        createdAt: "2024-01-10T11:20:00Z",
-        updatedAt: "2024-01-12T15:30:00Z"
+    const fetchBlogs = async () => {
+      try {
+        setIsLoading(true);
+        const response = await blogsAPI.getBlogs();
+        if (response.success) {
+          setBlogs(response.data);
+          setFilteredBlogs(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch blogs",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch blogs",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setBlogs([]);
+        setFilteredBlogs([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setBlogs(mockBlogs);
-    setFilteredBlogs(mockBlogs);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchBlogs();
+  }, [addToast]);
 
   // Filter and sort blogs
   useEffect(() => {
@@ -192,20 +117,8 @@ export default function BlogPage() {
       }
     });
 
-    // Apply sorting
-    filtered.sort((a, b) => {
-      if (!a || !b) return 0;
-      
-      const aValue = a[sortBy as keyof Blog] || '';
-      const bValue = b[sortBy as keyof Blog] || '';
-      
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-
     setFilteredBlogs(filtered);
-  }, [blogs, searchTerm, filters, sortBy, sortOrder]);
+  }, [blogs, searchTerm, filters]);
 
   const handleViewBlog = (blog: Blog) => {
     setSelectedBlog(blog);
@@ -230,38 +143,52 @@ export default function BlogPage() {
   const handleBlogSaved = async (savedBlog: Blog) => {
     if (!savedBlog) return;
     
-    if (editingBlog) {
-      // Update existing blog
-      // TODO: Implement API call for update
-      setBlogs(prev => prev.map(blog => blog.id === savedBlog.id ? savedBlog : blog));
-    } else {
-      // Create new blog - send only required fields
-      const blogData = {
-        title: savedBlog.title,
-        content: savedBlog.content,
-        excerpt: savedBlog.excerpt,
-        featuredImage: savedBlog.featuredImage,
-        images: savedBlog.images,
-        tags: savedBlog.tags,
-        categories: savedBlog.categories,
-        status: savedBlog.status || 'draft',
-        isFeatured: savedBlog.isFeatured || false,
-        author: savedBlog.author,
-        publishedAt: savedBlog.publishedAt
-      };
-      // TODO: Implement API call for create
-      setBlogs(prev => [...prev, savedBlog]);
+    try {
+      if (editingBlog) {
+        // Update existing blog in local state
+        setBlogs(prev => prev.map(blog => blog.id === savedBlog.id ? savedBlog : blog));
+      } else {
+        // Add new blog to local state
+        setBlogs(prev => [...prev, savedBlog]);
+      }
+    } catch (error) {
+      console.error("Error updating blog list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update blog list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingBlog(null);
     }
-    setIsFormModalOpen(false);
-    setEditingBlog(null);
   };
 
-  const handleBlogDeleted = (blogId: string) => {
+  const handleBlogDeleted = async (blogId: string) => {
     if (!blogId) return;
     
-    setBlogs(prev => prev.filter(blog => blog.id !== blogId));
-    setIsDeleteModalOpen(false);
-    setSelectedBlog(null);
+    try {
+      await blogsAPI.deleteBlog(blogId);
+      setBlogs(prev => prev.filter(blog => blog.id !== blogId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "Blog deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete blog",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedBlog(null);
+    }
   };
 
   const handleUpdateStatus = (blog: Blog) => {
@@ -271,16 +198,60 @@ export default function BlogPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (blogId: string, status: string) => {
-    setBlogs(prev => prev.map(b => 
-      b.id === blogId ? { ...b, status: status as 'draft' | 'published' | 'archived' } : b
-    ));
+  const handleStatusUpdate = async (blogId: string, status: string) => {
+    try {
+      const response = await blogsAPI.updateStatus(blogId, status);
+      if (response.success) {
+        setBlogs(prev => prev.map(b => 
+          b.id === blogId ? { ...b, status: status as 'draft' | 'published' | 'archived' } : b
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Blog status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating blog status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update blog status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedBlog(null);
+    }
   };
 
-  const handleToggleFeatured = (blogId: string) => {
-    setBlogs(prev => prev.map(b => 
-      b.id === blogId ? { ...b, isFeatured: !b.isFeatured } : b
-    ));
+  const handleToggleFeatured = async (blogId: string) => {
+    const blog = blogs.find(b => b.id === blogId);
+    if (!blog) return;
+    
+    try {
+      const response = await blogsAPI.updateFeatured(blogId, !blog.isFeatured);
+      if (response.success) {
+        setBlogs(prev => prev.map(b => 
+          b.id === blogId ? { ...b, isFeatured: !b.isFeatured } : b
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: `Blog ${!blog.isFeatured ? 'added to' : 'removed from'} featured`,
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling blog featured status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update featured status",
+        duration: 5000
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -298,25 +269,6 @@ export default function BlogPage() {
       month: "short",
       day: "numeric"
     });
-  };
-
-  // Sorting functionality
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
-  const getSortIcon = (column: string) => {
-    if (sortBy !== column) {
-      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? 
-      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
-      <ChevronDown className="h-4 w-4 text-gray-600" />;
   };
 
   // Pagination
@@ -380,7 +332,7 @@ export default function BlogPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-md">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
@@ -423,229 +375,209 @@ export default function BlogPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-                >
-                  <option value="createdAt">Created Date</option>
-                  <option value="publishedAt">Published Date</option>
-                  <option value="viewCount">Views</option>
-                  <option value="likeCount">Likes</option>
-                  <option value="title">Title</option>
-                </select>
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
-                  <option value={5}>5 per page</option>
-                  <option value={10}>10 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
+                  <option value={6}>6 per page</option>
+                  <option value={12}>12 per page</option>
+                  <option value={24}>24 per page</option>
                 </select>
               </div>
             </div>
           )}
         </div>
 
-        {/* Blogs Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto scrollbar-hide">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Image</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('title')}
+        {/* Blogs Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedData.map((blog) => (
+            <div key={blog.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video bg-gray-100 relative">
+                {blog.images && blog.images.length > 0 ? (
+                  <img
+                    src={blog.images[0]}
+                    alt={blog.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/placeholder.jpg';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <Badge
+                    color={blog.status === 'published' ? "green" : blog.status === 'draft' ? "yellow" : "gray"}
+                    size="sm"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Title</span>
-                      {getSortIcon('title')}
-                    </div>
-                  </TableHead>
-                  <TableHead>Excerpt</TableHead>
-                  <TableHead>Categories</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('status')}
+                    {blog.status || 'draft'}
+                  </Badge>
+                </div>
+                {blog.isFeatured && (
+                  <div className="absolute top-2 left-2">
+                    <Badge color="purple" size="sm">
+                      <Star className="h-3 w-3 mr-1 fill-current" />
+                      Featured
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                    {blog.title}
+                  </h3>
+                </div>
+                
+                <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  {blog.excerpt || "No excerpt available"}
+                </p>
+                
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {(blog.categories || []).slice(0, 2).map((category, index) => (
+                    <Badge key={index} color="blue" size="sm">
+                      {category}
+                    </Badge>
+                  ))}
+                  {(blog.categories || []).length > 2 && (
+                    <span className="text-xs text-gray-500">
+                      +{(blog.categories || []).length - 2}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <div className="flex items-center space-x-1">
+                    <User className="h-3 w-3" />
+                    <span>{blog.author || "Unknown"}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Eye className="h-3 w-3" />
+                    <span>{blog.viewCount || 0}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <div className="flex items-center space-x-1">
+                    <Heart className="h-3 w-3" />
+                    <span>{blog.likeCount || 0}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <MessageCircle className="h-3 w-3" />
+                    <span>{blog.commentCount || 0}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <span>
+                    {blog.publishedAt ? formatDate(blog.publishedAt) : "Not published"}
+                  </span>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                    className="text-palette-gold-600 hover:text-palette-gold-700"
+                    title="View Details"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Status</span>
-                      {getSortIcon('status')}
-                    </div>
-                  </TableHead>
-                  <TableHead>Engagement</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('publishedAt')}
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditBlog(blog)}
+                    className="text-palette-gold-600 hover:text-palette-gold-700"
+                    title="Edit Blog"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Published</span>
-                      {getSortIcon('publishedAt')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="w-32">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((blog) => (
-                  <TableRow key={blog.id}>
-                    <TableCell>
-                      <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {blog.featuredImage ? (
-                          <img 
-                            src={blog.featuredImage} 
-                            alt={blog.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <ImageIcon className="h-6 w-6 text-gray-400" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 line-clamp-1">{blog.title}</p>
-                        <p className="text-xs text-gray-500">/{blog.slug}</p>
-                        {blog.isFeatured && (
-                          <div className="flex items-center space-x-1 mt-1">
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                            <span className="text-xs text-yellow-600">Featured</span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs">
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {blog.excerpt || "No excerpt available"}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(blog.categories || []).slice(0, 2).map((category, index) => (
-                          <Badge key={index} color="blue" size="sm">
-                            {category}
-                          </Badge>
-                        ))}
-                        {(blog.categories || []).length > 2 && (
-                          <span className="text-xs text-gray-500">
-                            +{(blog.categories || []).length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{blog.author || "Unknown"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(blog.status || 'draft')}`}>
-                        {blog.status || 'draft'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{blog.viewCount}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Heart className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{blog.likeCount}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <MessageCircle className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{blog.commentCount}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {blog.publishedAt ? formatDate(blog.publishedAt) : "Not published"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewBlog(blog)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditBlog(blog)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="Edit Blog"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleFeatured(blog.id)}
-                          className={blog.isFeatured ? "text-yellow-600 hover:text-yellow-700" : "text-gray-600 hover:text-gray-700"}
-                          title={blog.isFeatured ? "Remove from Featured" : "Add to Featured"}
-                        >
-                          <Star className={`h-4 w-4 ${blog.isFeatured ? 'fill-current' : ''}`} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleUpdateStatus(blog)}
-                          className="text-palette-blue-600 hover:text-palette-blue-700"
-                          title="Update Status"
-                        >
-                          {blog.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteBlog(blog)}
-                          className="text-destructive hover:text-destructive-600"
-                          title="Delete Blog"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            showInfo={true}
-            totalItems={filteredBlogs.length}
-            pageSize={pageSize}
-          />
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleFeatured(blog.id)}
+                    className={blog.isFeatured ? "text-yellow-600 hover:text-yellow-700" : "text-gray-600 hover:text-gray-700"}
+                    title={blog.isFeatured ? "Remove from Featured" : "Add to Featured"}
+                  >
+                    <Star className={`h-4 w-4 ${blog.isFeatured ? 'fill-current' : ''}`} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleUpdateStatus(blog)}
+                    className="text-palette-blue-600 hover:text-palette-blue-700"
+                    title="Update Status"
+                  >
+                    {blog.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteBlog(blog)}
+                    className="text-destructive hover:text-destructive-600"
+                    title="Delete Blog"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Modals will be implemented next */}
+      {/* Blog Form Modal */}
+      <BlogFormModal
+        blog={editingBlog}
+        isOpen={isFormModalOpen}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setEditingBlog(null);
+        }}
+        onSave={handleBlogSaved}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        blog={selectedBlog}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedBlog(null);
+        }}
+        onConfirm={handleBlogDeleted}
+      />
     </DashboardLayout>
   );
 }

@@ -6,20 +6,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination } from "@/components/ui/pagination";
 import { Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Reply } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { ContactMessageReplyModal } from "@/components/contact-messages/ContactMessageReplyModal";
+import { useToast } from "@/amal-ui/components/ToastProvider";
+import * as API from "@/lib/api";
 
 interface ContactMessage {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
-  phoneNumber: string;
   subject: string;
   message: string;
   status: 'pending' | 'accepted' | 'replied' | 'declined';
+  replyTitle?: string;
+  replyMessage?: string;
+  replyAttachments?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export default function ContactMessagesPage() {
+  const { addToast } = useToast();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [filteredMessages, setFilteredMessages] = useState<ContactMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,71 +36,30 @@ export default function ContactMessagesPage() {
   const [pageSize, setPageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data
+  // Load messages from API
   useEffect(() => {
-    const mockMessages: ContactMessage[] = [
-      {
-        id: "1",
-        fullName: "Emmanuel Okafor",
-        email: "emmanuel@example.com",
-        phoneNumber: "+234 802 123 4567",
-        subject: "Paint Quality Inquiry",
-        message: "I would like to inquire about the quality and durability of your emulsion paints. I'm planning a large residential project and need reliable suppliers.",
-        status: "pending",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: "2",
-        fullName: "Aisha Mohammed",
-        email: "aisha@company.com",
-        phoneNumber: "+234 803 456 7890",
-        subject: "Partnership Opportunity",
-        message: "We are a construction company based in Kaduna and would like to explore partnership opportunities for upcoming projects in the northern region.",
-        status: "replied",
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-18T14:22:00Z"
-      },
-      {
-        id: "3",
-        fullName: "David Adebayo",
-        email: "david@business.com",
-        phoneNumber: "+234 804 789 0123",
-        subject: "Bulk Paint Order",
-        message: "I need to place a bulk order for industrial paints for our manufacturing facility. Please provide pricing and availability information.",
-        status: "accepted",
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "4",
-        fullName: "Grace Nwankwo",
-        email: "grace@home.com",
-        phoneNumber: "+234 805 234 5678",
-        subject: "Interior Design Consultation",
-        message: "I'm renovating my home and would like to schedule a consultation for interior design and paint selection. Please let me know your availability.",
-        status: "pending",
-        createdAt: "2024-01-18T08:45:00Z",
-        updatedAt: "2024-01-18T08:45:00Z"
-      },
-      {
-        id: "5",
-        fullName: "Samuel Ikenna",
-        email: "samuel@office.com",
-        phoneNumber: "+234 806 345 6789",
-        subject: "Office Renovation Quote",
-        message: "We need a comprehensive quote for office renovation including painting, flooring, and interior design for our new Lagos office space.",
-        status: "declined",
-        createdAt: "2024-01-19T14:30:00Z",
-        updatedAt: "2024-01-20T10:15:00Z"
+    const loadMessages = async () => {
+      try {
+        setIsLoading(true);
+        const response = await API.contactMessagesAPI.getMessages();
+        if (response.success) {
+          setMessages(response.data);
+          setFilteredMessages(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load contact messages:', error);
+        // Fallback to empty array on error
+        setMessages([]);
+        setFilteredMessages([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setMessages(mockMessages);
-    setFilteredMessages(mockMessages);
-    setIsLoading(false);
+    };
+
+    loadMessages();
   }, []);
 
   // Filter and sort messages
@@ -104,13 +69,13 @@ export default function ContactMessagesPage() {
     // Apply search
     if (searchTerm) {
       filtered = filtered.filter(message => {
-        const fullName = (message.fullName || '').toLowerCase();
+        const name = (message.name || '').toLowerCase();
         const email = (message.email || '').toLowerCase();
         const subject = (message.subject || '').toLowerCase();
         const messageText = (message.message || '').toLowerCase();
         const searchLower = searchTerm.toLowerCase();
         
-        return fullName.includes(searchLower) || 
+        return name.includes(searchLower) || 
                email.includes(searchLower) ||
                subject.includes(searchLower) ||
                messageText.includes(searchLower);
@@ -177,6 +142,82 @@ export default function ContactMessagesPage() {
     return sortOrder === 'asc' ? 
       <ChevronUp className="h-4 w-4 text-gray-600" /> : 
       <ChevronDown className="h-4 w-4 text-gray-600" />;
+  };
+
+  // API handler functions
+  const handleViewMessage = (message: ContactMessage) => {
+    setSelectedMessage(message);
+    // TODO: Implement view modal
+  };
+
+  const handleReplyToMessage = async (messageId: string, replyData: { reply: string; status: string }) => {
+    try {
+      const response = await API.contactMessagesAPI.replyToMessage(messageId, replyData);
+      if (response.success) {
+        // Update the message in the list
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId ? { ...msg, ...response.data } : msg
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Reply Sent',
+          description: 'Your reply has been sent successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to reply to message:', error);
+      addToast({
+        variant: 'error',
+        title: 'Reply Failed',
+        description: 'Failed to send reply. Please try again.',
+      });
+    }
+  };
+
+  const handleUpdateStatus = async (messageId: string, status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+    try {
+      const response = await API.contactMessagesAPI.updateStatus(messageId, status);
+      if (response.success) {
+        // Update the message in the list
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId ? { ...msg, status } : msg
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Status Updated',
+          description: `Contact message status updated to ${status}.`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update message status:', error);
+      addToast({
+        variant: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update contact message status. Please try again.',
+      });
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const response = await API.contactMessagesAPI.deleteMessage(messageId);
+      if (response.success) {
+        // Remove the message from the list
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        addToast({
+          variant: 'success',
+          title: 'Message Deleted',
+          description: 'Contact message has been deleted successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      addToast({
+        variant: 'error',
+        title: 'Delete Failed',
+        description: 'Failed to delete contact message. Please try again.',
+      });
+    }
   };
 
   // Pagination
@@ -273,11 +314,11 @@ export default function ContactMessagesPage() {
                 <TableRow>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('fullName')}
+                    onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center space-x-2">
                       <span>Contact</span>
-                      {getSortIcon('fullName')}
+                      {getSortIcon('name')}
                     </div>
                   </TableHead>
                   <TableHead 
@@ -316,9 +357,8 @@ export default function ContactMessagesPage() {
                   <TableRow key={message.id}>
                     <TableCell>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{message.fullName}</p>
+                        <p className="text-sm font-medium text-gray-900">{message.name}</p>
                         <p className="text-sm text-gray-600">{message.email}</p>
-                        <p className="text-xs text-gray-500">{message.phoneNumber}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -346,6 +386,7 @@ export default function ContactMessagesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => window.open(`/contact-messages/${message.id}`, '_blank')}
                           className="text-palette-gold-600 hover:text-palette-gold-700"
                           title="View Details"
                         >
@@ -354,6 +395,10 @@ export default function ContactMessagesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            setSelectedMessage(message);
+                            setIsReplyModalOpen(true);
+                          }}
                           className="text-palette-blue-600 hover:text-palette-blue-700"
                           title="Reply"
                         >
@@ -362,6 +407,10 @@ export default function ContactMessagesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            const newStatus = message.status === 'accepted' ? 'pending' : 'accepted';
+                            handleUpdateStatus(message.id, newStatus);
+                          }}
                           className="text-palette-green-600 hover:text-palette-green-700"
                           title="Update Status"
                         >
@@ -370,6 +419,11 @@ export default function ContactMessagesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this message?')) {
+                              handleDeleteMessage(message.id);
+                            }
+                          }}
                           className="text-destructive hover:text-destructive-600"
                           title="Delete"
                         >
@@ -394,6 +448,17 @@ export default function ContactMessagesPage() {
           />
         </div>
       </div>
+
+      {/* Reply Modal */}
+      <ContactMessageReplyModal
+        message={selectedMessage}
+        isOpen={isReplyModalOpen}
+        onClose={() => {
+          setIsReplyModalOpen(false);
+          setSelectedMessage(null);
+        }}
+        onReply={handleReplyToMessage}
+      />
     </DashboardLayout>
   );
 }

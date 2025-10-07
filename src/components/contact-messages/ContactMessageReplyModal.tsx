@@ -5,15 +5,12 @@ import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 
-interface PartnershipRequest {
+interface ContactMessage {
   id: string;
-  fullName: string;
-  companyName: string;
+  name: string;
   email: string;
-  phoneNumber: string;
-  partnershipType: string;
-  message?: string;
-  description?: string;
+  subject: string;
+  message: string;
   status: 'pending' | 'accepted' | 'replied' | 'declined';
   replyTitle?: string;
   replyMessage?: string;
@@ -22,14 +19,14 @@ interface PartnershipRequest {
   updatedAt: string;
 }
 
-interface PartnershipRequestReplyModalProps {
-  request?: PartnershipRequest | null;
+interface ContactMessageReplyModalProps {
+  message?: ContactMessage | null;
   isOpen: boolean;
   onClose: () => void;
-  onReply: (requestId: string, replyData: { reply: string; status: string }) => void;
+  onReply: (messageId: string, replyData: { reply: string; status: string }) => void;
 }
 
-export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply }: PartnershipRequestReplyModalProps) {
+export function ContactMessageReplyModal({ message, isOpen, onClose, onReply }: ContactMessageReplyModalProps) {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     replyMessage: ""
@@ -38,9 +35,9 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (request) {
+    if (message) {
       setFormData({
-        replyMessage: request.replyMessage || ""
+        replyMessage: message.replyMessage || ""
       });
     } else {
       setFormData({
@@ -48,7 +45,7 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
       });
     }
     setErrors({});
-  }, [request, isOpen]);
+  }, [message, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -64,14 +61,14 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm() || !request) return;
+    if (!validateForm() || !message) return;
 
     setIsSubmitting(true);
 
     try {
-      onReply(request.id, {
+      onReply(message.id, {
         reply: formData.replyMessage,
-        status: 'under_review'
+        status: 'replied'
       });
       
       // Show success toast
@@ -110,7 +107,7 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
-            Reply to Partnership Request
+            Reply to Contact Message
           </h2>
           <Button
             variant="ghost"
@@ -122,18 +119,17 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
           </Button>
         </div>
 
-        {request && (
+        {message && (
           <div className="space-y-6">
-            {/* Original Request */}
+            {/* Original Message */}
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-3">Partnership Request Details</h3>
+              <h3 className="font-medium text-gray-900 mb-3">Original Message</h3>
               <div className="space-y-2 text-sm">
-                <p><strong>Contact:</strong> {request.fullName} ({request.email})</p>
-                <p><strong>Company:</strong> {request.companyName}</p>
-                <p><strong>Partnership Type:</strong> {request.partnershipType}</p>
-                <p><strong>Description:</strong></p>
+                <p><strong>From:</strong> {message.name} ({message.email})</p>
+                <p><strong>Subject:</strong> {message.subject}</p>
+                <p><strong>Message:</strong></p>
                 <div className="bg-white p-3 rounded border-l-4 border-purple-500">
-                  <p className="whitespace-pre-wrap">{request.description}</p>
+                  <p className="whitespace-pre-wrap">{message.message}</p>
                 </div>
               </div>
             </div>

@@ -543,5 +543,581 @@ export const newsletterAPI = {
   }
 };
 
+// Contact Messages API
+export const contactMessagesAPI = {
+  // Get all contact messages
+  getMessages: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/contacts');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single contact message
+  getMessage: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/contacts/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create contact message
+  createMessage: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/contacts', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update contact message
+  updateMessage: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/contacts/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete contact message
+  deleteMessage: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/contacts/${id}`);
+    return { success: true, message: "Contact message deleted successfully" };
+  },
+
+  // Reply to contact message
+  replyToMessage: async (id: string, replyData: { reply: string; status: string }): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post(`/contacts/${id}/reply`, replyData);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update message status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/contacts/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Project Requests API
+export const projectRequestsAPI = {
+  // Get all project requests
+  getRequests: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/project-requests');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single project request
+  getRequest: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/project-requests/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create project request
+  createRequest: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/project-requests', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update project request
+  updateRequest: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/project-requests/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete project request
+  deleteRequest: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/project-requests/${id}`);
+    return { success: true, message: "Project request deleted successfully" };
+  },
+
+  // Reply to project request
+  replyToRequest: async (id: string, replyData: { reply: string; status: string }): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post(`/project-requests/${id}/reply`, replyData);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update request status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/project-requests/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Partnership Requests API
+export const partnershipRequestsAPI = {
+  // Get all partnership requests
+  getRequests: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/partnership-requests');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single partnership request
+  getRequest: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/partnership-requests/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create partnership request
+  createRequest: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/partnership-requests', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update partnership request
+  updateRequest: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/partnership-requests/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete partnership request
+  deleteRequest: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/partnership-requests/${id}`);
+    return { success: true, message: "Partnership request deleted successfully" };
+  },
+
+  // Reply to partnership request
+  replyToRequest: async (id: string, replyData: { reply: string; status: string }): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post(`/partnership-requests/${id}/reply`, replyData);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update request status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/partnership-requests/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Blogs API
+export const blogsAPI = {
+  // Get all blogs (Admin)
+  getBlogs: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/blogs');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single blog by ID (Admin)
+  getBlog: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/blogs/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Get blog by slug (Public)
+  getBlogBySlug: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/blogs/slug/${slug}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create blog
+  createBlog: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/blogs', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update blog
+  updateBlog: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/blogs/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete blog
+  deleteBlog: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/blogs/${id}`);
+    return { success: true, message: "Blog deleted successfully" };
+  },
+
+  // Update blog status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/blogs/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update blog featured status
+  updateFeatured: async (id: string, isFeatured: boolean): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/blogs/${id}/featured`, { isFeatured });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Get blog statistics
+  getStats: async (): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get('/blogs/stats');
+    return { success: true, data: response.data };
+  },
+
+  // Public endpoints (using static token)
+  getPublishedBlogs: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/blogs/public');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getFeaturedBlogs: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/blogs/featured');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getPopularBlogs: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/blogs/popular');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getBlogsByCategory: async (category: string): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get(`/blogs/category/${category}`);
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getBlogsByTag: async (tag: string): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get(`/blogs/tag/${tag}`);
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Increment view count (Public)
+  incrementViewCount: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/blogs/slug/${slug}/view`);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Increment like count (Public)
+  incrementLikeCount: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/blogs/slug/${slug}/like`);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// News API
+export const newsAPI = {
+  // Get all news (Admin)
+  getNews: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/news');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single news item by ID (Admin)
+  getNewsItem: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/news/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Get news by slug (Public)
+  getNewsBySlug: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/news/slug/${slug}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create news
+  createNews: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/news', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update news
+  updateNews: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/news/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete news
+  deleteNews: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/news/${id}`);
+    return { success: true, message: "News deleted successfully" };
+  },
+
+  // Update news status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/news/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update news featured status
+  updateFeatured: async (id: string, isFeatured: boolean): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/news/${id}/featured`, { isFeatured });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Get news statistics
+  getStats: async (): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get('/news/stats');
+    return { success: true, data: response.data };
+  },
+
+  // Public endpoints
+  getPublishedNews: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/news/published');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getFeaturedNews: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/news/featured');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  getNewsByTag: async (tag: string): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get(`/news/tag/${tag}`);
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Increment view count (Public)
+  incrementViewCount: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/news/slug/${slug}/view`);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
 // Export the axios instance for custom requests
 export default api;

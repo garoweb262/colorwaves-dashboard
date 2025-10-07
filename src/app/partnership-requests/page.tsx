@@ -6,6 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination } from "@/components/ui/pagination";
 import { Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Reply } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { PartnershipRequestReplyModal } from "@/components/partnership-requests/PartnershipRequestReplyModal";
+import { useToast } from "@/amal-ui/components/ToastProvider";
+import * as API from "@/lib/api";
 
 interface PartnershipRequest {
   id: string;
@@ -15,12 +18,17 @@ interface PartnershipRequest {
   phoneNumber: string;
   partnershipType: string;
   message?: string;
+  description?: string;
   status: 'pending' | 'accepted' | 'replied' | 'declined';
+  replyTitle?: string;
+  replyMessage?: string;
+  replyAttachments?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export default function PartnershipRequestsPage() {
+  const { addToast } = useToast();
   const [requests, setRequests] = useState<PartnershipRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<PartnershipRequest[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,64 +39,30 @@ export default function PartnershipRequestsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<PartnershipRequest | null>(null);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data
+  // Load requests from API
   useEffect(() => {
-    const mockRequests: PartnershipRequest[] = [
-      {
-        id: "1",
-        fullName: "John Doe",
-        companyName: "TechCorp Solutions",
-        email: "john.doe@techcorp.com",
-        phoneNumber: "+234 802 123 4567",
-        partnershipType: "sponsorship",
-        message: "We are interested in sponsoring your upcoming projects and would like to discuss potential collaboration opportunities.",
-        status: "pending",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: "2",
-        fullName: "Sarah Johnson",
-        companyName: "BuildMax Construction",
-        email: "sarah@buildmax.com",
-        phoneNumber: "+234 803 456 7890",
-        partnershipType: "supplier",
-        message: "We would like to become a supplier for your paint and construction materials. We have been in business for over 10 years.",
-        status: "replied",
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-18T14:22:00Z"
-      },
-      {
-        id: "3",
-        fullName: "Michael Chen",
-        companyName: "Innovation Hub",
-        email: "m.chen@innovationhub.com",
-        phoneNumber: "+234 804 789 0123",
-        partnershipType: "collaboration",
-        message: "We are looking for strategic partnerships to expand our real estate portfolio in Abuja.",
-        status: "accepted",
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "4",
-        fullName: "Fatima Ibrahim",
-        companyName: "Green Earth Paints",
-        email: "fatima@greenearth.com",
-        phoneNumber: "+234 805 234 5678",
-        partnershipType: "collaboration",
-        message: "We specialize in eco-friendly paint solutions and would like to collaborate on sustainable projects.",
-        status: "declined",
-        createdAt: "2024-01-18T08:45:00Z",
-        updatedAt: "2024-01-20T12:30:00Z"
+    const loadRequests = async () => {
+      try {
+        setIsLoading(true);
+        const response = await API.partnershipRequestsAPI.getRequests();
+        if (response.success) {
+          setRequests(response.data);
+          setFilteredRequests(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load partnership requests:', error);
+        // Fallback to empty array on error
+        setRequests([]);
+        setFilteredRequests([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setRequests(mockRequests);
-    setFilteredRequests(mockRequests);
-    setIsLoading(false);
+    };
+
+    loadRequests();
   }, []);
 
   // Filter and sort requests
@@ -174,6 +148,82 @@ export default function PartnershipRequestsPage() {
     return sortOrder === 'asc' ? 
       <ChevronUp className="h-4 w-4 text-gray-600" /> : 
       <ChevronDown className="h-4 w-4 text-gray-600" />;
+  };
+
+  // API handler functions
+  const handleViewRequest = (request: PartnershipRequest) => {
+    setSelectedRequest(request);
+    // TODO: Implement view modal
+  };
+
+  const handleReplyToRequest = async (requestId: string, replyData: { reply: string; status: string }) => {
+    try {
+      const response = await API.partnershipRequestsAPI.replyToRequest(requestId, replyData);
+      if (response.success) {
+        // Update the request in the list
+        setRequests(prev => prev.map(req => 
+          req.id === requestId ? { ...req, ...response.data } : req
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Reply Sent',
+          description: 'Your reply has been sent successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to reply to request:', error);
+      addToast({
+        variant: 'error',
+        title: 'Reply Failed',
+        description: 'Failed to send reply. Please try again.',
+      });
+    }
+  };
+
+  const handleUpdateStatus = async (requestId: string, status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+    try {
+      const response = await API.partnershipRequestsAPI.updateStatus(requestId, status);
+      if (response.success) {
+        // Update the request in the list
+        setRequests(prev => prev.map(req => 
+          req.id === requestId ? { ...req, status } : req
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Status Updated',
+          description: `Partnership request status updated to ${status}.`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update request status:', error);
+      addToast({
+        variant: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update partnership request status. Please try again.',
+      });
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const response = await API.partnershipRequestsAPI.deleteRequest(requestId);
+      if (response.success) {
+        // Remove the request from the list
+        setRequests(prev => prev.filter(req => req.id !== requestId));
+        addToast({
+          variant: 'success',
+          title: 'Request Deleted',
+          description: 'Partnership request has been deleted successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to delete request:', error);
+      addToast({
+        variant: 'error',
+        title: 'Delete Failed',
+        description: 'Failed to delete partnership request. Please try again.',
+      });
+    }
   };
 
   // Pagination
@@ -370,6 +420,7 @@ export default function PartnershipRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => window.open(`/partnership-requests/${request.id}`, '_blank')}
                           className="text-palette-gold-600 hover:text-palette-gold-700"
                           title="View Details"
                         >
@@ -378,6 +429,10 @@ export default function PartnershipRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setIsReplyModalOpen(true);
+                          }}
                           className="text-palette-blue-600 hover:text-palette-blue-700"
                           title="Reply"
                         >
@@ -386,6 +441,10 @@ export default function PartnershipRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            const newStatus = request.status === 'accepted' ? 'pending' : 'accepted';
+                            handleUpdateStatus(request.id, newStatus);
+                          }}
                           className="text-palette-green-600 hover:text-palette-green-700"
                           title="Update Status"
                         >
@@ -394,6 +453,11 @@ export default function PartnershipRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this partnership request?')) {
+                              handleDeleteRequest(request.id);
+                            }
+                          }}
                           className="text-destructive hover:text-destructive-600"
                           title="Delete"
                         >
@@ -418,6 +482,17 @@ export default function PartnershipRequestsPage() {
           />
         </div>
       </div>
+
+      {/* Reply Modal */}
+      <PartnershipRequestReplyModal
+        request={selectedRequest}
+        isOpen={isReplyModalOpen}
+        onClose={() => {
+          setIsReplyModalOpen(false);
+          setSelectedRequest(null);
+        }}
+        onReply={handleReplyToRequest}
+      />
     </DashboardLayout>
   );
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
-import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Star, Calendar, User, Image as ImageIcon } from "lucide-react";
+import { Button, Badge, useToast } from "@/amal-ui";
+import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight, Star, User, Image as ImageIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ImageUpload } from "@/components/ImageUpload";
+import { NewsFormModal } from "@/components/news/NewsFormModal";
+import { DeleteConfirmModal } from "@/components/news/DeleteConfirmModal";
+import { newsAPI } from "@/lib/api";
 
 interface News {
   _id?: string;
@@ -15,7 +15,6 @@ interface News {
   slug: string;
   content: string;
   excerpt?: string;
-  featuredImage?: string;
   images?: string[];
   tags?: string[];
   status?: 'draft' | 'published' | 'archived';
@@ -28,14 +27,13 @@ interface News {
 }
 
 export default function NewsPage() {
+  const { addToast } = useToast();
   const [news, setNews] = useState<News[]>([]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -45,99 +43,41 @@ export default function NewsPage() {
   const [editingNews, setEditingNews] = useState<News | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data
+  // Fetch news from API
   useEffect(() => {
-    const mockNews: News[] = [
-      {
-        id: "1",
-        title: "Colorwaves Launches New Eco-Friendly Paint Line",
-        slug: "colorwaves-launches-new-eco-friendly-paint-line",
-        content: "Colorwaves is proud to announce the launch of our new eco-friendly paint line, designed to meet the growing demand for sustainable building materials...",
-        excerpt: "Revolutionary eco-friendly paint line with zero VOC emissions and sustainable packaging.",
-        featuredImage: "/images/news/eco-paint-launch.jpg",
-        images: ["/images/news/eco-paint-1.jpg", "/images/news/eco-paint-2.jpg"],
-        tags: ["eco-friendly", "sustainability", "innovation", "paint"],
-        status: "published",
-        isFeatured: true,
-        viewCount: 1250,
-        author: "Dr. Adebayo Johnson",
-        publishedAt: "2024-01-20T10:00:00Z",
-        createdAt: "2024-01-20T10:00:00Z",
-        updatedAt: "2024-01-20T10:00:00Z"
-      },
-      {
-        id: "2",
-        title: "Major Partnership with Abuja Construction Company",
-        slug: "major-partnership-with-abuja-construction-company",
-        content: "Colorwaves has entered into a strategic partnership with Abuja Construction Company to supply premium paints for their upcoming residential projects...",
-        excerpt: "Strategic partnership to supply premium paints for major residential development projects.",
-        featuredImage: "/images/news/partnership-announcement.jpg",
-        images: ["/images/news/partnership-1.jpg"],
-        tags: ["partnership", "construction", "abuja", "residential"],
-        status: "published",
-        isFeatured: false,
-        viewCount: 890,
-        author: "Sarah Okafor",
-        publishedAt: "2024-01-18T14:30:00Z",
-        createdAt: "2024-01-18T14:30:00Z",
-        updatedAt: "2024-01-18T14:30:00Z"
-      },
-      {
-        id: "3",
-        title: "New Manufacturing Facility Opens in Lagos",
-        slug: "new-manufacturing-facility-opens-in-lagos",
-        content: "Our new state-of-the-art manufacturing facility in Lagos is now operational, increasing our production capacity by 300%...",
-        excerpt: "State-of-the-art facility increases production capacity by 300% and creates 200 new jobs.",
-        featuredImage: "/images/news/lagos-facility.jpg",
-        images: ["/images/news/facility-1.jpg", "/images/news/facility-2.jpg", "/images/news/facility-3.jpg"],
-        tags: ["manufacturing", "lagos", "expansion", "jobs"],
-        status: "published",
-        isFeatured: true,
-        viewCount: 2100,
-        author: "Michael Chen",
-        publishedAt: "2024-01-15T09:00:00Z",
-        createdAt: "2024-01-15T09:00:00Z",
-        updatedAt: "2024-01-15T09:00:00Z"
-      },
-      {
-        id: "4",
-        title: "Colorwaves Wins Industry Excellence Award",
-        slug: "colorwaves-wins-industry-excellence-award",
-        content: "We are honored to announce that Colorwaves has been awarded the Industry Excellence Award for Innovation in Paint Technology...",
-        excerpt: "Recognition for innovation in paint technology and commitment to quality.",
-        featuredImage: "/images/news/award-ceremony.jpg",
-        images: ["/images/news/award-1.jpg"],
-        tags: ["award", "excellence", "innovation", "recognition"],
-        status: "draft",
-        isFeatured: false,
-        viewCount: 0,
-        author: "Fatima Ibrahim",
-        createdAt: "2024-01-22T16:45:00Z",
-        updatedAt: "2024-01-22T16:45:00Z"
-      },
-      {
-        id: "5",
-        title: "Community Outreach Program Launched",
-        slug: "community-outreach-program-launched",
-        content: "Colorwaves is launching a new community outreach program to provide free paint and renovation services to underserved communities...",
-        excerpt: "Initiative to provide free paint and renovation services to underserved communities.",
-        featuredImage: "/images/news/community-outreach.jpg",
-        images: ["/images/news/outreach-1.jpg", "/images/news/outreach-2.jpg"],
-        tags: ["community", "outreach", "charity", "social-responsibility"],
-        status: "archived",
-        isFeatured: false,
-        viewCount: 450,
-        author: "David Johnson",
-        publishedAt: "2024-01-10T11:20:00Z",
-        createdAt: "2024-01-10T11:20:00Z",
-        updatedAt: "2024-01-12T15:30:00Z"
+    const fetchNews = async () => {
+      try {
+        setIsLoading(true);
+        const response = await newsAPI.getNews();
+        if (response.success) {
+          setNews(response.data);
+          setFilteredNews(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch news",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch news",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setNews([]);
+        setFilteredNews([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setNews(mockNews);
-    setFilteredNews(mockNews);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchNews();
+  }, [addToast]);
 
   // Filter and sort news
   useEffect(() => {
@@ -171,20 +111,8 @@ export default function NewsPage() {
       }
     });
 
-    // Apply sorting
-    filtered.sort((a, b) => {
-      if (!a || !b) return 0;
-      
-      const aValue = a[sortBy as keyof News] || '';
-      const bValue = b[sortBy as keyof News] || '';
-      
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-
     setFilteredNews(filtered);
-  }, [news, searchTerm, filters, sortBy, sortOrder]);
+  }, [news, searchTerm, filters]);
 
   const handleViewNews = (newsItem: News) => {
     setSelectedNews(newsItem);
@@ -209,37 +137,52 @@ export default function NewsPage() {
   const handleNewsSaved = async (savedNews: News) => {
     if (!savedNews) return;
     
-    if (editingNews) {
-      // Update existing news
-      // TODO: Implement API call for update
-      setNews(prev => prev.map(newsItem => newsItem.id === savedNews.id ? savedNews : newsItem));
-    } else {
-      // Create new news - send only required fields
-      const newsData = {
-        title: savedNews.title,
-        content: savedNews.content,
-        excerpt: savedNews.excerpt,
-        featuredImage: savedNews.featuredImage,
-        images: savedNews.images,
-        tags: savedNews.tags,
-        status: savedNews.status || 'draft',
-        isFeatured: savedNews.isFeatured || false,
-        author: savedNews.author,
-        publishedAt: savedNews.publishedAt
-      };
-      // TODO: Implement API call for create
-      setNews(prev => [...prev, savedNews]);
+    try {
+      if (editingNews) {
+        // Update existing news in local state
+        setNews(prev => prev.map(newsItem => newsItem.id === savedNews.id ? savedNews : newsItem));
+      } else {
+        // Add new news to local state
+        setNews(prev => [...prev, savedNews]);
+      }
+    } catch (error) {
+      console.error("Error updating news list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update news list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingNews(null);
     }
-    setIsFormModalOpen(false);
-    setEditingNews(null);
   };
 
-  const handleNewsDeleted = (newsId: string) => {
+  const handleNewsDeleted = async (newsId: string) => {
     if (!newsId) return;
     
-    setNews(prev => prev.filter(newsItem => newsItem.id !== newsId));
-    setIsDeleteModalOpen(false);
-    setSelectedNews(null);
+    try {
+      await newsAPI.deleteNews(newsId);
+      setNews(prev => prev.filter(newsItem => newsItem.id !== newsId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "News deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting news:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete news",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedNews(null);
+    }
   };
 
   const handleUpdateStatus = (newsItem: News) => {
@@ -249,16 +192,60 @@ export default function NewsPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (newsId: string, status: string) => {
-    setNews(prev => prev.map(n => 
-      n.id === newsId ? { ...n, status: status as 'draft' | 'published' | 'archived' } : n
-    ));
+  const handleStatusUpdate = async (newsId: string, status: string) => {
+    try {
+      const response = await newsAPI.updateStatus(newsId, status);
+      if (response.success) {
+        setNews(prev => prev.map(n => 
+          n.id === newsId ? { ...n, status: status as 'draft' | 'published' | 'archived' } : n
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "News status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating news status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update news status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedNews(null);
+    }
   };
 
-  const handleToggleFeatured = (newsId: string) => {
-    setNews(prev => prev.map(n => 
-      n.id === newsId ? { ...n, isFeatured: !n.isFeatured } : n
-    ));
+  const handleToggleFeatured = async (newsId: string) => {
+    const newsItem = news.find(n => n.id === newsId);
+    if (!newsItem) return;
+    
+    try {
+      const response = await newsAPI.updateFeatured(newsId, !newsItem.isFeatured);
+      if (response.success) {
+        setNews(prev => prev.map(n => 
+          n.id === newsId ? { ...n, isFeatured: !n.isFeatured } : n
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: `News ${!newsItem.isFeatured ? 'added to' : 'removed from'} featured`,
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling news featured status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update featured status",
+        duration: 5000
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -276,25 +263,6 @@ export default function NewsPage() {
       month: "short",
       day: "numeric"
     });
-  };
-
-  // Sorting functionality
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
-  const getSortIcon = (column: string) => {
-    if (sortBy !== column) {
-      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? 
-      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
-      <ChevronDown className="h-4 w-4 text-gray-600" />;
   };
 
   // Pagination
@@ -391,199 +359,192 @@ export default function NewsPage() {
                   onChange={(e) => setPageSize(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
                 >
-                  <option value={5}>5 per page</option>
-                  <option value={10}>10 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
+                  <option value={6}>6 per page</option>
+                  <option value={12}>12 per page</option>
+                  <option value={24}>24 per page</option>
                 </select>
               </div>
             </div>
           )}
         </div>
 
-        {/* News Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto scrollbar-hide">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Image</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('title')}
+        {/* News Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedData.map((newsItem) => (
+            <div key={newsItem.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video bg-gray-100 relative">
+                {newsItem.images && newsItem.images.length > 0 ? (
+                  <img
+                    src={newsItem.images[0]}
+                    alt={newsItem.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/placeholder.jpg';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <Badge
+                    color={newsItem.status === 'published' ? "green" : newsItem.status === 'draft' ? "yellow" : "gray"}
+                    size="sm"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Title</span>
-                      {getSortIcon('title')}
-                    </div>
-                  </TableHead>
-                  <TableHead>Excerpt</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('status')}
+                    {newsItem.status || 'draft'}
+                  </Badge>
+                </div>
+                {newsItem.isFeatured && (
+                  <div className="absolute top-2 left-2">
+                    <Badge color="purple" size="sm">
+                      <Star className="h-3 w-3 mr-1 fill-current" />
+                      Featured
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                    {newsItem.title}
+                  </h3>
+                </div>
+                
+                <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  {newsItem.excerpt || "No excerpt available"}
+                </p>
+                
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {(newsItem.tags || []).slice(0, 3).map((tag, index) => (
+                    <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                      {tag}
+                    </span>
+                  ))}
+                  {(newsItem.tags || []).length > 3 && (
+                    <span className="text-xs text-gray-500">
+                      +{(newsItem.tags || []).length - 3}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <div className="flex items-center space-x-1">
+                    <User className="h-3 w-3" />
+                    <span>{newsItem.author || "Unknown"}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Eye className="h-3 w-3" />
+                    <span>{newsItem.viewCount || 0}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <span>
+                    {newsItem.publishedAt ? formatDate(newsItem.publishedAt) : "Not published"}
+                  </span>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(`/news/${newsItem.slug}`, '_blank')}
+                    className="text-palette-gold-600 hover:text-palette-gold-700"
+                    title="View Details"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Status</span>
-                      {getSortIcon('status')}
-                    </div>
-                  </TableHead>
-                  <TableHead>Views</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('publishedAt')}
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditNews(newsItem)}
+                    className="text-palette-gold-600 hover:text-palette-gold-700"
+                    title="Edit News"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span>Published</span>
-                      {getSortIcon('publishedAt')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="w-32">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((newsItem) => (
-                  <TableRow key={newsItem.id}>
-                    <TableCell>
-                      <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                        {newsItem.featuredImage ? (
-                          <img 
-                            src={newsItem.featuredImage} 
-                            alt={newsItem.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <ImageIcon className="h-6 w-6 text-gray-400" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 line-clamp-1">{newsItem.title}</p>
-                        <p className="text-xs text-gray-500">/{newsItem.slug}</p>
-                        {newsItem.isFeatured && (
-                          <div className="flex items-center space-x-1 mt-1">
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                            <span className="text-xs text-yellow-600">Featured</span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs">
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {newsItem.excerpt || "No excerpt available"}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(newsItem.tags || []).slice(0, 2).map((tag, index) => (
-                          <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                            {tag}
-                          </span>
-                        ))}
-                        {(newsItem.tags || []).length > 2 && (
-                          <span className="text-xs text-gray-500">
-                            +{(newsItem.tags || []).length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{newsItem.author || "Unknown"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(newsItem.status || 'draft')}`}>
-                        {newsItem.status || 'draft'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Eye className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{newsItem.viewCount}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {newsItem.publishedAt ? formatDate(newsItem.publishedAt) : "Not published"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewNews(newsItem)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditNews(newsItem)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
-                          title="Edit News"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleFeatured(newsItem.id)}
-                          className={newsItem.isFeatured ? "text-yellow-600 hover:text-yellow-700" : "text-gray-600 hover:text-gray-700"}
-                          title={newsItem.isFeatured ? "Remove from Featured" : "Add to Featured"}
-                        >
-                          <Star className={`h-4 w-4 ${newsItem.isFeatured ? 'fill-current' : ''}`} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleUpdateStatus(newsItem)}
-                          className="text-palette-blue-600 hover:text-palette-blue-700"
-                          title="Update Status"
-                        >
-                          {newsItem.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteNews(newsItem)}
-                          className="text-destructive hover:text-destructive-600"
-                          title="Delete News"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            showInfo={true}
-            totalItems={filteredNews.length}
-            pageSize={pageSize}
-          />
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleFeatured(newsItem.id)}
+                    className={newsItem.isFeatured ? "text-yellow-600 hover:text-yellow-700" : "text-gray-600 hover:text-gray-700"}
+                    title={newsItem.isFeatured ? "Remove from Featured" : "Add to Featured"}
+                  >
+                    <Star className={`h-4 w-4 ${newsItem.isFeatured ? 'fill-current' : ''}`} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleUpdateStatus(newsItem)}
+                    className="text-palette-blue-600 hover:text-palette-blue-700"
+                    title="Update Status"
+                  >
+                    {newsItem.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteNews(newsItem)}
+                    className="text-destructive hover:text-destructive-600"
+                    title="Delete News"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Modals will be implemented next */}
+      {/* News Form Modal */}
+      <NewsFormModal
+        news={editingNews}
+        isOpen={isFormModalOpen}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setEditingNews(null);
+        }}
+        onSave={handleNewsSaved}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        news={selectedNews}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedNews(null);
+        }}
+        onConfirm={handleNewsDeleted}
+      />
     </DashboardLayout>
   );
 }

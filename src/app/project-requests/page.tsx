@@ -6,23 +6,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination } from "@/components/ui/pagination";
 import { Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Reply, Image } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { ProjectRequestReplyModal } from "@/components/project-requests/ProjectRequestReplyModal";
+import { useToast } from "@/amal-ui/components/ToastProvider";
+import * as API from "@/lib/api";
 
 interface ProjectRequest {
   id: string;
-  fullName: string;
+  clientName: string;
   email: string;
   phoneNumber: string;
-  projectType: string;
-  budgetRange: string;
-  location: string;
-  description: string;
-  images: string[];
+  companyName?: string;
+  projectTitle: string;
+  projectDescription: string;
+  budget: string;
+  timeline: string;
+  images?: string[];
+  services?: string[];
+  website?: string;
   status: 'pending' | 'accepted' | 'replied' | 'declined';
+  replyTitle?: string;
+  replyMessage?: string;
+  replyAttachments?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export default function ProjectRequestsPage() {
+  const { addToast } = useToast();
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<ProjectRequest[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,72 +43,35 @@ export default function ProjectRequestsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<ProjectRequest | null>(null);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data
+  // Load requests from API
   useEffect(() => {
-    const mockRequests: ProjectRequest[] = [
-      {
-        id: "1",
-        fullName: "Adewale Johnson",
-        email: "adewale@example.com",
-        phoneNumber: "+234 802 123 4567",
-        projectType: "real estate",
-        budgetRange: "₦10M - ₦20M",
-        location: "Abuja, FCT",
-        description: "Looking to develop a residential estate with modern housing units. We need comprehensive design and construction services including paint supply and interior decoration.",
-        images: ["/images/projects/request-1.jpg", "/images/projects/request-2.jpg"],
-        status: "pending",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: "2",
-        fullName: "Fatima Ibrahim",
-        email: "fatima@company.com",
-        phoneNumber: "+234 803 456 7890",
-        projectType: "office setup",
-        budgetRange: "₦5M - ₦10M",
-        location: "Lagos, Nigeria",
-        description: "Complete office renovation and setup for our new corporate headquarters. Need modern design, quality paint work, and professional finishing.",
-        images: ["/images/projects/office-1.jpg"],
-        status: "replied",
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-18T14:22:00Z"
-      },
-      {
-        id: "3",
-        fullName: "Michael Chen",
-        email: "m.chen@business.com",
-        phoneNumber: "+234 804 789 0123",
-        projectType: "renovation",
-        budgetRange: "₦2M - ₦5M",
-        location: "Port Harcourt, Rivers",
-        description: "Renovation of existing commercial building. Focus on modern paint schemes and interior updates.",
-        images: [],
-        status: "accepted",
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "4",
-        fullName: "Sarah Okafor",
-        email: "sarah@residence.com",
-        phoneNumber: "+234 805 234 5678",
-        projectType: "interior decoration",
-        budgetRange: "₦1M - ₦2M",
-        location: "Kaduna, Nigeria",
-        description: "Interior decoration project for luxury residential apartment. Need premium paint and finishing services.",
-        images: ["/images/projects/interior-1.jpg", "/images/projects/interior-2.jpg", "/images/projects/interior-3.jpg"],
-        status: "declined",
-        createdAt: "2024-01-18T08:45:00Z",
-        updatedAt: "2024-01-20T12:30:00Z"
+    const loadRequests = async () => {
+      try {
+        setIsLoading(true);
+        const response = await API.projectRequestsAPI.getRequests();
+        if (response.success) {
+          setRequests(response.data);
+          setFilteredRequests(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load project requests:', error);
+        addToast({
+          variant: 'error',
+          title: 'Error',
+          description: 'Failed to load project requests. Please try again.',
+        });
+        // Fallback to empty array on error
+        setRequests([]);
+        setFilteredRequests([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setRequests(mockRequests);
-    setFilteredRequests(mockRequests);
-    setIsLoading(false);
+    };
+
+    loadRequests();
   }, []);
 
   // Filter and sort requests
@@ -108,17 +81,17 @@ export default function ProjectRequestsPage() {
     // Apply search
     if (searchTerm) {
       filtered = filtered.filter(request => {
-        const fullName = (request.fullName || '').toLowerCase();
+        const clientName = (request.clientName || '').toLowerCase();
         const email = (request.email || '').toLowerCase();
-        const projectType = (request.projectType || '').toLowerCase();
-        const location = (request.location || '').toLowerCase();
-        const description = (request.description || '').toLowerCase();
+        const projectTitle = (request.projectTitle || '').toLowerCase();
+        const companyName = (request.companyName || '').toLowerCase();
+        const description = (request.projectDescription || '').toLowerCase();
         const searchLower = searchTerm.toLowerCase();
         
-        return fullName.includes(searchLower) || 
+        return clientName.includes(searchLower) || 
                email.includes(searchLower) ||
-               projectType.includes(searchLower) ||
-               location.includes(searchLower) ||
+               projectTitle.includes(searchLower) ||
+               companyName.includes(searchLower) ||
                description.includes(searchLower);
       });
     }
@@ -128,7 +101,7 @@ export default function ProjectRequestsPage() {
       if (value && value !== 'all') {
         filtered = filtered.filter(request => {
           if (key === 'status') return request.status === value;
-          if (key === 'projectType') return request.projectType === value;
+          if (key === 'projectType') return request.projectTitle.toLowerCase().includes(value.toLowerCase());
           return true;
         });
       }
@@ -148,6 +121,82 @@ export default function ProjectRequestsPage() {
 
     setFilteredRequests(filtered);
   }, [requests, searchTerm, filters, sortBy, sortOrder]);
+
+  // API handler functions
+  const handleViewRequest = (request: ProjectRequest) => {
+    setSelectedRequest(request);
+    // TODO: Implement view modal
+  };
+
+  const handleReplyToRequest = async (requestId: string, replyData: { reply: string; status: string }) => {
+    try {
+      const response = await API.projectRequestsAPI.replyToRequest(requestId, replyData);
+      if (response.success) {
+        // Update the request in the list
+        setRequests(prev => prev.map(req => 
+          req.id === requestId ? { ...req, ...response.data } : req
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Reply Sent',
+          description: 'Your reply has been sent successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to reply to request:', error);
+      addToast({
+        variant: 'error',
+        title: 'Reply Failed',
+        description: 'Failed to send reply. Please try again.',
+      });
+    }
+  };
+
+  const handleUpdateStatus = async (requestId: string, status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+    try {
+      const response = await API.projectRequestsAPI.updateStatus(requestId, status);
+      if (response.success) {
+        // Update the request in the list
+        setRequests(prev => prev.map(req => 
+          req.id === requestId ? { ...req, status } : req
+        ));
+        addToast({
+          variant: 'success',
+          title: 'Status Updated',
+          description: `Project request status updated to ${status}.`,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update request status:', error);
+      addToast({
+        variant: 'error',
+        title: 'Update Failed',
+        description: 'Failed to update project request status. Please try again.',
+      });
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const response = await API.projectRequestsAPI.deleteRequest(requestId);
+      if (response.success) {
+        // Remove the request from the list
+        setRequests(prev => prev.filter(req => req.id !== requestId));
+        addToast({
+          variant: 'success',
+          title: 'Request Deleted',
+          description: 'Project request has been deleted successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to delete request:', error);
+      addToast({
+        variant: 'error',
+        title: 'Delete Failed',
+        description: 'Failed to delete project request. Please try again.',
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -296,23 +345,23 @@ export default function ProjectRequestsPage() {
                 <TableRow>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('fullName')}
+                    onClick={() => handleSort('clientName')}
                   >
                     <div className="flex items-center space-x-2">
                       <span>Contact</span>
-                      {getSortIcon('fullName')}
+                      {getSortIcon('clientName')}
                     </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('projectType')}
+                    onClick={() => handleSort('projectTitle')}
                   >
                     <div className="flex items-center space-x-2">
-                      <span>Project Type</span>
-                      {getSortIcon('projectType')}
+                      <span>Project Title</span>
+                      {getSortIcon('projectTitle')}
                     </div>
                   </TableHead>
-                  <TableHead>Budget & Location</TableHead>
+                  <TableHead>Budget & Timeline</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Images</TableHead>
                   <TableHead 
@@ -341,26 +390,29 @@ export default function ProjectRequestsPage() {
                   <TableRow key={request.id}>
                     <TableCell>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{request.fullName}</p>
+                        <p className="text-sm font-medium text-gray-900">{request.clientName}</p>
                         <p className="text-sm text-gray-600">{request.email}</p>
                         <p className="text-xs text-gray-500">{request.phoneNumber}</p>
+                        {request.companyName && (
+                          <p className="text-xs text-gray-500">{request.companyName}</p>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge color="blue" size="sm">
-                        {request.projectType}
-                      </Badge>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{request.projectTitle}</p>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{request.budgetRange}</p>
-                        <p className="text-sm text-gray-600">{request.location}</p>
+                        <p className="text-sm font-medium text-gray-900">{request.budget}</p>
+                        <p className="text-sm text-gray-600">{request.timeline}</p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs">
                         <p className="text-sm text-gray-600 line-clamp-2">
-                          {request.description}
+                          {request.projectDescription}
                         </p>
                       </div>
                     </TableCell>
@@ -368,7 +420,7 @@ export default function ProjectRequestsPage() {
                       <div className="flex items-center space-x-1">
                         <Image className="h-4 w-4 text-gray-400" />
                         <span className="text-xs text-gray-500">
-                          {request.images.length} image{request.images.length !== 1 ? 's' : ''}
+                          {request.images?.length || 0} image{(request.images?.length || 0) !== 1 ? 's' : ''}
                         </span>
                       </div>
                     </TableCell>
@@ -387,6 +439,7 @@ export default function ProjectRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => window.open(`/project-requests/${request.id}`, '_blank')}
                           className="text-palette-gold-600 hover:text-palette-gold-700"
                           title="View Details"
                         >
@@ -395,6 +448,10 @@ export default function ProjectRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setIsReplyModalOpen(true);
+                          }}
                           className="text-palette-blue-600 hover:text-palette-blue-700"
                           title="Reply"
                         >
@@ -403,6 +460,10 @@ export default function ProjectRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            const newStatus = request.status === 'accepted' ? 'pending' : 'accepted';
+                            handleUpdateStatus(request.id, newStatus);
+                          }}
                           className="text-palette-green-600 hover:text-palette-green-700"
                           title="Update Status"
                         >
@@ -411,6 +472,11 @@ export default function ProjectRequestsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this project request?')) {
+                              handleDeleteRequest(request.id);
+                            }
+                          }}
                           className="text-destructive hover:text-destructive-600"
                           title="Delete"
                         >
@@ -435,6 +501,17 @@ export default function ProjectRequestsPage() {
           />
         </div>
       </div>
+
+      {/* Reply Modal */}
+      <ProjectRequestReplyModal
+        request={selectedRequest}
+        isOpen={isReplyModalOpen}
+        onClose={() => {
+          setIsReplyModalOpen(false);
+          setSelectedRequest(null);
+        }}
+        onReply={handleReplyToRequest}
+      />
     </DashboardLayout>
   );
 }

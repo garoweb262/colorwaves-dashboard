@@ -5,15 +5,19 @@ import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 
-interface PartnershipRequest {
+interface ProjectRequest {
   id: string;
-  fullName: string;
-  companyName: string;
+  clientName: string;
   email: string;
   phoneNumber: string;
-  partnershipType: string;
-  message?: string;
-  description?: string;
+  companyName?: string;
+  projectTitle: string;
+  projectDescription: string;
+  budget: string;
+  timeline: string;
+  images?: string[];
+  services?: string[];
+  website?: string;
   status: 'pending' | 'accepted' | 'replied' | 'declined';
   replyTitle?: string;
   replyMessage?: string;
@@ -22,14 +26,14 @@ interface PartnershipRequest {
   updatedAt: string;
 }
 
-interface PartnershipRequestReplyModalProps {
-  request?: PartnershipRequest | null;
+interface ProjectRequestReplyModalProps {
+  request?: ProjectRequest | null;
   isOpen: boolean;
   onClose: () => void;
   onReply: (requestId: string, replyData: { reply: string; status: string }) => void;
 }
 
-export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply }: PartnershipRequestReplyModalProps) {
+export function ProjectRequestReplyModal({ request, isOpen, onClose, onReply }: ProjectRequestReplyModalProps) {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     replyMessage: ""
@@ -110,7 +114,7 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
-            Reply to Partnership Request
+            Reply to Project Request
           </h2>
           <Button
             variant="ghost"
@@ -126,14 +130,16 @@ export function PartnershipRequestReplyModal({ request, isOpen, onClose, onReply
           <div className="space-y-6">
             {/* Original Request */}
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-3">Partnership Request Details</h3>
+              <h3 className="font-medium text-gray-900 mb-3">Project Request Details</h3>
               <div className="space-y-2 text-sm">
-                <p><strong>Contact:</strong> {request.fullName} ({request.email})</p>
-                <p><strong>Company:</strong> {request.companyName}</p>
-                <p><strong>Partnership Type:</strong> {request.partnershipType}</p>
+                <p><strong>Client:</strong> {request.clientName} ({request.email})</p>
+                {request.companyName && <p><strong>Company:</strong> {request.companyName}</p>}
+                <p><strong>Project:</strong> {request.projectTitle}</p>
+                <p><strong>Budget:</strong> {request.budget}</p>
+                <p><strong>Timeline:</strong> {request.timeline}</p>
                 <p><strong>Description:</strong></p>
                 <div className="bg-white p-3 rounded border-l-4 border-purple-500">
-                  <p className="whitespace-pre-wrap">{request.description}</p>
+                  <p className="whitespace-pre-wrap">{request.projectDescription}</p>
                 </div>
               </div>
             </div>
