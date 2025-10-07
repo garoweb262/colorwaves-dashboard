@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
+import { ImageUpload } from "@/components/ImageUpload";
+import { uploadAPI, testimoniesAPI } from "@/lib/api";
 
 interface Testimony {
+  _id?: string;
   id: string;
   content: string;
   clientName: string;
@@ -26,6 +29,7 @@ interface TestimonyFormModalProps {
 }
 
 export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: TestimonyFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     content: "",
     clientName: "",
@@ -36,6 +40,8 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     if (testimony) {
@@ -58,6 +64,7 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
       });
     }
     setErrors({});
+    setUploadedImageFile(null);
   }, [testimony, isOpen]);
 
   const validateForm = () => {
@@ -97,48 +104,116 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let finalImageUrl = formData.clientImage;
+
+      // If there's a new image file to upload, upload it first
+      if (uploadedImageFile) {
+        console.log("Starting image upload for testimony...", uploadedImageFile.name);
+        setIsUploadingImage(true);
+        
+        try {
+          const uploadResponse = await uploadAPI.uploadImage(uploadedImageFile, "testimonies");
+          console.log("Upload response:", uploadResponse);
+          
+          if (uploadResponse.success && uploadResponse.data.fileUrl) {
+            finalImageUrl = uploadResponse.data.fileUrl;
+            console.log("Successfully uploaded image:", finalImageUrl);
+          } else {
+            console.error("Upload failed - invalid response:", uploadResponse);
+            throw new Error("Failed to upload image - invalid response");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          addToast({
+            variant: "error",
+            title: "Image Upload Failed",
+            description: "Failed to upload image. Please try again.",
+            duration: 5000
+          });
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
+      const testimonyData = {
+        content: formData.content,
+        clientName: formData.clientName,
+        clientPosition: formData.clientPosition,
+        clientCompany: formData.clientCompany,
+        rating: Number(formData.rating), // Convert to number
+        clientImage: finalImageUrl
+      };
+
+      let savedTestimony: Testimony;
 
       if (testimony) {
-        // For edit, only send the editable fields
-        const updateData = {
-          content: formData.content,
-          clientName: formData.clientName,
-          clientPosition: formData.clientPosition,
-          clientCompany: formData.clientCompany,
-          rating: formData.rating,
-          clientImage: formData.clientImage
-        };
-        onSave(updateData as Testimony);
+        // Update existing testimony
+        const response = await testimoniesAPI.updateTestimony(testimony.id, testimonyData);
+        if (response.success) {
+          savedTestimony = response.data;
+          addToast({
+            variant: "success",
+            title: "Testimony Updated",
+            description: "Testimony has been updated successfully.",
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to update testimony");
+        }
       } else {
-        // For create, send all fields
-        const savedTestimony: Testimony = {
-          id: Date.now().toString(),
-          content: formData.content,
-          clientName: formData.clientName,
-          clientPosition: formData.clientPosition,
-          clientCompany: formData.clientCompany,
-          rating: formData.rating,
-          clientImage: formData.clientImage,
-          isActive: true, // Default to active
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        onSave(savedTestimony);
+        // Create new testimony
+        const response = await testimoniesAPI.createTestimony(testimonyData);
+        if (response.success) {
+          savedTestimony = response.data;
+          addToast({
+            variant: "success",
+            title: "Testimony Created",
+            description: "Testimony has been created successfully.",
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to create testimony");
+        }
       }
-    } catch (error) {
+
+      onSave(savedTestimony!);
+      onClose();
+    } catch (error: any) {
       console.error("Error saving testimony:", error);
+      
+      addToast({
+        variant: "error",
+        title: testimony ? "Update Failed" : "Creation Failed",
+        description: error.response?.data?.message || (testimony 
+          ? "Failed to update testimony. Please try again."
+          : "Failed to create testimony. Please try again."),
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleImageSelect = (imageUrl: string, file?: File) => {
+    console.log("handleImageSelect called with:", { imageUrl, file });
+    if (file) {
+      console.log("Setting uploaded file:", file);
+      setUploadedImageFile(file);
+    }
+    handleInputChange("clientImage", imageUrl);
+  };
+
+  const handleImageRemove = () => {
+    setUploadedImageFile(null);
+    handleInputChange("clientImage", "");
   };
 
   return (
@@ -242,7 +317,7 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
             </label>
             <select
               value={formData.rating}
-              onChange={(e) => handleInputChange("rating", e.target.value)}
+              onChange={(e) => handleInputChange("rating", Number(e.target.value))}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
                 errors.rating ? "border-red-300" : "border-gray-300"
               }`}
@@ -260,16 +335,20 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
 
           {/* Client Image */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Image URL
-            </label>
-            <input
-              type="url"
-              value={formData.clientImage}
-              onChange={(e) => handleInputChange("clientImage", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="Enter client's image URL"
+            <ImageUpload
+              label="Client Image"
+              description="Upload client's profile image"
+              currentImage={formData.clientImage}
+              onImageSelect={(imageUrl, file) => {
+                console.log("ImageUpload onImageSelect called with:", { imageUrl, file });
+                handleImageSelect(imageUrl, file);
+              }}
+              onImageRemove={handleImageRemove}
+              maxSize={5}
             />
+            {errors.clientImage && (
+              <p className="mt-1 text-sm text-red-600">{errors.clientImage}</p>
+            )}
           </div>
 
 
@@ -285,10 +364,10 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              loading={isSubmitting || isUploadingImage}
+              disabled={isSubmitting || isUploadingImage}
             >
-              {testimony ? "Update Testimony" : "Create Testimony"}
+              {isUploadingImage ? "Uploading Image..." : testimony ? "Update Testimony" : "Create Testimony"}
             </Button>
           </div>
         </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Upload, X, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { Button } from "@/amal-ui";
@@ -42,18 +42,22 @@ export function ImageUpload({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Memoize the current images to prevent infinite re-renders
+  const memoizedCurrentImages = useMemo(() => currentImages, [currentImages?.join(',')]);
+  const memoizedCurrentImage = useMemo(() => currentImage, [currentImage]);
+
   // Update preview images when currentImages or currentImage changes
   useEffect(() => {
-    if (multiple && currentImages) {
-      setPreviewImages(currentImages);
-    } else if (!multiple && currentImage) {
-      setPreviewImages([currentImage]);
+    if (multiple && memoizedCurrentImages) {
+      setPreviewImages(memoizedCurrentImages);
+    } else if (!multiple && memoizedCurrentImage) {
+      setPreviewImages([memoizedCurrentImage]);
     } else {
       setPreviewImages([]);
     }
-  }, [currentImages, currentImage, multiple]);
+  }, [memoizedCurrentImages, memoizedCurrentImage, multiple]);
 
-  const handleImageSelect = (file: File) => {
+  const handleImageSelect = useCallback((file: File) => {
     setUploadError(null);
     
     // Validate file size
@@ -91,7 +95,7 @@ export function ImageUpload({
     }
     
     setIsUploading(false);
-  };
+  }, [maxSize, multiple, maxImages, previewImages, selectedFiles, onImageSelect, onImagesSelect]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();

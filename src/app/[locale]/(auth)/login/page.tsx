@@ -156,9 +156,16 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mb-2">
               Demo credentials: admin@colorwaves.ng / password123
             </p>
+            <button
+              type="button"
+              onClick={() => router.push("/forgot-password")}
+              className="text-sm text-palette-violet hover:text-palette-violet/80 font-medium"
+            >
+              Forgot your password?
+            </button>
           </div>
         </form>
       </div>

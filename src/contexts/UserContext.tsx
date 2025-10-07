@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { roles, type Role } from "@/lib/menuConfig";
-import api from "@/lib/api";
+import { authAPI } from "@/lib/api";
 
 interface User {
   id: string;
@@ -56,15 +56,15 @@ export function UserProvider({ children }: UserProviderProps) {
       if (storedToken) {
         setToken(storedToken);
         try {
-          const response = await api.get('/auth/profile');
-          if (response.data) {
+          const result = await authAPI.getProfile();
+          if (result.success && result.data) {
             const userData: User = {
-              id: response.data.id,
-              firstName: response.data.firstName,
-              lastName: response.data.lastName,
-              email: response.data.email,
-              role: response.data.role,
-              avatar: `${response.data.firstName[0]}${response.data.lastName[0]}`
+              id: result.data.id,
+              firstName: result.data.firstName,
+              lastName: result.data.lastName,
+              email: result.data.email,
+              role: result.data.role,
+              avatar: `${result.data.firstName[0]}${result.data.lastName[0]}`
             };
             setUser(userData);
           }
@@ -132,27 +132,30 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
-      // console.log('Login attempt:', { email, baseURL: api.defaults.baseURL });
-      const response = await api.post('/auth/login', { email, password });
-      // console.log('Login response:', response.data);
-      const data: LoginResponse = response.data;
+      const result = await authAPI.login(email, password);
       
-      // Store token
-      localStorage.setItem('authToken', data.access_token);
-      setToken(data.access_token);
-      
-      // Set user data
-      const userData: User = {
-        id: data.user.id,
-        firstName: data.user.firstName,
-        lastName: data.user.lastName,
-        email: data.user.email,
-        role: data.user.role,
-        avatar: `${data.user.firstName[0]}${data.user.lastName[0]}`
-      };
-      
-      setUser(userData);
-      return { success: true, message: "Login successful" };
+      if (result.success && result.data) {
+        const data: LoginResponse = result.data;
+        
+        // Store token
+        localStorage.setItem('authToken', data.access_token);
+        setToken(data.access_token);
+        
+        // Set user data
+        const userData: User = {
+          id: data.user.id,
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
+          email: data.user.email,
+          role: data.user.role,
+          avatar: `${data.user.firstName[0]}${data.user.lastName[0]}`
+        };
+        
+        setUser(userData);
+        return { success: true, message: "Login successful" };
+      } else {
+        return { success: false, message: result.message || "Login failed" };
+      }
     } catch (error: any) {
       const message = error.response?.data?.message || "Login failed";
       return { success: false, message };

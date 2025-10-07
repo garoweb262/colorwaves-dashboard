@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Badge, useToast } from "@/amal-ui";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight, Star, User, Image as ImageIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -15,7 +16,7 @@ interface News {
   slug: string;
   content: string;
   excerpt?: string;
-  images?: string[];
+  imageUrl?: string;
   tags?: string[];
   status?: 'draft' | 'published' | 'archived';
   isFeatured?: boolean;
@@ -27,6 +28,7 @@ interface News {
 }
 
 export default function NewsPage() {
+  const router = useRouter();
   const { addToast } = useToast();
   const [news, setNews] = useState<News[]>([]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
@@ -373,9 +375,9 @@ export default function NewsPage() {
           {paginatedData.map((newsItem) => (
             <div key={newsItem.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-gray-100 relative">
-                {newsItem.images && newsItem.images.length > 0 ? (
+                {newsItem.imageUrl ? (
                   <img
-                    src={newsItem.images[0]}
+                    src={newsItem.imageUrl}
                     alt={newsItem.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -450,7 +452,7 @@ export default function NewsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.open(`/news/${newsItem.slug}`, '_blank')}
+                    onClick={() => router.push(`/news/${newsItem.slug}`)}
                     className="text-palette-gold-600 hover:text-palette-gold-700"
                     title="View Details"
                   >

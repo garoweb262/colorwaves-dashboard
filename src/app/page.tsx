@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
@@ -150,12 +150,12 @@ export default function LoginPage() {
                 />
                 <span className="text-gray-600">Remember me</span>
               </label>
-              <a
-                href="#"
-                className="text-palette-violet hover:text-palette-indigo transition-colors"
+              <div
+                onClick={() => router.push("/forgot-password")}
+                className="text-palette-violet hover:text-palette-indigo transition-colors cursor-pointer"
               >
                 Forgot password?
-              </a>
+              </div>
             </motion.div>
 
             <motion.div

@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Badge, useToast } from "@/amal-ui";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight, Star, User, Image as ImageIcon, Heart, MessageCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BlogFormModal } from "@/components/blogs/BlogFormModal";
 import { DeleteConfirmModal } from "@/components/blogs/DeleteConfirmModal";
+import { StatusUpdateModal } from "@/amal-ui/crud/components/StatusUpdateModal";
 import { blogsAPI } from "@/lib/api";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface Blog {
   _id?: string;
@@ -15,7 +18,7 @@ interface Blog {
   slug: string;
   content: string;
   excerpt?: string;
-  images?: string[];
+  imageUrl?: string;
   tags?: string[];
   categories?: string[];
   status?: 'draft' | 'published' | 'archived';
@@ -30,6 +33,7 @@ interface Blog {
 }
 
 export default function BlogPage() {
+  const router = useRouter();
   const { addToast } = useToast();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
@@ -45,6 +49,21 @@ export default function BlogPage() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Status update configuration
+  const statusConfig = {
+    entityName: "Blog",
+    entityNamePlural: "Blogs",
+    basePath: "/blogs",
+    columns: [],
+    formFields: [],
+    statusField: "status",
+    statusOptions: [
+      { value: "draft", label: "Draft", color: "yellow" },
+      { value: "published", label: "Published", color: "green" },
+      { value: "archived", label: "Archived", color: "gray" }
+    ]
+  };
 
   // Fetch blogs from API
   useEffect(() => {
@@ -290,6 +309,9 @@ export default function BlogPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="blogs" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -395,9 +417,9 @@ export default function BlogPage() {
           {paginatedData.map((blog) => (
             <div key={blog.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-gray-100 relative">
-                {blog.images && blog.images.length > 0 ? (
+                {blog.imageUrl ? (
                   <img
-                    src={blog.images[0]}
+                    src={blog.imageUrl}
                     alt={blog.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -483,7 +505,7 @@ export default function BlogPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                    onClick={() => router.push(`/blog/${blog.slug}`)}
                     className="text-palette-gold-600 hover:text-palette-gold-700"
                     title="View Details"
                   >
@@ -578,6 +600,20 @@ export default function BlogPage() {
         }}
         onConfirm={handleBlogDeleted}
       />
+
+      {/* Status Update Modal */}
+      {selectedBlog && (
+        <StatusUpdateModal
+          config={statusConfig}
+          item={selectedBlog}
+          isOpen={isStatusModalOpen}
+          onClose={() => {
+            setIsStatusModalOpen(false);
+            setSelectedBlog(null);
+          }}
+          onUpdate={handleStatusUpdate}
+        />
+      )}
     </DashboardLayout>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
+import { Button, Badge, useToast } from "@/amal-ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
@@ -10,8 +10,10 @@ import { FaqViewModal } from "@/components/faqs/FaqViewModal";
 import { FaqFormModal } from "@/components/faqs/FaqFormModal";
 import { FaqStatusModal } from "@/components/faqs/FaqStatusModal";
 import { DeleteConfirmModal } from "@/components/faqs/DeleteConfirmModal";
+import { faqsAPI } from "@/lib/api";
 
 interface Faq {
+  _id?: string;
   id: string;
   question: string;
   answer: string;
@@ -21,6 +23,7 @@ interface Faq {
 }
 
 export default function FaqsPage() {
+  const { addToast } = useToast();
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [filteredFaqs, setFilteredFaqs] = useState<Faq[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,39 +41,41 @@ export default function FaqsPage() {
   const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data - replace with actual API call
+  // Fetch FAQs from API
   useEffect(() => {
-    const mockFaqs: Faq[] = [
-      {
-        id: "1",
-        question: "What types of paints do you produce?",
-        answer: "We produce decorative, industrial, and textured paints, tailored for different needs.",
-        status: "active",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        question: "Do you take on real estate projects outside Abuja?",
-        answer: "Yes, we operate nationwide with select projects.",
-        status: "active",
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "3",
-        question: "Can I become a distributor?",
-        answer: "Absolutely. Contact our team via the partnership page.",
-        status: "active",
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-18T10:30:00Z"
+    const fetchFaqs = async () => {
+      try {
+        setIsLoading(true);
+        const response = await faqsAPI.getFaqs();
+        if (response.success) {
+          setFaqs(response.data);
+          setFilteredFaqs(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch FAQs",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching FAQs:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch FAQs",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setFaqs([]);
+        setFilteredFaqs([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setFaqs(mockFaqs);
-    setFilteredFaqs(mockFaqs);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchFaqs();
+  }, [addToast]);
 
   // Filter and sort FAQs
   useEffect(() => {
@@ -132,24 +137,55 @@ export default function FaqsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleFaqSaved = (savedFaq: Faq) => {
+  const handleFaqSaved = async (savedFaq: Faq) => {
     if (!savedFaq) return;
     
-    if (editingFaq) {
-      setFaqs(prev => prev.map(faq => faq.id === savedFaq.id ? savedFaq : faq));
-    } else {
-      setFaqs(prev => [...prev, savedFaq]);
+    try {
+      if (editingFaq) {
+        // Update existing FAQ in local state
+        setFaqs(prev => prev.map(faq => faq.id === savedFaq.id ? savedFaq : faq));
+      } else {
+        // Add new FAQ to local state
+        setFaqs(prev => [...prev, savedFaq]);
+      }
+    } catch (error) {
+      console.error("Error updating FAQ list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update FAQ list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingFaq(null);
     }
-    setIsFormModalOpen(false);
-    setEditingFaq(null);
   };
 
-  const handleFaqDeleted = (faqId: string) => {
+  const handleFaqDeleted = async (faqId: string) => {
     if (!faqId) return;
     
-    setFaqs(prev => prev.filter(faq => faq.id !== faqId));
-    setIsDeleteModalOpen(false);
-    setSelectedFaq(null);
+    try {
+      await faqsAPI.deleteFaq(faqId);
+      setFaqs(prev => prev.filter(faq => faq.id !== faqId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "FAQ deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting FAQ:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete FAQ",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedFaq(null);
+    }
   };
 
   const handleUpdateStatus = (faq: Faq) => {
@@ -159,10 +195,32 @@ export default function FaqsPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (faqId: string, status: string) => {
-    setFaqs(prev => prev.map(f => 
-      f.id === faqId ? { ...f, status } : f
-    ));
+  const handleStatusUpdate = async (faqId: string, status: string) => {
+    try {
+      const response = await faqsAPI.updateStatus(faqId, status);
+      if (response.success) {
+        setFaqs(prev => prev.map(f => 
+          f.id === faqId ? { ...f, status } : f
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "FAQ status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating FAQ status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update FAQ status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedFaq(null);
+    }
   };
 
   const formatDate = (dateString: string) => {

@@ -7,8 +7,11 @@ import { Pagination } from "@/components/ui/pagination";
 import { Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Reply } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PartnershipRequestReplyModal } from "@/components/partnership-requests/PartnershipRequestReplyModal";
+import { DeleteConfirmModal } from "@/components/partnership-requests/DeleteConfirmModal";
+import { StatusUpdateModal } from "@/components/partnership-requests/StatusUpdateModal";
 import { useToast } from "@/amal-ui/components/ToastProvider";
 import * as API from "@/lib/api";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface PartnershipRequest {
   id: string;
@@ -40,6 +43,8 @@ export default function PartnershipRequestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<PartnershipRequest | null>(null);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Load requests from API
@@ -180,13 +185,15 @@ export default function PartnershipRequestsPage() {
     }
   };
 
-  const handleUpdateStatus = async (requestId: string, status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+  const handleUpdateStatus = async (status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+    if (!selectedRequest) return;
+    
     try {
-      const response = await API.partnershipRequestsAPI.updateStatus(requestId, status);
+      const response = await API.partnershipRequestsAPI.updateStatus(selectedRequest.id, status);
       if (response.success) {
         // Update the request in the list
         setRequests(prev => prev.map(req => 
-          req.id === requestId ? { ...req, status } : req
+          req.id === selectedRequest.id ? { ...req, status } : req
         ));
         addToast({
           variant: 'success',
@@ -204,12 +211,14 @@ export default function PartnershipRequestsPage() {
     }
   };
 
-  const handleDeleteRequest = async (requestId: string) => {
+  const handleDeleteRequest = async () => {
+    if (!selectedRequest) return;
+    
     try {
-      const response = await API.partnershipRequestsAPI.deleteRequest(requestId);
+      const response = await API.partnershipRequestsAPI.deleteRequest(selectedRequest.id);
       if (response.success) {
         // Remove the request from the list
-        setRequests(prev => prev.filter(req => req.id !== requestId));
+        setRequests(prev => prev.filter(req => req.id !== selectedRequest.id));
         addToast({
           variant: 'success',
           title: 'Request Deleted',
@@ -245,6 +254,9 @@ export default function PartnershipRequestsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="partnership-requests" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -442,21 +454,20 @@ export default function PartnershipRequestsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            const newStatus = request.status === 'accepted' ? 'pending' : 'accepted';
-                            handleUpdateStatus(request.id, newStatus);
+                            setSelectedRequest(request);
+                            setIsStatusModalOpen(true);
                           }}
                           className="text-palette-green-600 hover:text-palette-green-700"
                           title="Update Status"
                         >
-                          {request.status === 'accepted' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                          <ToggleLeft className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this partnership request?')) {
-                              handleDeleteRequest(request.id);
-                            }
+                            setSelectedRequest(request);
+                            setIsDeleteModalOpen(true);
                           }}
                           className="text-destructive hover:text-destructive-600"
                           title="Delete"

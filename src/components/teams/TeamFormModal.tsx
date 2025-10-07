@@ -5,9 +5,10 @@ import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
-import { uploadAPI } from "@/lib/api";
+import { uploadAPI, teamsAPI } from "@/lib/api";
 
 interface Team {
+  _id?: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -151,59 +152,60 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
         }
       }
 
+      const teamData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        position: formData.position,
+        bio: formData.bio,
+        email: formData.email || undefined,
+        linkedin: formData.linkedin || undefined,
+        twitter: formData.twitter || undefined,
+        image: finalImageUrl || undefined
+      };
+
+      let savedTeam: Team;
+
       if (team) {
-        // For edit, only send the editable fields
-        const updateData = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          position: formData.position,
-          bio: formData.bio,
-          email: formData.email || undefined,
-          linkedin: formData.linkedin || undefined,
-          twitter: formData.twitter || undefined,
-          image: finalImageUrl || undefined,
-          order: formData.order
-        };
-        onSave(updateData as Team);
+        // Update existing team member
+        const response = await teamsAPI.updateTeam(team.id, teamData);
+        if (response.success) {
+          savedTeam = response.data;
+          addToast({
+            variant: "success",
+            title: "Team Member Updated",
+            description: `Team member "${formData.firstName} ${formData.lastName}" has been updated successfully.`,
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to update team member");
+        }
       } else {
-        // For create, send all fields
-        const savedTeam: Team = {
-          id: Date.now().toString(),
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          position: formData.position,
-          bio: formData.bio,
-          email: formData.email || undefined,
-          linkedin: formData.linkedin || undefined,
-          twitter: formData.twitter || undefined,
-          image: finalImageUrl || undefined,
-          order: formData.order,
-          status: "ACTIVE", // Default status
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        onSave(savedTeam);
+        // Create new team member
+        const response = await teamsAPI.createTeam(teamData);
+        if (response.success) {
+          savedTeam = response.data;
+          addToast({
+            variant: "success",
+            title: "Team Member Created",
+            description: `Team member "${formData.firstName} ${formData.lastName}" has been created successfully.`,
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to create team member");
+        }
       }
-      
-      // Show success toast
-      addToast({
-        variant: "success",
-        title: team ? "Team Member Updated" : "Team Member Created",
-        description: team 
-          ? `Team member "${formData.firstName} ${formData.lastName}" has been updated successfully.`
-          : `Team member "${formData.firstName} ${formData.lastName}" has been created successfully.`,
-        duration: 4000
-      });
-    } catch (error) {
+
+      onSave(savedTeam!);
+      onClose();
+    } catch (error: any) {
       console.error("Error saving team member:", error);
       
-      // Show error toast
       addToast({
         variant: "error",
         title: team ? "Update Failed" : "Creation Failed",
-        description: team 
+        description: error.response?.data?.message || (team 
           ? "Failed to update team member. Please try again."
-          : "Failed to create team member. Please try again.",
+          : "Failed to create team member. Please try again."),
         duration: 5000
       });
     } finally {

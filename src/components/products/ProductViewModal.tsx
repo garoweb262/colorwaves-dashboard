@@ -6,8 +6,10 @@ import { X, Calendar, Edit3, ChevronLeft, ChevronRight } from "lucide-react";
 import { Modal } from "@/amal-ui";
 
 interface Product {
+  _id?: string;
   id: string;
   name: string;
+  slug: string;
   description: string;
   imageUrls: string[];
   category: string;
@@ -17,13 +19,15 @@ interface Product {
 }
 
 interface ProductViewModalProps {
-  product: Product;
+  product: Product | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function ProductViewModal({ product, isOpen, onClose }: ProductViewModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (!product) return null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

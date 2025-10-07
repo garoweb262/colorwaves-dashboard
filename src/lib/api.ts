@@ -969,6 +969,357 @@ export const blogsAPI = {
   }
 };
 
+// Products API
+export const productsAPI = {
+  // Get all products (Admin)
+  getProducts: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/products');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single product by ID (Admin)
+  getProduct: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/products/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create product
+  createProduct: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/products', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update product
+  updateProduct: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/products/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete product
+  deleteProduct: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/products/${id}`);
+    return { success: true, message: "Product deleted successfully" };
+  },
+
+  // Update product status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/products/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Projects API
+export const projectsAPI = {
+  // Get all projects
+  getProjects: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/projects');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single project by ID
+  getProject: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/projects/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Get project by slug
+  getProjectBySlug: async (slug: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/projects/slug/${slug}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create project
+  createProject: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/projects', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update project
+  updateProject: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/projects/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete project
+  deleteProject: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/projects/${id}`);
+    return { success: true, message: "Project deleted successfully" };
+  },
+
+  // Update project status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/projects/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Teams API
+export const teamsAPI = {
+  // Get all team members
+  getTeams: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/teams');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single team member by ID
+  getTeam: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/teams/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create team member
+  createTeam: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/teams', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update team member
+  updateTeam: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/teams/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete team member
+  deleteTeam: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/teams/${id}`);
+    return { success: true, message: "Team member deleted successfully" };
+  },
+
+  // Update team member status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/teams/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// Testimonies API
+export const testimoniesAPI = {
+  // Get all testimonies
+  getTestimonies: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/testimonies');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single testimony by ID
+  getTestimony: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/testimonies/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create testimony
+  createTestimony: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/testimonies', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update testimony
+  updateTestimony: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/testimonies/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete testimony
+  deleteTestimony: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/testimonies/${id}`);
+    return { success: true, message: "Testimony deleted successfully" };
+  },
+
+  // Update testimony status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/testimonies/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
+// FAQs API
+export const faqsAPI = {
+  // Get all FAQs
+  getFaqs: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/faqs');
+    const data = response.data;
+    // Transform _id to id for each item if needed
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single FAQ by ID
+  getFaq: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/faqs/${id}`);
+    const data = response.data;
+    // Transform _id to id if needed
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create FAQ
+  createFaq: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/faqs', data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update FAQ
+  updateFaq: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/faqs/${id}`, data);
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete FAQ
+  deleteFaq: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/faqs/${id}`);
+    return { success: true, message: "FAQ deleted successfully" };
+  },
+
+  // Update FAQ status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/faqs/${id}/status`, { status });
+    const responseData = response.data;
+    // Transform _id to id if needed
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  }
+};
+
 // News API
 export const newsAPI = {
   // Get all news (Admin)
@@ -1116,6 +1467,142 @@ export const newsAPI = {
       responseData.id = responseData._id;
     }
     return { success: true, data: responseData };
+  }
+};
+
+// Auth API
+export const authAPI = {
+  // Login
+  login: async (email: string, password: string): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Login failed' 
+      };
+    }
+  },
+
+  // Forgot Password
+  forgotPassword: async (email: string): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to send OTP' 
+      };
+    }
+  },
+
+  // Verify OTP
+  verifyOtp: async (email: string, otp: string): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.post('/auth/verify-otp', { email, otp });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Invalid OTP' 
+      };
+    }
+  },
+
+  // Reset Password
+  resetPassword: async (email: string, otp: string, newPassword: string): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.post('/auth/reset-password', { email, otp, newPassword });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to reset password' 
+      };
+    }
+  },
+
+  // Get Profile
+  getProfile: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.get('/auth/profile');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to get profile' 
+      };
+    }
+  },
+
+  // Refresh Token
+  refreshToken: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.post('/auth/refresh');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to refresh token' 
+      };
+    }
+  }
+};
+
+// Statistics API
+export const statisticsAPI = {
+  // Get dashboard statistics
+  getDashboardStatistics: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.get('/statistics/dashboard');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to fetch dashboard statistics' 
+      };
+    }
+  },
+
+  // Get all statistics
+  getAllStatistics: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.get('/statistics');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to fetch statistics' 
+      };
+    }
+  },
+
+  // Get service statistics
+  getServiceStatistics: async (serviceName: string): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.get(`/statistics/service/${serviceName}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to fetch service statistics' 
+      };
+    }
+  },
+
+  // Get overview statistics
+  getOverviewStatistics: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await api.get('/statistics/overview');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Failed to fetch overview statistics' 
+      };
+    }
   }
 };
 

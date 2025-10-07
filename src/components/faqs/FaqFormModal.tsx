@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/amal-ui";
+import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
+import { faqsAPI } from "@/lib/api";
 
 interface Faq {
+  _id?: string;
   id: string;
   question: string;
   answer: string;
@@ -22,6 +24,7 @@ interface FaqFormModalProps {
 }
 
 export function FaqFormModal({ faq, isOpen, onClose, onSave }: FaqFormModalProps) {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     question: "",
     answer: ""
@@ -69,30 +72,56 @@ export function FaqFormModal({ faq, isOpen, onClose, onSave }: FaqFormModalProps
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const faqData = {
+        question: formData.question,
+        answer: formData.answer
+      };
+
+      let savedFaq: Faq;
 
       if (faq) {
-        // For edit, only send the editable fields
-        const updateData = {
-          question: formData.question,
-          answer: formData.answer
-        };
-        onSave(updateData as Faq);
+        // Update existing FAQ
+        const response = await faqsAPI.updateFaq(faq.id, faqData);
+        if (response.success) {
+          savedFaq = response.data;
+          addToast({
+            variant: "success",
+            title: "FAQ Updated",
+            description: "FAQ has been updated successfully.",
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to update FAQ");
+        }
       } else {
-        // For create, send all fields
-        const savedFaq: Faq = {
-          id: Date.now().toString(),
-          question: formData.question,
-          answer: formData.answer,
-          status: "active", // Default to active
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        onSave(savedFaq);
+        // Create new FAQ
+        const response = await faqsAPI.createFaq(faqData);
+        if (response.success) {
+          savedFaq = response.data;
+          addToast({
+            variant: "success",
+            title: "FAQ Created",
+            description: "FAQ has been created successfully.",
+            duration: 4000
+          });
+        } else {
+          throw new Error("Failed to create FAQ");
+        }
       }
-    } catch (error) {
+
+      onSave(savedFaq!);
+      onClose();
+    } catch (error: any) {
       console.error("Error saving FAQ:", error);
+      
+      addToast({
+        variant: "error",
+        title: faq ? "Update Failed" : "Creation Failed",
+        description: error.response?.data?.message || (faq 
+          ? "Failed to update FAQ. Please try again."
+          : "Failed to create FAQ. Please try again."),
+        duration: 5000
+      });
     } finally {
       setIsSubmitting(false);
     }

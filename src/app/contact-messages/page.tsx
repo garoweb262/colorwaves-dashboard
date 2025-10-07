@@ -7,8 +7,11 @@ import { Pagination } from "@/components/ui/pagination";
 import { Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight, Reply } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContactMessageReplyModal } from "@/components/contact-messages/ContactMessageReplyModal";
+import { DeleteConfirmModal } from "@/components/contact-messages/DeleteConfirmModal";
+import { StatusUpdateModal } from "@/components/contact-messages/StatusUpdateModal";
 import { useToast } from "@/amal-ui/components/ToastProvider";
 import * as API from "@/lib/api";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface ContactMessage {
   id: string;
@@ -37,6 +40,8 @@ export default function ContactMessagesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Load messages from API
@@ -174,13 +179,15 @@ export default function ContactMessagesPage() {
     }
   };
 
-  const handleUpdateStatus = async (messageId: string, status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+  const handleUpdateStatus = async (status: 'pending' | 'accepted' | 'replied' | 'declined') => {
+    if (!selectedMessage) return;
+    
     try {
-      const response = await API.contactMessagesAPI.updateStatus(messageId, status);
+      const response = await API.contactMessagesAPI.updateStatus(selectedMessage.id, status);
       if (response.success) {
         // Update the message in the list
         setMessages(prev => prev.map(msg => 
-          msg.id === messageId ? { ...msg, status } : msg
+          msg.id === selectedMessage.id ? { ...msg, status } : msg
         ));
         addToast({
           variant: 'success',
@@ -198,12 +205,14 @@ export default function ContactMessagesPage() {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
+  const handleDeleteMessage = async () => {
+    if (!selectedMessage) return;
+    
     try {
-      const response = await API.contactMessagesAPI.deleteMessage(messageId);
+      const response = await API.contactMessagesAPI.deleteMessage(selectedMessage.id);
       if (response.success) {
         // Remove the message from the list
-        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        setMessages(prev => prev.filter(msg => msg.id !== selectedMessage.id));
         addToast({
           variant: 'success',
           title: 'Message Deleted',
@@ -239,6 +248,9 @@ export default function ContactMessagesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="contact-messages" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -408,21 +420,20 @@ export default function ContactMessagesPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            const newStatus = message.status === 'accepted' ? 'pending' : 'accepted';
-                            handleUpdateStatus(message.id, newStatus);
+                            setSelectedMessage(message);
+                            setIsStatusModalOpen(true);
                           }}
                           className="text-palette-green-600 hover:text-palette-green-700"
                           title="Update Status"
                         >
-                          {message.status === 'accepted' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                          <ToggleLeft className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this message?')) {
-                              handleDeleteMessage(message.id);
-                            }
+                            setSelectedMessage(message);
+                            setIsDeleteModalOpen(true);
                           }}
                           className="text-destructive hover:text-destructive-600"
                           title="Delete"
@@ -458,6 +469,30 @@ export default function ContactMessagesPage() {
           setSelectedMessage(null);
         }}
         onReply={handleReplyToMessage}
+      />
+      
+      <DeleteConfirmModal
+        message={selectedMessage}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedMessage(null);
+        }}
+        onConfirm={() => {
+          handleDeleteMessage();
+          setIsDeleteModalOpen(false);
+          setSelectedMessage(null);
+        }}
+      />
+      
+      <StatusUpdateModal
+        message={selectedMessage}
+        isOpen={isStatusModalOpen}
+        onClose={() => {
+          setIsStatusModalOpen(false);
+          setSelectedMessage(null);
+        }}
+        onUpdate={handleUpdateStatus}
       />
     </DashboardLayout>
   );

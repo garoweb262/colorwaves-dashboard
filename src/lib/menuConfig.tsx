@@ -109,24 +109,24 @@ export const menuItems: MenuItem[] = [
     icon: <Users className="h-5 w-5" />,
     roles: ["super-admin", "admin", "brand"]
   },
-  {
-    title: "Careers",
-    href: "/careers",
-    icon: <Users className="h-5 w-5" />,
-    roles: ["super-admin", "admin", "brand"]
-  },
-  {
-    title: "Departments",
-    href: "/departments",
-    icon: <Database className="h-5 w-5" />,
-    roles: ["super-admin", "admin", "brand"]
-  },
-  {
-    title: "Applications",
-    href: "/applications",
-    icon: <FileText className="h-5 w-5" />,
-    roles: ["super-admin", "admin", "brand"]
-  },
+  // {
+  //   title: "Careers",
+  //   href: "/careers",
+  //   icon: <Users className="h-5 w-5" />,
+  //   roles: ["super-admin", "admin", "brand"]
+  // },
+  // {
+  //   title: "Departments",
+  //   href: "/departments",
+  //   icon: <Database className="h-5 w-5" />,
+  //   roles: ["super-admin", "admin", "brand"]
+  // },
+  // {
+  //   title: "Applications",
+  //   href: "/applications",
+  //   icon: <FileText className="h-5 w-5" />,
+  //   roles: ["super-admin", "admin", "brand"]
+  // },
   {
     title: "News",
     href: "/news",

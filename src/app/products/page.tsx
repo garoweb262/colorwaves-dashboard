@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
+import { useRouter } from "next/navigation";
+import { Button, Badge, useToast } from "@/amal-ui";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ProductViewModal } from "@/components/products/ProductViewModal";
 import { ProductFormModal } from "@/components/products/ProductFormModal";
 import { ProductStatusModal } from "@/components/products/ProductStatusModal";
 import { DeleteConfirmModal } from "@/components/products/DeleteConfirmModal";
-import { SkeletonGrid, EmptyProductsState } from "@/components/ui";
+import { productsAPI } from "@/lib/api";
 
 interface Product {
+  _id?: string;
   id: string;
   name: string;
+  slug: string;
   description: string;
   imageUrls: string[];
   category: string;
@@ -22,6 +25,8 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const router = useRouter();
+  const { addToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,96 +42,41 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data - replace with actual API call
+  // Fetch products from API
   useEffect(() => {
-    const mockProducts: Product[] = [
-      {
-        id: "1",
-        name: "Emulsion Paints",
-        description: "High-quality emulsion paints for interior and exterior walls. Available in various colors and finishes.",
-        imageUrls: [
-          "/images/products/emulsion-1.jpg",
-          "/images/products/emulsion-2.jpg",
-          "/images/products/emulsion-3.jpg"
-        ],
-        category: "Paints Line",
-        isActive: true,
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        name: "Gloss Paints",
-        description: "Premium gloss paints for doors, windows, and metal surfaces. Durable and weather-resistant.",
-        imageUrls: [
-          "/images/products/gloss-1.jpg",
-          "/images/products/gloss-2.jpg"
-        ],
-        category: "Paints Line",
-        isActive: true,
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
-      },
-      {
-        id: "3",
-        name: "Textured Coatings",
-        description: "Decorative textured coatings for unique wall finishes. Easy to apply and maintain.",
-        imageUrls: [
-          "/images/products/textured-1.jpg",
-          "/images/products/textured-2.jpg",
-          "/images/products/textured-3.jpg",
-          "/images/products/textured-4.jpg"
-        ],
-        category: "Paints Line",
-        isActive: true,
-        createdAt: "2024-01-17T11:20:00Z",
-        updatedAt: "2024-01-18T10:30:00Z"
-      },
-      {
-        id: "4",
-        name: "Industrial Protective Paints",
-        description: "Heavy-duty protective paints for industrial applications. Corrosion-resistant and long-lasting.",
-        imageUrls: [
-          "/images/products/industrial-1.jpg",
-          "/images/products/industrial-2.jpg"
-        ],
-        category: "Paints Line",
-        isActive: true,
-        createdAt: "2024-01-18T08:45:00Z",
-        updatedAt: "2024-01-19T12:15:00Z"
-      },
-      {
-        id: "5",
-        name: "Painting Accessories",
-        description: "Complete range of painting accessories including brushes, rollers, and tools.",
-        imageUrls: [
-          "/images/products/accessories-1.jpg",
-          "/images/products/accessories-2.jpg",
-          "/images/products/accessories-3.jpg"
-        ],
-        category: "Other Solutions",
-        isActive: true,
-        createdAt: "2024-01-19T14:30:00Z",
-        updatedAt: "2024-01-20T09:15:00Z"
-      },
-      {
-        id: "6",
-        name: "Specialized Coatings",
-        description: "Coatings for specialized projects including fire-resistant and anti-microbial options.",
-        imageUrls: [
-          "/images/products/specialized-1.jpg"
-        ],
-        category: "Other Solutions",
-        isActive: false,
-        createdAt: "2024-01-20T16:20:00Z",
-        updatedAt: "2024-01-21T11:45:00Z"
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await productsAPI.getProducts();
+        if (response.success) {
+          setProducts(response.data);
+          setFilteredProducts(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch products",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch products",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setProducts(mockProducts);
-    setFilteredProducts(mockProducts);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchProducts();
+  }, [addToast]);
 
   // Filter products
   useEffect(() => {
@@ -180,24 +130,55 @@ export default function ProductsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleProductSaved = (savedProduct: Product) => {
+  const handleProductSaved = async (savedProduct: Product) => {
     if (!savedProduct) return;
     
-    if (editingProduct) {
-      setProducts(prev => prev.map(product => product.id === savedProduct.id ? savedProduct : product));
-    } else {
-      setProducts(prev => [...prev, savedProduct]);
+    try {
+      if (editingProduct) {
+        // Update existing product in local state
+        setProducts(prev => prev.map(product => product.id === savedProduct.id ? savedProduct : product));
+      } else {
+        // Add new product to local state
+        setProducts(prev => [...prev, savedProduct]);
+      }
+    } catch (error) {
+      console.error("Error updating product list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update product list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingProduct(null);
     }
-    setIsFormModalOpen(false);
-    setEditingProduct(null);
   };
 
-  const handleProductDeleted = (productId: string) => {
+  const handleProductDeleted = async (productId: string) => {
     if (!productId) return;
     
-    setProducts(prev => prev.filter(product => product.id !== productId));
-    setIsDeleteModalOpen(false);
-    setSelectedProduct(null);
+    try {
+      await productsAPI.deleteProduct(productId);
+      setProducts(prev => prev.filter(product => product.id !== productId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "Product deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete product",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedProduct(null);
+    }
   };
 
   const handleUpdateStatus = (product: Product) => {
@@ -207,10 +188,32 @@ export default function ProductsPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (productId: string, status: string) => {
-    setProducts(prev => prev.map(p => 
-      p.id === productId ? { ...p, isActive: status === 'active' } : p
-    ));
+  const handleStatusUpdate = async (productId: string, status: string) => {
+    try {
+      const response = await productsAPI.updateStatus(productId, status);
+      if (response.success) {
+        setProducts(prev => prev.map(p => 
+          p.id === productId ? { ...p, isActive: status === 'active' } : p
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Product status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update product status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedProduct(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -233,21 +236,8 @@ export default function ProductsPage() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Products Management</h1>
-              <p className="text-gray-600">Manage company products and offerings</p>
-            </div>
-            <Button
-              disabled
-              leftIcon={<Plus className="h-4 w-4" />}
-              className="bg-primary hover:bg-primary-600 text-primary-foreground"
-            >
-              Add Product
-            </Button>
-          </div>
-          <SkeletonGrid items={6} />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
@@ -341,140 +331,146 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paginatedData.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-video bg-gray-100 relative">
-                <img
-                  src={product.imageUrls[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/placeholder.jpg';
-                  }}
-                />
-                <div className="absolute top-2 right-2">
-                  <Badge
-                    color={product.isActive ? "green" : "gray"}
-                    size="sm"
-                  >
-                    {product.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </div>
-                {product.imageUrls.length > 1 && (
-                  <div className="absolute bottom-2 right-2">
-                    <Badge color="blue" size="sm">
-                      +{product.imageUrls.length - 1} more
-                    </Badge>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-                    {product.name}
-                  </h3>
-                </div>
-                
-                <Badge color="purple" size="sm" className="mb-2">
-                  {product.category}
-                </Badge>
-                
-                <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                  {product.description}
-                </p>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                  <span>Created: {formatDate(product.createdAt)}</span>
-                  <span>Updated: {formatDate(product.updatedAt)}</span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleViewProduct(product)}
-                    className="text-palette-gold-600 hover:text-palette-gold-700"
-                    title="View Details"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditProduct(product)}
-                    className="text-palette-gold-600 hover:text-palette-gold-700"
-                    title="Edit Product"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleUpdateStatus(product)}
-                    className="text-palette-blue-600 hover:text-palette-blue-700"
-                    title={product.isActive ? "Deactivate" : "Activate"}
-                  >
-                    {product.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteProduct(product)}
-                    className="text-destructive hover:text-destructive-600"
-                    title="Delete Product"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-2">
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <p className="text-gray-500">No products found. Add your first product to get started.</p>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
+              onClick={handleAddProduct}
+              className="mt-4"
             >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
+              Add Product
             </Button>
           </div>
-        )}
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedData.map((product) => (
+                <div key={product.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gray-100 relative">
+                    <img
+                      src={product.imageUrls[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/placeholder.jpg';
+                      }}
+                    />
+                    <div className="absolute top-2 right-2">
+                      <Badge
+                        color={product.isActive ? "green" : "gray"}
+                        size="sm"
+                      >
+                        {product.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    {product.imageUrls.length > 1 && (
+                      <div className="absolute bottom-2 right-2">
+                        <Badge color="blue" size="sm">
+                          +{product.imageUrls.length - 1} more
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                        {product.name}
+                      </h3>
+                    </div>
+                    
+                    <Badge color="purple" size="sm" className="mb-2">
+                      {product.category}
+                    </Badge>
+                    
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span>Created: {formatDate(product.createdAt)}</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(`/products/${product.slug}`)}
+                        className="text-palette-gold-600 hover:text-palette-gold-700"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditProduct(product)}
+                        className="text-palette-gold-600 hover:text-palette-gold-700"
+                        title="Edit Product"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleUpdateStatus(product)}
+                        className="text-palette-blue-600 hover:text-palette-blue-700"
+                        title={product.isActive ? "Deactivate" : "Activate"}
+                      >
+                        {product.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(product)}
+                        className="text-destructive hover:text-destructive-600"
+                        title="Delete Product"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {/* Empty State */}
-        {filteredProducts.length === 0 && (
-          <EmptyProductsState
-            onAdd={handleAddProduct}
-            className="py-12"
-          />
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* Modals */}
-      {selectedProduct && (
-        <ProductViewModal
-          product={selectedProduct}
-          isOpen={isViewModalOpen}
-          onClose={() => setIsViewModalOpen(false)}
-        />
-      )}
+      <ProductViewModal
+        product={selectedProduct}
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedProduct(null);
+        }}
+      />
 
       <ProductFormModal
         product={editingProduct}
@@ -486,23 +482,25 @@ export default function ProductsPage() {
         onSave={handleProductSaved}
       />
 
-      {selectedProduct && (
-        <DeleteConfirmModal
-          product={selectedProduct}
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleProductDeleted}
-        />
-      )}
+      <DeleteConfirmModal
+        product={selectedProduct}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onConfirm={handleProductDeleted}
+      />
 
-      {selectedProduct && (
-        <ProductStatusModal
-          product={selectedProduct}
-          isOpen={isStatusModalOpen}
-          onClose={() => setIsStatusModalOpen(false)}
-          onUpdateStatus={handleStatusUpdate}
-        />
-      )}
+      <ProductStatusModal
+        product={selectedProduct}
+        isOpen={isStatusModalOpen}
+        onClose={() => {
+          setIsStatusModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onUpdateStatus={handleStatusUpdate}
+      />
     </DashboardLayout>
   );
 }

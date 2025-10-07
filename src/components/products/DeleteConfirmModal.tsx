@@ -6,8 +6,10 @@ import { X, AlertTriangle } from "lucide-react";
 import { Modal } from "@/amal-ui";
 
 interface Product {
+  _id?: string;
   id: string;
   name: string;
+  slug: string;
   description: string;
   imageUrls: string[];
   category: string;
@@ -17,7 +19,7 @@ interface Product {
 }
 
 interface DeleteConfirmModalProps {
-  product: Product;
+  product: Product | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (productId: string) => void;
@@ -26,15 +28,13 @@ interface DeleteConfirmModalProps {
 export function DeleteConfirmModal({ product, isOpen, onClose, onConfirm }: DeleteConfirmModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  if (!product) return null;
+
   const handleDelete = async () => {
     setIsDeleting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       onConfirm(product.id);
-      onClose();
     } catch (error) {
       console.error("Error deleting product:", error);
     } finally {

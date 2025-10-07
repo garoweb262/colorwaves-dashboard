@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
-import { ArrowLeft, Calendar, User, Eye, Heart, MessageCircle, Tag, Edit, Trash2, Star } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Button, useToast, Badge } from "@/amal-ui";
+import { ArrowLeft, Calendar, User, Eye, Heart, MessageCircle, Edit, Trash2, ToggleLeft, ToggleRight, Star, Tag, Image as ImageIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useRouter } from "next/navigation";
-import * as API from "@/lib/api";
-import { BlogFormModal } from "@/components/blogs/BlogFormModal";
+import { blogsAPI } from "@/lib/api";
 
 interface Blog {
   _id?: string;
@@ -15,7 +14,7 @@ interface Blog {
   slug: string;
   content: string;
   excerpt?: string;
-  images?: string[];
+  imageUrl?: string;
   tags?: string[];
   categories?: string[];
   status?: 'draft' | 'published' | 'archived';
@@ -29,114 +28,159 @@ interface Blog {
   updatedAt?: string;
 }
 
-interface BlogDetailPageProps {
-  params: {
-    slug: string;
-  };
-}
-
-export default function BlogDetailPage({ params }: BlogDetailPageProps) {
+export default function BlogDetailPage() {
+  const params = useParams();
   const router = useRouter();
+  const { addToast } = useToast();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [isUpdatingFeatured, setIsUpdatingFeatured] = useState(false);
 
   useEffect(() => {
-    const loadBlog = async () => {
+    const fetchBlog = async () => {
       try {
         setIsLoading(true);
-        const response = await API.blogsAPI.getBlogBySlug(params.slug);
+        const slug = params.slug as string;
+        const response = await blogsAPI.getBlogBySlug(slug);
+        
         if (response.success) {
           setBlog(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch blog details",
+            duration: 5000
+          });
+          router.push("/blog");
         }
       } catch (error) {
-        console.error('Failed to load blog:', error);
+        console.error("Error fetching blog:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Blog post not found",
+          duration: 5000
+        });
+        router.push("/blog");
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadBlog();
-  }, [params.slug]);
+    if (params.slug) {
+      fetchBlog();
+    }
+  }, [params.slug, addToast, router]);
 
   const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleBlogSaved = async (updatedBlog: Blog) => {
-    setBlog(updatedBlog);
-    setIsEditing(false);
+    router.push(`/blog?edit=${blog?.id}`);
   };
 
   const handleDelete = async () => {
     if (!blog) return;
-
-    if (confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
+    
+    if (confirm("Are you sure you want to delete this blog post?")) {
       try {
-        setIsDeleting(true);
-        const response = await API.blogsAPI.deleteBlog(blog.id);
-        if (response.success) {
-          router.push('/blog');
-        }
+        await blogsAPI.deleteBlog(blog.id);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Blog post deleted successfully",
+          duration: 3000
+        });
+        router.push("/blog");
       } catch (error) {
-        console.error('Failed to delete blog:', error);
-      } finally {
-        setIsDeleting(false);
+        console.error("Error deleting blog:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to delete blog post",
+          duration: 5000
+        });
       }
     }
   };
 
-  const handleStatusUpdate = async (status: string) => {
+  const handleToggleStatus = async () => {
     if (!blog) return;
-
+    
     try {
-      setIsUpdatingStatus(true);
-      const response = await API.blogsAPI.updateStatus(blog.id, status);
+      const statusMap: Record<string, string> = {
+        'draft': 'published',
+        'published': 'archived',
+        'archived': 'draft'
+      };
+      const newStatus = statusMap[blog.status || 'draft'];
+      const response = await blogsAPI.updateStatus(blog.id, newStatus);
+      
       if (response.success) {
-        setBlog(response.data);
+        setBlog(prev => prev ? { ...prev, status: newStatus as 'draft' | 'published' | 'archived' } : null);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Blog status updated successfully",
+          duration: 3000
+        });
       }
     } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setIsUpdatingStatus(false);
+      console.error("Error updating status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update blog status",
+        duration: 5000
+      });
     }
   };
 
   const handleToggleFeatured = async () => {
     if (!blog) return;
-
+    
     try {
-      setIsUpdatingFeatured(true);
-      const response = await API.blogsAPI.updateFeatured(blog.id, !blog.isFeatured);
+      const response = await blogsAPI.updateFeatured(blog.id, !blog.isFeatured);
+      
       if (response.success) {
-        setBlog(response.data);
+        setBlog(prev => prev ? { ...prev, isFeatured: !prev.isFeatured } : null);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: `Blog ${!blog.isFeatured ? 'added to' : 'removed from'} featured`,
+          duration: 3000
+        });
       }
     } catch (error) {
-      console.error('Failed to toggle featured status:', error);
-    } finally {
-      setIsUpdatingFeatured(false);
+      console.error("Error updating featured status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update featured status",
+        duration: 5000
+      });
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
     });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'yellow';
+      case 'published': return 'green';
+      case 'archived': return 'gray';
+      default: return 'gray';
+    }
   };
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-palette-violet"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
@@ -145,14 +189,11 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
   if (!blog) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Blog Post Not Found</h2>
-            <p className="text-gray-600 mb-4">The blog post you're looking for doesn't exist.</p>
-            <Button onClick={() => router.push('/blog')}>
-              Back to Blog Posts
-            </Button>
-          </div>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Blog post not found</h2>
+          <Button onClick={() => router.push("/blog")}>
+            Back to Blog
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -163,261 +204,157 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/blog")}
+            leftIcon={<ArrowLeft className="h-4 w-4" />}
+          >
+            Back to Blog
+          </Button>
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => router.push('/blog')}
+              onClick={handleToggleFeatured}
+              leftIcon={<Star className={`h-4 w-4 ${blog.isFeatured ? 'fill-current text-yellow-500' : ''}`} />}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {blog.isFeatured ? "Unfeature" : "Feature"}
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{blog.title}</h1>
-              <p className="text-gray-600">Blog post details and management</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge
-              color={blog.status === 'published' ? "green" : blog.status === 'draft' ? "yellow" : "gray"}
-              size="lg"
+            <Button
+              variant="outline"
+              onClick={handleToggleStatus}
+              leftIcon={blog.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
             >
-              {blog.status ? blog.status.charAt(0).toUpperCase() + blog.status.slice(1) : 'Draft'}
-            </Badge>
-            {blog.isFeatured && (
-              <Badge color="purple" size="lg">
-                <Star className="h-3 w-3 mr-1" />
-                Featured
-              </Badge>
-            )}
+              Change Status
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleEdit}
+              leftIcon={<Edit className="h-4 w-4" />}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDelete}
+              leftIcon={<Trash2 className="h-4 w-4" />}
+              className="text-destructive hover:text-destructive-600"
+            >
+              Delete
+            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Blog Images */}
-            {blog.images && blog.images.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="aspect-video">
-                  <img
-                    src={blog.images[0]}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder.jpg';
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Blog Content */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="prose max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: blog.content }} />
-              </div>
+        {/* Main Content */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* Featured Image */}
+          {blog.imageUrl && (
+            <div className="aspect-video bg-gray-100">
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/images/placeholder.jpg';
+                }}
+              />
             </div>
+          )}
 
-            {/* Tags and Categories */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {blog.tags && blog.tags.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                      <Tag className="h-5 w-5 mr-2" />
-                      Tags
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {blog.tags.map((tag, index) => (
-                        <Badge key={index} color="blue" size="sm">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {blog.categories && blog.categories.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Categories</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {blog.categories.map((category, index) => (
-                        <Badge key={index} color="green" size="sm">
-                          {category}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+          {/* Blog Details */}
+          <div className="p-8">
+            <div className="mb-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Badge color={getStatusColor(blog.status || 'draft')} size="md">
+                  {blog.status || 'draft'}
+                </Badge>
+                {blog.isFeatured && (
+                  <Badge color="purple" size="md">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Featured
+                  </Badge>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Blog Stats */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Statistics</h3>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Views
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">{blog.viewCount || 0}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 flex items-center">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Likes
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">{blog.likeCount || 0}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 flex items-center">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Comments
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">{blog.commentCount || 0}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Blog Information */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Information</h3>
-              
-              <div className="space-y-3">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">{blog.title}</h1>
+              {blog.excerpt && (
+                <p className="text-lg text-gray-600 mb-4">{blog.excerpt}</p>
+              )}
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
                 {blog.author && (
-                  <div className="flex items-center space-x-3">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{blog.author}</p>
-                      <p className="text-xs text-gray-500">Author</p>
-                    </div>
+                  <div className="flex items-center space-x-1">
+                    <User className="h-4 w-4" />
+                    <span>{blog.author}</span>
                   </div>
                 )}
-                
-                <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {blog.publishedAt ? formatDate(blog.publishedAt) : formatDate(blog.createdAt)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {blog.publishedAt ? 'Published' : 'Created'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Management Actions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Management Actions</h3>
-              
-              <div className="space-y-3">
-                <Button
-                  onClick={handleEdit}
-                  className="w-full"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Blog Post
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleToggleFeatured}
-                  loading={isUpdatingFeatured}
-                  className="w-full"
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  {blog.isFeatured ? 'Remove from Featured' : 'Mark as Featured'}
-                </Button>
-                
-                <div className="grid grid-cols-1 gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('published')}
-                    loading={isUpdatingStatus}
-                    disabled={blog.status === 'published'}
-                  >
-                    Publish
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('draft')}
-                    loading={isUpdatingStatus}
-                    disabled={blog.status === 'draft'}
-                  >
-                    Save as Draft
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('archived')}
-                    loading={isUpdatingStatus}
-                    disabled={blog.status === 'archived'}
-                  >
-                    Archive
-                  </Button>
-                </div>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleDelete}
-                  loading={isDeleting}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Blog Post
-                </Button>
-              </div>
-            </div>
-
-            {/* Timestamps */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timestamps</h3>
-              
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Created</p>
-                  <p className="text-xs text-gray-500">{formatDate(blog.createdAt)}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                  <p className="text-xs text-gray-500">{formatDate(blog.updatedAt)}</p>
-                </div>
-                
                 {blog.publishedAt && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Published</p>
-                    <p className="text-xs text-gray-500">{formatDate(blog.publishedAt)}</p>
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(blog.publishedAt)}</span>
                   </div>
                 )}
+                <div className="flex items-center space-x-1">
+                  <Eye className="h-4 w-4" />
+                  <span>{blog.viewCount || 0} views</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4" />
+                  <span>{blog.likeCount || 0} likes</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>{blog.commentCount || 0} comments</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Categories */}
+            {blog.categories && blog.categories.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">Categories</h3>
+                <div className="flex flex-wrap gap-2">
+                  {blog.categories.map((category, index) => (
+                    <Badge key={index} color="blue" size="sm">
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="prose max-w-none mb-8">
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {blog.content}
+              </div>
+            </div>
+
+            {/* Tags */}
+            {blog.tags && blog.tags.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Tags</h2>
+                <div className="flex flex-wrap gap-2">
+                  {blog.tags.map((tag, index) => (
+                    <Badge key={index} color="purple" size="md">
+                      <Tag className="h-3 w-3 mr-1" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Metadata */}
+            <div className="pt-6 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                <div>
+                  <span className="font-medium">Created:</span> {formatDate(blog.createdAt || '')}
+                </div>
+                <div>
+                  <span className="font-medium">Last Updated:</span> {formatDate(blog.updatedAt || '')}
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Edit Modal */}
-        {isEditing && (
-          <BlogFormModal
-            blog={blog}
-            isOpen={isEditing}
-            onClose={() => setIsEditing(false)}
-            onSave={handleBlogSaved}
-          />
-        )}
       </div>
     </DashboardLayout>
   );

@@ -12,6 +12,7 @@ import { UserStatusModal } from "@/components/users/UserStatusModal";
 import { DeleteConfirmModal } from "@/components/users/DeleteConfirmModal";
 import { useCRUD } from "@/hooks/useCRUD";
 import { useAuth } from "@/hooks/useAuth";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface User {
   _id?: string; // Backend uses _id
@@ -419,6 +420,9 @@ export default function UsersPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="users" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

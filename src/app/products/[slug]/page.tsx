@@ -2,95 +2,92 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button, useToast } from "@/amal-ui";
-import { ArrowLeft, Calendar, Users, ExternalLink, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Button, useToast, Badge } from "@/amal-ui";
+import { ArrowLeft, Calendar, Tag, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { projectsAPI } from "@/lib/api";
+import { crudAPI } from "@/lib/api";
 
-interface Project {
+interface Product {
   _id?: string;
   id: string;
-  title: string;
+  name: string;
   slug: string;
   description: string;
-  client: string;
-  technologies: string[];
   imageUrls: string[];
+  category: string;
   isActive: boolean;
-  startDate?: string;
-  endDate?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export default function ProjectDetailPage() {
+export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addToast } = useToast();
-  const [project, setProject] = useState<Project | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchProject = async () => {
+    const fetchProduct = async () => {
       try {
         setIsLoading(true);
         const slug = params.slug as string;
-        const response = await projectsAPI.getProjectBySlug(slug);
+        const response = await crudAPI.getItemBySlug<Product>('/products', slug);
         
         if (response.success) {
-          setProject(response.data);
+          setProduct(response.data);
         } else {
           addToast({
             variant: "error",
             title: "Error",
-            description: "Failed to fetch project details",
+            description: "Failed to fetch product details",
             duration: 5000
           });
-          router.push("/projects");
+          router.push("/products");
         }
       } catch (error) {
-        console.error("Error fetching project:", error);
+        console.error("Error fetching product:", error);
         addToast({
           variant: "error",
           title: "Error",
-          description: "Project not found",
+          description: "Product not found",
           duration: 5000
         });
-        router.push("/projects");
+        router.push("/products");
       } finally {
         setIsLoading(false);
       }
     };
 
     if (params.slug) {
-      fetchProject();
+      fetchProduct();
     }
   }, [params.slug, addToast, router]);
 
   const handleEdit = () => {
-    router.push(`/projects?edit=${project?.id}`);
+    router.push(`/products?edit=${product?.id}`);
   };
 
   const handleDelete = async () => {
-    if (!project) return;
+    if (!product) return;
     
-    if (confirm("Are you sure you want to delete this project?")) {
+    if (confirm("Are you sure you want to delete this product?")) {
       try {
-        await projectsAPI.deleteProject(project.id);
+        await crudAPI.deleteItem('/products', product.id);
         addToast({
           variant: "success",
           title: "Success",
-          description: "Project deleted successfully",
+          description: "Product deleted successfully",
           duration: 3000
         });
-        router.push("/projects");
+        router.push("/products");
       } catch (error) {
-        console.error("Error deleting project:", error);
+        console.error("Error deleting product:", error);
         addToast({
           variant: "error",
           title: "Error",
-          description: "Failed to delete project",
+          description: "Failed to delete product",
           duration: 5000
         });
       }
@@ -98,18 +95,18 @@ export default function ProjectDetailPage() {
   };
 
   const handleToggleStatus = async () => {
-    if (!project) return;
+    if (!product) return;
     
     try {
-      const newStatus = project.isActive ? "inactive" : "active";
-      const response = await projectsAPI.updateStatus(project.id, newStatus);
+      const newStatus = product.isActive ? "inactive" : "active";
+      const response = await crudAPI.updateStatus('/products', product.id, newStatus);
       
       if (response.success) {
-        setProject(prev => prev ? { ...prev, isActive: !prev.isActive } : null);
+        setProduct(prev => prev ? { ...prev, isActive: !prev.isActive } : null);
         addToast({
           variant: "success",
           title: "Success",
-          description: "Project status updated successfully",
+          description: "Product status updated successfully",
           duration: 3000
         });
       }
@@ -118,10 +115,18 @@ export default function ProjectDetailPage() {
       addToast({
         variant: "error",
         title: "Error",
-        description: "Failed to update project status",
+        description: "Failed to update product status",
         duration: 5000
       });
     }
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % product!.imageUrls.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + product!.imageUrls.length) % product!.imageUrls.length);
   };
 
   const formatDate = (dateString: string) => {
@@ -142,13 +147,13 @@ export default function ProjectDetailPage() {
     );
   }
 
-  if (!project) {
+  if (!product) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Project not found</h2>
-          <Button onClick={() => router.push("/projects")}>
-            Back to Projects
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Product not found</h2>
+          <Button onClick={() => router.push("/products")}>
+            Back to Products
           </Button>
         </div>
       </DashboardLayout>
@@ -162,18 +167,18 @@ export default function ProjectDetailPage() {
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
-            onClick={() => router.push("/projects")}
+            onClick={() => router.push("/products")}
             leftIcon={<ArrowLeft className="h-4 w-4" />}
           >
-            Back to Projects
+            Back to Products
           </Button>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               onClick={handleToggleStatus}
-              leftIcon={project.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+              leftIcon={product.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
             >
-              {project.isActive ? "Deactivate" : "Activate"}
+              {product.isActive ? "Deactivate" : "Activate"}
             </Button>
             <Button
               variant="outline"
@@ -195,101 +200,87 @@ export default function ProjectDetailPage() {
 
         {/* Main Content */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          {/* Project Images */}
-          {project.imageUrls && project.imageUrls.length > 0 && (
+          {/* Product Images */}
+          {product.imageUrls && product.imageUrls.length > 0 && (
             <div className="relative">
-              <div className="aspect-video bg-gray-100">
+              <div className="aspect-video bg-gray-100 relative">
                 <img
-                  src={project.imageUrls[currentImageIndex]}
-                  alt={project.title}
+                  src={product.imageUrls[currentImageIndex]}
+                  alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src = '/images/placeholder.jpg';
                   }}
                 />
+                
+                {product.imageUrls.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                    
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-black/50 text-white text-sm px-3 py-1 rounded-full">
+                        {currentImageIndex + 1} / {product.imageUrls.length}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
-              
-              {project.imageUrls.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                  {project.imageUrls.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex ? 'bg-white w-8' : 'bg-white/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
-          {/* Project Details */}
+          {/* Product Details */}
           <div className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.title}</h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
-                    <Users className="h-4 w-4" />
-                    <span>Client: {project.client}</span>
-                  </div>
-                  {project.startDate && (
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDate(project.startDate)}</span>
-                      {project.endDate && <span> - {formatDate(project.endDate)}</span>}
-                    </div>
-                  )}
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Badge color="purple" size="md">
+                    {product.category}
+                  </Badge>
+                  <Badge color={product.isActive ? "green" : "gray"} size="md">
+                    {product.isActive ? "Active" : "Inactive"}
+                  </Badge>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-              }`}>
-                {project.isActive ? "Active" : "Inactive"}
-              </span>
             </div>
 
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{project.description}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{product.description}</p>
             </div>
 
-            {/* Technologies */}
-            {project.technologies && project.technologies.length > 0 && (
+            {/* Image Gallery Thumbnails */}
+            {product.imageUrls && product.imageUrls.length > 1 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Technologies Used</h2>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.map((tech, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Image Gallery */}
-            {project.imageUrls && project.imageUrls.length > 1 && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Gallery</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">All Images</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {project.imageUrls.map((imageUrl, index) => (
+                  {product.imageUrls.map((imageUrl, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
                       className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex ? 'border-blue-500 scale-105' : 'border-gray-200 hover:border-gray-300'
+                        index === currentImageIndex ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <img
                         src={imageUrl}
-                        alt={`${project.title} - Image ${index + 1}`}
+                        alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.src = '/images/placeholder.jpg';
@@ -305,10 +296,10 @@ export default function ProjectDetailPage() {
             <div className="pt-6 border-t border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div>
-                  <span className="font-medium">Created:</span> {formatDate(project.createdAt)}
+                  <span className="font-medium">Created:</span> {formatDate(product.createdAt)}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {formatDate(project.updatedAt)}
+                  <span className="font-medium">Last Updated:</span> {formatDate(product.updatedAt)}
                 </div>
               </div>
             </div>
@@ -318,3 +309,4 @@ export default function ProjectDetailPage() {
     </DashboardLayout>
   );
 }
+

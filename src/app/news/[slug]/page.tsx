@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
-import { ArrowLeft, Calendar, User, Eye, Tag, Edit, Trash2, Star } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Button, useToast, Badge } from "@/amal-ui";
+import { ArrowLeft, Calendar, User, Eye, Heart, Edit, Trash2, ToggleLeft, ToggleRight, Star, Tag } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useRouter } from "next/navigation";
-import * as API from "@/lib/api";
-import { NewsFormModal } from "@/components/news/NewsFormModal";
+import { newsAPI } from "@/lib/api";
 
 interface News {
   _id?: string;
@@ -15,125 +14,171 @@ interface News {
   slug: string;
   content: string;
   excerpt?: string;
-  images?: string[];
+  imageUrl?: string;
   tags?: string[];
   status?: 'draft' | 'published' | 'archived';
   isFeatured?: boolean;
   viewCount?: number;
+  likeCount?: number;
   author?: string;
   publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface NewsDetailPageProps {
-  params: {
-    slug: string;
-  };
-}
-
-export default function NewsDetailPage({ params }: NewsDetailPageProps) {
+export default function NewsDetailPage() {
+  const params = useParams();
   const router = useRouter();
+  const { addToast } = useToast();
   const [news, setNews] = useState<News | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [isUpdatingFeatured, setIsUpdatingFeatured] = useState(false);
 
   useEffect(() => {
-    const loadNews = async () => {
+    const fetchNews = async () => {
       try {
         setIsLoading(true);
-        const response = await API.newsAPI.getNewsBySlug(params.slug);
+        const slug = params.slug as string;
+        const response = await newsAPI.getNewsBySlug(slug);
+        
         if (response.success) {
           setNews(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch news details",
+            duration: 5000
+          });
+          router.push("/news");
         }
       } catch (error) {
-        console.error('Failed to load news:', error);
+        console.error("Error fetching news:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "News article not found",
+          duration: 5000
+        });
+        router.push("/news");
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadNews();
-  }, [params.slug]);
+    if (params.slug) {
+      fetchNews();
+    }
+  }, [params.slug, addToast, router]);
 
   const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleNewsSaved = async (updatedNews: News) => {
-    setNews(updatedNews);
-    setIsEditing(false);
+    router.push(`/news?edit=${news?.id}`);
   };
 
   const handleDelete = async () => {
     if (!news) return;
-
-    if (confirm('Are you sure you want to delete this news article? This action cannot be undone.')) {
+    
+    if (confirm("Are you sure you want to delete this news article?")) {
       try {
-        setIsDeleting(true);
-        const response = await API.newsAPI.deleteNews(news.id);
-        if (response.success) {
-          router.push('/news');
-        }
+        await newsAPI.deleteNews(news.id);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "News article deleted successfully",
+          duration: 3000
+        });
+        router.push("/news");
       } catch (error) {
-        console.error('Failed to delete news:', error);
-      } finally {
-        setIsDeleting(false);
+        console.error("Error deleting news:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to delete news article",
+          duration: 5000
+        });
       }
     }
   };
 
-  const handleStatusUpdate = async (status: string) => {
+  const handleToggleStatus = async () => {
     if (!news) return;
-
+    
     try {
-      setIsUpdatingStatus(true);
-      const response = await API.newsAPI.updateStatus(news.id, status);
+      const statusMap: Record<string, string> = {
+        'draft': 'published',
+        'published': 'archived',
+        'archived': 'draft'
+      };
+      const newStatus = statusMap[news.status || 'draft'];
+      const response = await newsAPI.updateStatus(news.id, newStatus);
+      
       if (response.success) {
-        setNews(response.data);
+        setNews(prev => prev ? { ...prev, status: newStatus as 'draft' | 'published' | 'archived' } : null);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "News status updated successfully",
+          duration: 3000
+        });
       }
     } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setIsUpdatingStatus(false);
+      console.error("Error updating status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update news status",
+        duration: 5000
+      });
     }
   };
 
   const handleToggleFeatured = async () => {
     if (!news) return;
-
+    
     try {
-      setIsUpdatingFeatured(true);
-      const response = await API.newsAPI.updateFeatured(news.id, !news.isFeatured);
+      const response = await newsAPI.updateFeatured(news.id, !news.isFeatured);
+      
       if (response.success) {
-        setNews(response.data);
+        setNews(prev => prev ? { ...prev, isFeatured: !prev.isFeatured } : null);
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: `News ${!news.isFeatured ? 'added to' : 'removed from'} featured`,
+          duration: 3000
+        });
       }
     } catch (error) {
-      console.error('Failed to toggle featured status:', error);
-    } finally {
-      setIsUpdatingFeatured(false);
+      console.error("Error updating featured status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update featured status",
+        duration: 5000
+      });
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
     });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'yellow';
+      case 'published': return 'green';
+      case 'archived': return 'gray';
+      default: return 'gray';
+    }
   };
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-palette-violet"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
@@ -142,14 +187,11 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
   if (!news) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">News Article Not Found</h2>
-            <p className="text-gray-600 mb-4">The news article you're looking for doesn't exist.</p>
-            <Button onClick={() => router.push('/news')}>
-              Back to News Articles
-            </Button>
-          </div>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">News article not found</h2>
+          <Button onClick={() => router.push("/news")}>
+            Back to News
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -160,228 +202,139 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/news")}
+            leftIcon={<ArrowLeft className="h-4 w-4" />}
+          >
+            Back to News
+          </Button>
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => router.push('/news')}
+              onClick={handleToggleFeatured}
+              leftIcon={<Star className={`h-4 w-4 ${news.isFeatured ? 'fill-current text-yellow-500' : ''}`} />}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {news.isFeatured ? "Unfeature" : "Feature"}
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{news.title}</h1>
-              <p className="text-gray-600">News article details and management</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge
-              color={news.status === 'published' ? "green" : news.status === 'draft' ? "yellow" : "gray"}
-              size="lg"
+            <Button
+              variant="outline"
+              onClick={handleToggleStatus}
+              leftIcon={news.status === 'published' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
             >
-              {news.status ? news.status.charAt(0).toUpperCase() + news.status.slice(1) : 'Draft'}
-            </Badge>
-            {news.isFeatured && (
-              <Badge color="purple" size="lg">
-                <Star className="h-3 w-3 mr-1" />
-                Featured
-              </Badge>
-            )}
+              Change Status
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleEdit}
+              leftIcon={<Edit className="h-4 w-4" />}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDelete}
+              leftIcon={<Trash2 className="h-4 w-4" />}
+              className="text-destructive hover:text-destructive-600"
+            >
+              Delete
+            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* News Images */}
-            {news.images && news.images.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="aspect-video">
-                  <img
-                    src={news.images[0]}
-                    alt={news.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder.jpg';
-                    }}
-                  />
+        {/* Main Content */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* Featured Image */}
+          {news.imageUrl && (
+            <div className="aspect-video bg-gray-100">
+              <img
+                src={news.imageUrl}
+                alt={news.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/images/placeholder.jpg';
+                }}
+              />
+            </div>
+          )}
+
+          {/* News Details */}
+          <div className="p-8">
+            <div className="mb-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Badge color={getStatusColor(news.status || 'draft')} size="md">
+                  {news.status || 'draft'}
+                </Badge>
+                {news.isFeatured && (
+                  <Badge color="purple" size="md">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Featured
+                  </Badge>
+                )}
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">{news.title}</h1>
+              {news.excerpt && (
+                <p className="text-lg text-gray-600 mb-4">{news.excerpt}</p>
+              )}
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                {news.author && (
+                  <div className="flex items-center space-x-1">
+                    <User className="h-4 w-4" />
+                    <span>{news.author}</span>
+                  </div>
+                )}
+                {news.publishedAt && (
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(news.publishedAt)}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-1">
+                  <Eye className="h-4 w-4" />
+                  <span>{news.viewCount || 0} views</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4" />
+                  <span>{news.likeCount || 0} likes</span>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* News Content */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="prose max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: news.content }} />
+            {/* Content */}
+            <div className="prose max-w-none mb-8">
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {news.content}
               </div>
             </div>
 
             {/* Tags */}
             {news.tags && news.tags.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                  <Tag className="h-5 w-5 mr-2" />
-                  Tags
-                </h3>
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {news.tags.map((tag, index) => (
-                    <Badge key={index} color="blue" size="sm">
+                    <Badge key={index} color="blue" size="md">
+                      <Tag className="h-3 w-3 mr-1" />
                       {tag}
                     </Badge>
                   ))}
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* News Stats */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">News Statistics</h3>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Views
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">{news.viewCount || 0}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* News Information */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">News Information</h3>
-              
-              <div className="space-y-3">
-                {news.author && (
-                  <div className="flex items-center space-x-3">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{news.author}</p>
-                      <p className="text-xs text-gray-500">Author</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {news.publishedAt ? formatDate(news.publishedAt) : formatDate(news.createdAt)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {news.publishedAt ? 'Published' : 'Created'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Management Actions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Management Actions</h3>
-              
-              <div className="space-y-3">
-                <Button
-                  onClick={handleEdit}
-                  className="w-full"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit News Article
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleToggleFeatured}
-                  loading={isUpdatingFeatured}
-                  className="w-full"
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  {news.isFeatured ? 'Remove from Featured' : 'Mark as Featured'}
-                </Button>
-                
-                <div className="grid grid-cols-1 gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('published')}
-                    loading={isUpdatingStatus}
-                    disabled={news.status === 'published'}
-                  >
-                    Publish
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('draft')}
-                    loading={isUpdatingStatus}
-                    disabled={news.status === 'draft'}
-                  >
-                    Save as Draft
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusUpdate('archived')}
-                    loading={isUpdatingStatus}
-                    disabled={news.status === 'archived'}
-                  >
-                    Archive
-                  </Button>
-                </div>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleDelete}
-                  loading={isDeleting}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete News Article
-                </Button>
-              </div>
-            </div>
-
-            {/* Timestamps */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timestamps</h3>
-              
-              <div className="space-y-3">
+            {/* Metadata */}
+            <div className="pt-6 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Created</p>
-                  <p className="text-xs text-gray-500">{formatDate(news.createdAt)}</p>
+                  <span className="font-medium">Created:</span> {formatDate(news.createdAt || '')}
                 </div>
-                
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                  <p className="text-xs text-gray-500">{formatDate(news.updatedAt)}</p>
+                  <span className="font-medium">Last Updated:</span> {formatDate(news.updatedAt || '')}
                 </div>
-                
-                {news.publishedAt && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Published</p>
-                    <p className="text-xs text-gray-500">{formatDate(news.publishedAt)}</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Edit Modal */}
-        {isEditing && (
-          <NewsFormModal
-            news={news}
-            isOpen={isEditing}
-            onClose={() => setIsEditing(false)}
-            onSave={handleNewsSaved}
-          />
-        )}
       </div>
     </DashboardLayout>
   );

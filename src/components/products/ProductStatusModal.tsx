@@ -6,8 +6,10 @@ import { X, AlertTriangle } from "lucide-react";
 import { Modal } from "@/amal-ui";
 
 interface Product {
+  _id?: string;
   id: string;
   name: string;
+  slug: string;
   description: string;
   imageUrls: string[];
   category: string;
@@ -17,7 +19,7 @@ interface Product {
 }
 
 interface ProductStatusModalProps {
-  product: Product;
+  product: Product | null;
   isOpen: boolean;
   onClose: () => void;
   onUpdateStatus: (productId: string, status: string) => void;
@@ -26,16 +28,14 @@ interface ProductStatusModalProps {
 export function ProductStatusModal({ product, isOpen, onClose, onUpdateStatus }: ProductStatusModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  if (!product) return null;
+
   const handleStatusUpdate = async () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       const newStatus = product.isActive ? "inactive" : "active";
       onUpdateStatus(product.id, newStatus);
-      onClose();
     } catch (error) {
       console.error("Error updating product status:", error);
     } finally {

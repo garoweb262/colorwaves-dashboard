@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { ServiceFormModal } from "@/components/services/ServiceFormModal";
 import { DeleteConfirmModal } from "@/components/services/DeleteConfirmModal";
 import { ServiceStatusModal } from "@/components/services/ServiceStatusModal";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface Service {
   _id?: string;
@@ -284,7 +285,11 @@ export default function ServicesPage() {
 
   return (
     <DashboardLayout>
-      <PageTemplate
+      <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="services" />
+        
+        <PageTemplate
         title="Service Management"
         description="Manage your services and pricing"
         actionButton={
@@ -478,6 +483,7 @@ export default function ServicesPage() {
         }}
         onUpdateStatus={handleStatusUpdate}
       />
+      </div>
     </DashboardLayout>
   );
 }

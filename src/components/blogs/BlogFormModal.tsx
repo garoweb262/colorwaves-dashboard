@@ -7,6 +7,7 @@ import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
 import { uploadAPI, blogsAPI } from "@/lib/api";
 
+
 interface Blog {
   _id?: string;
   id: string;
@@ -49,7 +50,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedImagesFiles, setUploadedImagesFiles] = useState<File[]>([]);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [categoryInput, setCategoryInput] = useState("");
@@ -79,7 +80,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
       });
     }
     setErrors({});
-    setUploadedImagesFiles([]);
+    setUploadedImageFile(null);
     setTagInput("");
     setCategoryInput("");
   }, [blog, isOpen]);
@@ -109,61 +110,74 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
     setIsSubmitting(true);
 
     try {
-      let finalImages = formData.images;
+      let finalImageUrl = formData.images[0] || "";
 
-      // Upload images if there are new ones
-      if (uploadedImagesFiles.length > 0) {
+      // If there's a new image file to upload, upload it first
+      if (uploadedImageFile) {
+        console.log("Starting image upload for blog...", uploadedImageFile.name);
         setIsUploadingImage(true);
         
         try {
-          const uploadResponse = await uploadAPI.uploadImages(uploadedImagesFiles, "blogs");
+          const uploadResponse = await uploadAPI.uploadImage(uploadedImageFile, "blogs");
+          console.log("Upload response:", uploadResponse);
           
-          if (uploadResponse.success && uploadResponse.data.length > 0) {
-            const newImageUrls = uploadResponse.data.map(img => img.fileUrl);
-            finalImages = [...formData.images, ...newImageUrls];
+          if (uploadResponse.success && uploadResponse.data.fileUrl) {
+            finalImageUrl = uploadResponse.data.fileUrl;
+            console.log("Successfully uploaded image:", finalImageUrl);
           } else {
-            throw new Error("Failed to upload images");
+            console.error("Upload failed - invalid response:", uploadResponse);
+            throw new Error("Failed to upload image - invalid response");
           }
         } catch (uploadError) {
-          console.error("Error uploading images:", uploadError);
+          console.error("Error uploading image:", uploadError);
           addToast({
             variant: "error",
-            title: "Images Upload Failed",
-            description: "Failed to upload images. Please try again.",
+            title: "Image Upload Failed",
+            description: "Failed to upload image. Please try again.",
             duration: 5000
           });
           return;
         } finally {
           setIsUploadingImage(false);
         }
+      } else {
+        console.log("No new image to upload for blog");
       }
 
-      // Filter out blob URLs and only keep proper uploaded URLs
-      const validImages = finalImages.filter(img => 
-        typeof img === 'string' && 
-        (img.startsWith('http://') || img.startsWith('https://'))
-      );
-
-      // Only send required fields to API - exclude auto-generated fields and status
+      // Only send required fields to API - exclude auto-generated fields
       const blogData = {
         title: formData.title,
         content: formData.content,
         excerpt: formData.excerpt,
-        images: validImages,
+        imageUrl: finalImageUrl,
         tags: formData.tags,
         categories: formData.categories,
         isFeatured: formData.isFeatured,
         author: formData.author
       };
 
+      console.log("Submitting blog data:", blogData);
+
       if (blog) {
         // Update existing blog
+        console.log("Updating existing blog with ID:", blog.id);
         const response = await blogsAPI.updateBlog(blog.id, blogData);
-        onSave(response.data);
+        console.log("Update response:", response);
+        if (response.success) {
+          onSave(response.data);
+        } else {
+          throw new Error("Failed to update blog");
+        }
       } else {
         // Create new blog
+        console.log("Creating new blog");
         const response = await blogsAPI.createBlog(blogData);
-        onSave(response.data);
+        console.log("Create response:", response);
+        if (response.success) {
+          onSave(response.data);
+        } else {
+          throw new Error("Failed to create blog");
+        }
       }
       
       // Show success toast
@@ -199,15 +213,17 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
     }
   };
 
-  const handleImagesSelect = (imageUrls: string[], files?: File[]) => {
-    if (files) {
-      setUploadedImagesFiles(files);
+  const handleImageSelect = (imageUrl: string, file?: File) => {
+    console.log("handleImageSelect called with:", { imageUrl, file });
+    if (file) {
+      console.log("Setting uploaded file:", file);
+      setUploadedImageFile(file);
     }
-    handleInputChange("images", imageUrls);
+    handleInputChange("images", [imageUrl]);
   };
 
-  const handleImagesRemove = () => {
-    setUploadedImagesFiles([]);
+  const handleImageRemove = () => {
+    setUploadedImageFile(null);
     handleInputChange("images", []);
   };
 
@@ -322,13 +338,14 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
           {/* Images */}
           <div>
             <ImageUpload
-              label="Blog Images"
-              description="Upload images for this blog post"
-              currentImages={formData.images}
-              onImageSelect={(imageUrl, file) => handleImagesSelect([imageUrl], file ? [file] : undefined)}
-              onImageRemove={handleImagesRemove}
-              multiple={true}
-              maxImages={10}
+              label="Blog Image"
+              description="Upload an image for this blog post"
+              currentImage={formData.images[0] || ""}
+              onImageSelect={(imageUrl, file) => {
+                console.log("ImageUpload onImageSelect called with:", { imageUrl, file });
+                handleImageSelect(imageUrl, file);
+              }}
+              onImageRemove={handleImageRemove}
               maxSize={5}
             />
           </div>

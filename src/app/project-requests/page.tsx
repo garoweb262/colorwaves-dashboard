@@ -9,6 +9,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ProjectRequestReplyModal } from "@/components/project-requests/ProjectRequestReplyModal";
 import { useToast } from "@/amal-ui/components/ToastProvider";
 import * as API from "@/lib/api";
+import { ServiceStatistics } from "@/components/ServiceStatistics";
 
 interface ProjectRequest {
   id: string;
@@ -254,6 +255,9 @@ export default function ProjectRequestsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Service Statistics */}
+        <ServiceStatistics serviceName="project-requests" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
+import { Button, Badge, useToast } from "@/amal-ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { TeamFormModal } from "@/components/teams/TeamFormModal";
+import { teamsAPI } from "@/lib/api";
 
 interface Team {
+  _id?: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -25,6 +27,7 @@ interface Team {
 }
 
 export default function TeamPage() {
+  const { addToast } = useToast();
   const [teams, setTeams] = useState<Team[]>([]);
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,45 +44,41 @@ export default function TeamPage() {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data - replace with actual API call
+  // Fetch teams from API
   useEffect(() => {
-    const mockTeams: Team[] = [
-      {
-        id: "1",
-        firstName: "John",
-        lastName: "Doe",
-        position: "Software Developer",
-        bio: "Experienced software developer with 5+ years of experience",
-        email: "john.doe@colorwaves.ng",
-        linkedin: "https://linkedin.com/in/johndoe",
-        twitter: "https://twitter.com/johndoe",
-        image: "https://example.com/john-doe.jpg",
-        order: 1,
-        status: "ACTIVE",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        firstName: "Jane",
-        lastName: "Smith",
-        position: "Project Manager",
-        bio: "Experienced project manager with expertise in agile methodologies",
-        email: "jane.smith@colorwaves.ng",
-        linkedin: "https://linkedin.com/in/janesmith",
-        twitter: "https://twitter.com/janesmith",
-        image: "https://example.com/jane-smith.jpg",
-        order: 2,
-        status: "ACTIVE",
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
+    const fetchTeams = async () => {
+      try {
+        setIsLoading(true);
+        const response = await teamsAPI.getTeams();
+        if (response.success) {
+          setTeams(response.data);
+          setFilteredTeams(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch team members",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch team members",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setTeams([]);
+        setFilteredTeams([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setTeams(mockTeams);
-    setFilteredTeams(mockTeams);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchTeams();
+  }, [addToast]);
 
   // Filter and sort teams
   useEffect(() => {
@@ -141,24 +140,55 @@ export default function TeamPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleTeamSaved = (savedTeam: Team) => {
+  const handleTeamSaved = async (savedTeam: Team) => {
     if (!savedTeam) return;
     
-    if (editingTeam) {
-      setTeams(prev => prev.map(team => team.id === savedTeam.id ? savedTeam : team));
-    } else {
-      setTeams(prev => [...prev, savedTeam]);
+    try {
+      if (editingTeam) {
+        // Update existing team member in local state
+        setTeams(prev => prev.map(team => team.id === savedTeam.id ? savedTeam : team));
+      } else {
+        // Add new team member to local state
+        setTeams(prev => [...prev, savedTeam]);
+      }
+    } catch (error) {
+      console.error("Error updating team list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update team list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingTeam(null);
     }
-    setIsFormModalOpen(false);
-    setEditingTeam(null);
   };
 
-  const handleTeamDeleted = (teamId: string) => {
+  const handleTeamDeleted = async (teamId: string) => {
     if (!teamId) return;
     
-    setTeams(prev => prev.filter(team => team.id !== teamId));
-    setIsDeleteModalOpen(false);
-    setSelectedTeam(null);
+    try {
+      await teamsAPI.deleteTeam(teamId);
+      setTeams(prev => prev.filter(team => team.id !== teamId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "Team member deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete team member",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedTeam(null);
+    }
   };
 
   const handleUpdateStatus = (team: Team) => {
@@ -168,10 +198,32 @@ export default function TeamPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (teamId: string, status: string) => {
-    setTeams(prev => prev.map(t => 
-      t.id === teamId ? { ...t, status: status.toUpperCase() } : t
-    ));
+  const handleStatusUpdate = async (teamId: string, status: string) => {
+    try {
+      const response = await teamsAPI.updateStatus(teamId, status);
+      if (response.success) {
+        setTeams(prev => prev.map(t => 
+          t.id === teamId ? { ...t, status: status.toUpperCase() } : t
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Team member status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating team member status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update team member status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedTeam(null);
+    }
   };
 
   const formatDate = (dateString: string) => {

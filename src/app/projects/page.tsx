@@ -413,7 +413,7 @@ export default function ProjectsPage() {
                 {/* Actions */}
                 <div className="flex items-center justify-between">
                   <Button
-                    onClick={() => handleViewProject(project)}
+                    onClick={() => router.push(`/projects/${project.slug}`)}
                     className="flex-1 bg-primary hover:bg-primary-600 text-primary-foreground"
                     size="sm"
                   >

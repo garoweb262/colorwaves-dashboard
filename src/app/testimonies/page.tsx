@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Badge } from "@/amal-ui";
+import { Button, Badge, useToast } from "@/amal-ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Plus, Edit, Trash2, Eye, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
@@ -10,8 +10,10 @@ import { TestimonyViewModal } from "@/components/testimonies/TestimonyViewModal"
 import { TestimonyFormModal } from "@/components/testimonies/TestimonyFormModal";
 import { TestimonyStatusModal } from "@/components/testimonies/TestimonyStatusModal";
 import { DeleteConfirmModal } from "@/components/testimonies/DeleteConfirmModal";
+import { testimoniesAPI } from "@/lib/api";
 
 interface Testimony {
+  _id?: string;
   id: string;
   content: string;
   clientName: string;
@@ -25,6 +27,7 @@ interface Testimony {
 }
 
 export default function TestimoniesPage() {
+  const { addToast } = useToast();
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [filteredTestimonies, setFilteredTestimonies] = useState<Testimony[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,39 +45,41 @@ export default function TestimoniesPage() {
   const [editingTestimony, setEditingTestimony] = useState<Testimony | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data - replace with actual API call
+  // Fetch testimonies from API
   useEffect(() => {
-    const mockTestimonies: Testimony[] = [
-      {
-        id: "1",
-        content: "Colorwaves transformed our office space with their durable paint and excellent finishing.",
-        clientName: "Adewale",
-        clientPosition: "Business Owner",
-        clientCompany: "Tech Solutions Ltd",
-        rating: 5,
-        clientImage: "https://example.com/adewale.jpg",
-        isActive: true,
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-20T14:22:00Z"
-      },
-      {
-        id: "2",
-        content: "Their housing project was not only affordable but beautifully executed.",
-        clientName: "Fatima",
-        clientPosition: "Homeowner",
-        clientCompany: "Personal",
-        rating: 5,
-        clientImage: "https://example.com/fatima.jpg",
-        isActive: true,
-        createdAt: "2024-01-16T09:15:00Z",
-        updatedAt: "2024-01-19T16:45:00Z"
+    const fetchTestimonies = async () => {
+      try {
+        setIsLoading(true);
+        const response = await testimoniesAPI.getTestimonies();
+        if (response.success) {
+          setTestimonies(response.data);
+          setFilteredTestimonies(response.data);
+        } else {
+          addToast({
+            variant: "error",
+            title: "Error",
+            description: "Failed to fetch testimonies",
+            duration: 5000
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching testimonies:", error);
+        addToast({
+          variant: "error",
+          title: "Error",
+          description: "Failed to fetch testimonies",
+          duration: 5000
+        });
+        // Fallback to empty array
+        setTestimonies([]);
+        setFilteredTestimonies([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
-    
-    setTestimonies(mockTestimonies);
-    setFilteredTestimonies(mockTestimonies);
-    setIsLoading(false);
-  }, []);
+    };
+
+    fetchTestimonies();
+  }, [addToast]);
 
   // Filter and sort testimonies
   useEffect(() => {
@@ -141,24 +146,55 @@ export default function TestimoniesPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleTestimonySaved = (savedTestimony: Testimony) => {
+  const handleTestimonySaved = async (savedTestimony: Testimony) => {
     if (!savedTestimony) return;
     
-    if (editingTestimony) {
-      setTestimonies(prev => prev.map(testimony => testimony.id === savedTestimony.id ? savedTestimony : testimony));
-    } else {
-      setTestimonies(prev => [...prev, savedTestimony]);
+    try {
+      if (editingTestimony) {
+        // Update existing testimony in local state
+        setTestimonies(prev => prev.map(testimony => testimony.id === savedTestimony.id ? savedTestimony : testimony));
+      } else {
+        // Add new testimony to local state
+        setTestimonies(prev => [...prev, savedTestimony]);
+      }
+    } catch (error) {
+      console.error("Error updating testimony list:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update testimony list",
+        duration: 5000
+      });
+    } finally {
+      setIsFormModalOpen(false);
+      setEditingTestimony(null);
     }
-    setIsFormModalOpen(false);
-    setEditingTestimony(null);
   };
 
-  const handleTestimonyDeleted = (testimonyId: string) => {
+  const handleTestimonyDeleted = async (testimonyId: string) => {
     if (!testimonyId) return;
     
-    setTestimonies(prev => prev.filter(testimony => testimony.id !== testimonyId));
-    setIsDeleteModalOpen(false);
-    setSelectedTestimony(null);
+    try {
+      await testimoniesAPI.deleteTestimony(testimonyId);
+      setTestimonies(prev => prev.filter(testimony => testimony.id !== testimonyId));
+      addToast({
+        variant: "success",
+        title: "Success",
+        description: "Testimony deleted successfully",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Error deleting testimony:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to delete testimony",
+        duration: 5000
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedTestimony(null);
+    }
   };
 
   const handleUpdateStatus = (testimony: Testimony) => {
@@ -168,10 +204,32 @@ export default function TestimoniesPage() {
     setIsStatusModalOpen(true);
   };
 
-  const handleStatusUpdate = (testimonyId: string, status: string) => {
-    setTestimonies(prev => prev.map(t => 
-      t.id === testimonyId ? { ...t, isActive: status === 'active' } : t
-    ));
+  const handleStatusUpdate = async (testimonyId: string, status: string) => {
+    try {
+      const response = await testimoniesAPI.updateStatus(testimonyId, status);
+      if (response.success) {
+        setTestimonies(prev => prev.map(t => 
+          t.id === testimonyId ? { ...t, isActive: status === 'active' } : t
+        ));
+        addToast({
+          variant: "success",
+          title: "Success",
+          description: "Testimony status updated successfully",
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error updating testimony status:", error);
+      addToast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to update testimony status",
+        duration: 5000
+      });
+    } finally {
+      setIsStatusModalOpen(false);
+      setSelectedTestimony(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
