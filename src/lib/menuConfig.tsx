@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Newspaper,
   BookOpen,
+  Mail,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -108,6 +109,12 @@ export const menuItems: MenuItem[] = [
     href: "/partnership-requests",
     icon: <Users className="h-5 w-5" />,
     roles: ["super-admin", "admin", "brand"]
+  },
+  {
+    title: "Newsletter",
+    href: "/newsletter",
+    icon: <Mail className="h-5 w-5" />,
+    roles: ["super-admin", "admin", "brand", "sales", "support"]
   },
   // {
   //   title: "Careers",
