@@ -5,16 +5,9 @@ import {
   FileText,
   ShoppingCart,
   Users,
-  Shield,
-  BarChart3,
   Settings,
-  Image,
-  Calendar,
   MessageSquare,
-  Database,
-  Palette,
   HelpCircle,
-  ChevronRight,
   Newspaper,
   BookOpen,
   Mail,
@@ -134,12 +127,12 @@ export const menuItems: MenuItem[] = [
   //   icon: <FileText className="h-5 w-5" />,
   //   roles: ["super-admin", "admin", "brand"]
   // },
-  {
-    title: "News",
-    href: "/news",
-    icon: <Newspaper className="h-5 w-5" />,
-    roles: ["super-admin", "admin", "brand"]
-  },
+  // {
+  //   title: "News",
+  //   href: "/news",
+  //   icon: <Newspaper className="h-5 w-5" />,
+  //   roles: ["super-admin", "admin", "brand"]
+  // },
   {
     title: "Blog",
     href: "/blog",
