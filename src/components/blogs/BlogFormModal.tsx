@@ -46,7 +46,8 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
     tags: [] as string[],
     categories: [] as string[],
     isFeatured: false,
-    author: ""
+    author: "",
+    videoUrl: ""
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +66,8 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
         tags: blog.tags || [],
         categories: blog.categories || [],
         isFeatured: blog.isFeatured || false,
-        author: blog.author || ""
+        author: blog.author || "",
+        videoUrl: (blog as any).videoUrl || ""
       });
     } else {
       setFormData({
@@ -76,7 +78,8 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
         tags: [],
         categories: [],
         isFeatured: false,
-        author: ""
+        author: "",
+        videoUrl: ""
       });
     }
     setErrors({});
@@ -153,7 +156,8 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
         tags: formData.tags,
         categories: formData.categories,
         isFeatured: formData.isFeatured,
-        author: formData.author
+        author: formData.author,
+        videoUrl: formData.videoUrl || ''
       };
 
       console.log("Submitting blog data:", blogData);
@@ -161,7 +165,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
       if (blog) {
         // Update existing blog
         console.log("Updating existing blog with ID:", blog.id);
-        const response = await blogsAPI.updateBlog(blog.id, blogData);
+        const response = await blogsAPI.updateBlog(blog.id, blogData as any);
         console.log("Update response:", response);
         if (response.success) {
           onSave(response.data);
@@ -171,7 +175,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
       } else {
         // Create new blog
         console.log("Creating new blog");
-        const response = await blogsAPI.createBlog(blogData);
+        const response = await blogsAPI.createBlog(blogData as any);
         console.log("Create response:", response);
         if (response.success) {
           onSave(response.data);
@@ -284,6 +288,20 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">{errors.title}</p>
             )}
+          </div>
+
+          {/* Video URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              YouTube Video Link
+            </label>
+            <input
+              type="url"
+              value={formData.videoUrl}
+              onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
           </div>
 
           {/* Excerpt */}

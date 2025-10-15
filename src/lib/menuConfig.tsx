@@ -82,6 +82,7 @@ export const menuItems: MenuItem[] = [
     children: [
       { title: "Projects", href: "/projects", icon: <FileText className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
      { title: "Team", href: "/team", icon: <Users className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
+     { title: "Partners", href: "/partners", icon: <Users className="h-4 w-4" />, roles: ["super-admin", "admin", "brand"] },
     ],
     roles: ["super-admin", "admin", "brand"]
   },

@@ -9,6 +9,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { DeleteConfirmModal } from "@/components/newsletter/DeleteConfirmModal";
 import { useToast } from "@/amal-ui/components/ToastProvider";
 import { newsletterAPI } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 interface NewsletterSubscriber {
   id: string;
@@ -31,6 +32,7 @@ interface NewsletterStats {
 
 export default function NewsletterPage() {
   const { addToast } = useToast();
+  const router = useRouter();
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [filteredSubscribers, setFilteredSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -194,6 +196,21 @@ export default function NewsletterPage() {
             <p className="text-sm text-gray-500 mt-1">
               Manage your newsletter subscribers and view statistics
             </p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/newsletter/campaigns')}
+              leftIcon={<Calendar className="h-4 w-4" />}
+            >
+              View Campaigns
+            </Button>
+            <Button
+              onClick={() => window.open('/newsletter/send', '_blank')}
+              leftIcon={<Mail className="h-4 w-4" />}
+            >
+              Send Newsletter
+            </Button>
           </div>
         </div>
 

@@ -2,15 +2,17 @@
 
 import React, { useState } from "react";
 import { Button, useToast } from "@/amal-ui";
-import { ArrowLeft, Send, Upload, X } from "lucide-react";
+import { ArrowLeft, Send, Upload, X, Image as ImageIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { useRouter } from "next/navigation";
-import { ImageUpload } from "@/components/ImageUpload";
+import { FileUpload } from "@/components/FileUpload";
 import { uploadAPI, newsletterAPI } from "@/lib/api";
 
 interface NewsletterFormData {
   subject: string;
   messageContent: string;
+  headerImageUrl: string;
   fileUrls: string[];
 }
 
@@ -20,25 +22,17 @@ export default function SendNewsletterPage() {
   const [formData, setFormData] = useState<NewsletterFormData>({
     subject: "",
     messageContent: "",
+    headerImageUrl: "",
     fileUrls: []
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   const handleInputChange = (field: keyof NewsletterFormData, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
-  };
-
-  const handleFilesSelect = (urls: string[], files?: File[]) => {
-    if (files) {
-      setUploadedFiles(files);
-    }
-    handleInputChange("fileUrls", urls);
   };
 
   const validateForm = () => {
@@ -66,40 +60,12 @@ export default function SendNewsletterPage() {
     setIsSubmitting(true);
 
     try {
-      let finalFileUrls = [...formData.fileUrls];
-
-      // Upload files if there are new files
-      if (uploadedFiles.length > 0) {
-        setIsUploadingFiles(true);
-        
-        try {
-          const uploadResponse = await uploadAPI.uploadImages(uploadedFiles, "newsletters");
-          
-          if (uploadResponse.success && uploadResponse.data) {
-            const newFileUrls = uploadResponse.data.map(item => item.fileUrl);
-            finalFileUrls = [...finalFileUrls, ...newFileUrls];
-          } else {
-            throw new Error("Failed to upload files");
-          }
-        } catch (uploadError) {
-          console.error("Error uploading files:", uploadError);
-          addToast({
-            variant: "error",
-            title: "Files Upload Failed",
-            description: "Failed to upload files. Please try again.",
-            duration: 5000
-          });
-          return;
-        } finally {
-          setIsUploadingFiles(false);
-        }
-      }
-
-      // Send newsletter
+      // Send newsletter (both header image and file attachments are already uploaded via FileUpload components)
       const result = await newsletterAPI.sendNewsletter({
         subject: formData.subject,
         messageContent: formData.messageContent,
-        fileUrls: finalFileUrls
+        headerImageUrl: formData.headerImageUrl,
+        fileUrls: formData.fileUrls
       });
 
       if (result.success) {
@@ -128,9 +94,7 @@ export default function SendNewsletterPage() {
 
   const removeFile = (index: number) => {
     const newFileUrls = formData.fileUrls.filter((_, i) => i !== index);
-    const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setFormData(prev => ({ ...prev, fileUrls: newFileUrls }));
-    setUploadedFiles(newFiles);
   };
 
   return (
@@ -175,19 +139,38 @@ export default function SendNewsletterPage() {
               )}
             </div>
 
+            {/* Header Image */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Header Image (Optional)
+              </label>
+              <FileUpload
+                label="Upload Header Image"
+                description="Upload a header image for your newsletter"
+                accept="image/*"
+                maxSize={5}
+                folder="newsletters"
+                currentFile={formData.headerImageUrl}
+                onFileUpload={(fileUrl, fileName) => {
+                  setFormData(prev => ({ ...prev, headerImageUrl: fileUrl }));
+                }}
+                onFileRemove={() => {
+                  setFormData(prev => ({ ...prev, headerImageUrl: "" }));
+                }}
+                showPreview={true}
+              />
+            </div>
+
             {/* Message Content */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Message Content *
+                Message Content * (Rich Text)
               </label>
-              <textarea
+              <RichTextEditor
                 value={formData.messageContent}
-                onChange={(e) => handleInputChange("messageContent", e.target.value)}
-                rows={12}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                  errors.messageContent ? "border-red-300" : "border-gray-300"
-                }`}
+                onChange={(value) => handleInputChange("messageContent", value)}
                 placeholder="Enter your newsletter message content here..."
+                className={errors.messageContent ? "border-red-300" : ""}
               />
               {errors.messageContent && (
                 <p className="mt-1 text-sm text-red-600">{errors.messageContent}</p>
@@ -199,45 +182,50 @@ export default function SendNewsletterPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Attachments (Optional)
               </label>
-              <ImageUpload
-                label="Upload Newsletter Attachments"
-                description="Upload files to attach to the newsletter (PDFs, images, documents)"
-                currentImages={formData.fileUrls}
-                onImageSelect={() => {}}
-                onImagesSelect={(urls, files) => handleFilesSelect(urls, files)}
-                onImageRemove={() => {}}
-                maxSize={10}
-                multiple={true}
-                maxImages={10}
-              />
-              
-              {/* Display uploaded files */}
-              {formData.fileUrls.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Attached Files:</h4>
-                  <div className="space-y-2">
-                    {formData.fileUrls.map((url, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                        <div className="flex items-center space-x-2">
-                          <Upload className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-700 truncate max-w-md">
-                            {url.split('/').pop() || `File ${index + 1}`}
-                          </span>
+              <div className="space-y-4">
+                {/* Add new file upload */}
+                <FileUpload
+                  label="Add Attachment"
+                  description="Upload files to attach to the newsletter (PDFs, images, documents)"
+                  accept="*/*"
+                  maxSize={10}
+                  folder="newsletters"
+                  onFileUpload={(fileUrl, fileName) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      fileUrls: [...prev.fileUrls, fileUrl]
+                    }));
+                  }}
+                />
+                
+                {/* Display uploaded files */}
+                {formData.fileUrls.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Attached Files:</h4>
+                    <div className="space-y-2">
+                      {formData.fileUrls.map((url, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                          <div className="flex items-center space-x-2">
+                            <Upload className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-700 truncate max-w-md">
+                              {url.split('/').pop() || `File ${index + 1}`}
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Preview */}
@@ -246,13 +234,35 @@ export default function SendNewsletterPage() {
                 Preview
               </label>
               <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900">
                     Subject: {formData.subject || "Newsletter Subject"}
                   </h3>
-                  <div className="text-sm text-gray-600 whitespace-pre-wrap">
-                    {formData.messageContent || "Newsletter content will appear here..."}
+                  
+                  {/* Header Image Preview */}
+                  {formData.headerImageUrl && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Header Image:</p>
+                      <img 
+                        src={formData.headerImageUrl} 
+                        alt="Header preview" 
+                        className="max-w-full h-32 object-cover rounded-md border"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Content Preview */}
+                  <div className="mt-3">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Content:</p>
+                    <div 
+                      className="text-sm text-gray-600 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ 
+                        __html: formData.messageContent || "Newsletter content will appear here..." 
+                      }}
+                    />
                   </div>
+                  
+                  {/* Attachments */}
                   {formData.fileUrls.length > 0 && (
                     <div className="mt-3">
                       <p className="text-sm font-medium text-gray-700">Attachments:</p>
@@ -273,17 +283,17 @@ export default function SendNewsletterPage() {
                 type="button"
                 variant="outline"
                 onClick={() => router.push('/newsletter')}
-                disabled={isSubmitting || isUploadingFiles}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                loading={isSubmitting || isUploadingFiles}
-                disabled={isSubmitting || isUploadingFiles}
+                loading={isSubmitting}
+                disabled={isSubmitting}
                 leftIcon={<Send className="h-4 w-4" />}
               >
-                {isUploadingFiles ? "Uploading Files..." : "Send Newsletter"}
+                Send Newsletter
               </Button>
             </div>
           </form>

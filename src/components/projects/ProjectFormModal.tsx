@@ -5,7 +5,7 @@ import { Button, useToast } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
-import { uploadAPI } from "@/lib/api";
+import { uploadAPI, projectsAPI } from "@/lib/api";
 
 interface Project {
   id: string;
@@ -39,7 +39,8 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
     imageUrls: [] as string[],
     startDate: "",
     endDate: "",
-    isActive: true
+    isActive: true,
+    videoUrl: ""
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +58,8 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
         imageUrls: project.imageUrls,
         startDate: project.startDate || "",
         endDate: project.endDate || "",
-        isActive: project.isActive
+        isActive: project.isActive,
+        videoUrl: (project as any).videoUrl || ""
       });
     } else {
       setFormData({
@@ -68,7 +70,8 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
         imageUrls: [],
         startDate: "",
         endDate: "",
-        isActive: true
+        isActive: true,
+        videoUrl: ""
       });
     }
     setErrors({});
@@ -143,7 +146,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
       }
 
       if (project) {
-        // For edit, only send the editable fields
+        // Update via API so backend persists videoUrl too
         const updateData = {
           title: formData.title,
           description: formData.description,
@@ -152,15 +155,19 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
           imageUrls: finalImageUrls,
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
-          isActive: formData.isActive
+          isActive: formData.isActive,
+          videoUrl: formData.videoUrl || undefined
         };
-        onSave(updateData as Project);
+        const response = await projectsAPI.updateProject(project.id, updateData);
+        if (response.success) {
+          onSave(response.data as Project);
+        } else {
+          throw new Error("Failed to update project");
+        }
       } else {
-        // For create, send all fields
-        const savedProject: Project = {
-          id: Date.now().toString(),
+        // Create via API
+        const createData = {
           title: formData.title,
-          slug: formData.title.toLowerCase().replace(/\s+/g, '-'),
           description: formData.description,
           client: formData.client,
           technologies: formData.technologies,
@@ -168,10 +175,14 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           isActive: formData.isActive,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        onSave(savedProject);
+          videoUrl: formData.videoUrl || undefined
+        } as any;
+        const response = await projectsAPI.createProject(createData);
+        if (response.success) {
+          onSave(response.data as Project);
+        } else {
+          throw new Error("Failed to create project");
+        }
       }
       
       // Show success toast
@@ -270,6 +281,20 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">{errors.title}</p>
             )}
+          </div>
+
+          {/* Video URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              YouTube Video Link
+            </label>
+            <input
+              type="url"
+              value={formData.videoUrl}
+              onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
           </div>
 
           {/* Description */}

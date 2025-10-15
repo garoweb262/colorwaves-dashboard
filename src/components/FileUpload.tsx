@@ -197,6 +197,7 @@ export function FileUpload({
             
             <div className="flex justify-center space-x-2">
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
@@ -205,6 +206,7 @@ export function FileUpload({
                 Change File
               </Button>
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleRemoveFile}
@@ -246,6 +248,7 @@ export function FileUpload({
             </p>
             
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}

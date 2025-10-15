@@ -19,6 +19,7 @@ interface Project {
   isActive: boolean;
   startDate?: string;
   endDate?: string;
+    videoUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -222,6 +223,20 @@ export default function ProjectDetailPage() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Video Embed */}
+          {project.videoUrl && (
+            <div className="aspect-video bg-black">
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${(project.videoUrl.split('v=')[1] || '').split('&')[0]}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
           )}
 

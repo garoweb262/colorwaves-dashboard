@@ -15,6 +15,7 @@ interface Blog {
   content: string;
   excerpt?: string;
   imageUrl?: string;
+    videoUrl?: string;
   tags?: string[];
   categories?: string[];
   status?: 'draft' | 'published' | 'archived';
@@ -51,17 +52,15 @@ export default function BlogDetailPage() {
             description: "Failed to fetch blog details",
             duration: 5000
           });
-          router.push("/blog");
         }
       } catch (error) {
         console.error("Error fetching blog:", error);
         addToast({
           variant: "error",
           title: "Error",
-          description: "Blog post not found",
+          description: (error as any)?.response?.data?.message || "Failed to fetch blog details",
           duration: 5000
         });
-        router.push("/blog");
       } finally {
         setIsLoading(false);
       }
@@ -256,6 +255,20 @@ export default function BlogDetailPage() {
                 onError={(e) => {
                   e.currentTarget.src = '/images/placeholder.jpg';
                 }}
+              />
+            </div>
+          )}
+
+          {/* Video Embed */}
+          {blog.videoUrl && (
+            <div className="aspect-video bg-black">
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${(blog.videoUrl.split('v=')[1] || '').split('&')[0]}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
               />
             </div>
           )}

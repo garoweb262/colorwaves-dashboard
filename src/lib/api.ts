@@ -52,6 +52,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Skip global logout for explicitly public requests
+    const skipLogout = error?.config?.headers && (error.config.headers as any)['x-skip-auth-logout'] === 'true';
+    if (skipLogout) {
+      return Promise.reject(error);
+    }
     // console.error('API Error:', {
     //   url: error.config?.url,
     //   status: error.response?.status,
@@ -537,7 +542,7 @@ export const newsletterAPI = {
   },
 
   // Send newsletter
-  sendNewsletter: async (data: { subject: string; messageContent: string; fileUrls?: string[] }): Promise<{ success: boolean; data: any }> => {
+  sendNewsletter: async (data: { subject: string; messageContent: string; headerImageUrl?: string; fileUrls?: string[] }): Promise<{ success: boolean; data: any }> => {
     const response = await api.post('/newsletter/send', data);
     return { success: true, data: response.data };
   }
@@ -808,15 +813,17 @@ export const blogsAPI = {
     return { success: true, data };
   },
 
-  // Get blog by slug (Public)
+  // Get blog by slug (Admin via JWT): fetch all and match slug
   getBlogBySlug: async (slug: string): Promise<{ success: boolean; data: any }> => {
-    const response = await api.get(`/blogs/slug/${slug}`);
-    const data = response.data;
-    // Transform _id to id if needed
-    if (data && data._id && !data.id) {
-      data.id = data._id;
+    // Use admin list with JWT, then find by slug locally
+    const listRes = await api.get('/blogs', { headers: { 'x-skip-auth-logout': 'true' } });
+    const items = Array.isArray(listRes.data) ? listRes.data : (listRes.data?.data || []);
+    const found = items.find((b: any) => b?.slug === slug);
+    if (!found) {
+      throw { response: { data: { message: 'Blog not found', statusCode: 404 } } };
     }
-    return { success: true, data };
+    if (found && found._id && !found.id) found.id = found._id;
+    return { success: true, data: found };
   },
 
   // Create blog
@@ -1182,6 +1189,65 @@ export const teamsAPI = {
     }
     return { success: true, data: responseData };
   }
+};
+
+// Partners API
+export const partnersAPI = {
+  // Get all partners
+  getPartners: async (): Promise<{ success: boolean; data: any[] }> => {
+    const response = await api.get('/partners');
+    const data = response.data;
+    if (Array.isArray(data)) {
+      data.forEach((item: any) => {
+        if (item && item._id && !item.id) {
+          item.id = item._id;
+        }
+      });
+    }
+    return { success: true, data };
+  },
+
+  // Get single partner by ID
+  getPartner: async (id: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.get(`/partners/${id}`);
+    const data = response.data;
+    if (data && data._id && !data.id) {
+      data.id = data._id;
+    }
+    return { success: true, data };
+  },
+
+  // Create partner
+  createPartner: async (data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.post('/partners', data);
+    const responseData = response.data;
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Update partner
+  updatePartner: async (id: string, data: any): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/partners/${id}`, data);
+    const responseData = response.data;
+    if (responseData && responseData._id && !responseData.id) {
+      responseData.id = responseData._id;
+    }
+    return { success: true, data: responseData };
+  },
+
+  // Delete partner
+  deletePartner: async (id: string): Promise<{ success: boolean; message: string }> => {
+    await api.delete(`/partners/${id}`);
+    return { success: true, message: 'Partner deleted successfully' };
+  },
+
+  // Update partner status
+  updateStatus: async (id: string, status: string): Promise<{ success: boolean; data: any }> => {
+    const response = await api.patch(`/partners/${id}/status`, { status });
+    return { success: true, data: response.data };
+  },
 };
 
 // Testimonies API
