@@ -43,7 +43,7 @@ export function DashboardLayout({ children, breadcrumbs = [] }: DashboardLayoutP
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--dashboard-background)' }}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (

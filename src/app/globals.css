@@ -8,6 +8,7 @@
   --font-maven-pro: 'Maven Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Arial', sans-serif;
 }
 
+
 /* Brandon Grotesque Font Family */
 @font-face {
   font-family: 'Brandon Grotesque';
@@ -235,7 +236,8 @@
     --palette-lime: #A2D63A;
     --palette-sky: #2E86C1;
     
-   
+    /* New Dark Purple Background */
+    --dashboard-background: #210021;
   }
 
   .dark {
@@ -276,7 +278,8 @@
     --palette-lime: #A2D63A;
     --palette-sky: #2E86C1;
     
- 
+    /* New Dark Purple Background */
+    --dashboard-background: #210021;
   }
 }
 
@@ -287,6 +290,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--dashboard-background);
   }
 }
 
