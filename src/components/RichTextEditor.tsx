@@ -115,9 +115,9 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
   ];
 
   return (
-    <div className={`border border-gray-300 rounded-md ${className}`}>
+    <div className={`glass-card ${className}`}>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 bg-gray-50">
+      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-white/10 glass-panel">
         {toolbarButtons.map((button, index) => (
           <Button
             key={index}
@@ -126,13 +126,13 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
             size="sm"
             onClick={() => execCommand(button.command, button.value)}
             title={button.title}
-            className="h-8 w-8 p-0 hover:bg-gray-200"
+            className="h-8 w-8 p-0 hover:bg-white/10"
           >
             {button.icon}
           </Button>
         ))}
         
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="w-px h-6 bg-white/20 mx-1" />
         
         <Button
           type="button"
@@ -140,7 +140,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
           size="sm"
           onClick={insertLink}
           title="Insert Link"
-          className="h-8 w-8 p-0 hover:bg-gray-200"
+          className="h-8 w-8 p-0 hover:bg-white/10"
         >
           <Link className="h-4 w-4" />
         </Button>
@@ -151,7 +151,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
           size="sm"
           onClick={insertImage}
           title="Insert Image"
-          className="h-8 w-8 p-0 hover:bg-gray-200"
+          className="h-8 w-8 p-0 hover:bg-white/10"
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
@@ -164,8 +164,8 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
         onInput={handleInput}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`min-h-[200px] p-4 focus:outline-none ${
-          isFocused ? "ring-2 ring-palette-violet ring-opacity-50" : ""
+        className={`min-h-[200px] p-4 focus:outline-none text-white/90 ${
+          isFocused ? "ring-2 ring-white/30 ring-opacity-50" : ""
         }`}
         style={{
           minHeight: "200px",
@@ -178,7 +178,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
       <style jsx>{`
         [contenteditable]:empty:before {
           content: attr(data-placeholder);
-          color: #9ca3af;
+          color: rgba(255, 255, 255, 0.5);
           pointer-events: none;
         }
         
@@ -186,40 +186,45 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter your cont
           font-size: 1.875rem;
           font-weight: bold;
           margin: 0.5rem 0;
+          color: white;
         }
         
         [contenteditable] h2 {
           font-size: 1.5rem;
           font-weight: bold;
           margin: 0.5rem 0;
+          color: white;
         }
         
         [contenteditable] h3 {
           font-size: 1.25rem;
           font-weight: bold;
           margin: 0.5rem 0;
+          color: white;
         }
         
         [contenteditable] p {
           margin: 0.5rem 0;
           line-height: 1.6;
+          color: rgba(255, 255, 255, 0.9);
         }
         
         [contenteditable] ul, [contenteditable] ol {
           margin: 0.5rem 0;
           padding-left: 1.5rem;
+          color: rgba(255, 255, 255, 0.9);
         }
         
         [contenteditable] blockquote {
-          border-left: 4px solid #e5e7eb;
+          border-left: 4px solid rgba(255, 255, 255, 0.3);
           padding-left: 1rem;
           margin: 0.5rem 0;
           font-style: italic;
-          color: #6b7280;
+          color: rgba(255, 255, 255, 0.7);
         }
         
         [contenteditable] a {
-          color: #3b82f6;
+          color: #60a5fa;
           text-decoration: underline;
         }
         

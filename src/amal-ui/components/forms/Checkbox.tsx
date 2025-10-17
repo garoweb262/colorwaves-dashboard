@@ -77,9 +77,9 @@ export const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
             onClick={handleToggle}
             disabled={disabled}
             className={cn(
-              "relative flex h-5 w-5 items-center justify-center border-2 border-gray-200 bg-white transition-colors focus:outline-none focus:ring-1 focus:ring-orange-400 disabled:cursor-not-allowed disabled:opacity-50",
-              checked && "border-orange-600 bg-orange-600",
-              error && "border-red-300 focus:ring-red-400",
+              "relative flex h-5 w-5 items-center justify-center glass-checkbox transition-colors focus:outline-none focus:ring-1 focus:ring-white/20 disabled:cursor-not-allowed disabled:opacity-50",
+              checked && "border-white/40 bg-white/20",
+              error && "border-red-400/50 focus:ring-red-400/30",
               className
             )}
             whileTap={{ scale: 0.9 }}
@@ -100,9 +100,9 @@ export const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
 
           {label && (
             <motion.label
-              className="text-sm font-medium text-gray-700 cursor-pointer"
+              className="text-sm font-medium text-white/80 cursor-pointer"
               onClick={handleToggle}
-              whileHover={{ color: "#f97316" }}
+              whileHover={{ color: "rgba(255, 255, 255, 1)" }}
             >
               {label}
             </motion.label>
@@ -113,7 +113,7 @@ export const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-1 text-sm text-red-600"
+            className="mt-1 text-sm text-red-300"
           >
             {error}
           </motion.p>
@@ -123,7 +123,7 @@ export const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-1 text-sm text-gray-500"
+            className="mt-1 text-sm text-white/60"
           >
             {helperText}
           </motion.p>

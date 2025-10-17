@@ -83,8 +83,8 @@ export default function CampaignDetailsPage() {
               Back to Campaigns
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Campaign Details</h1>
-              <p className="text-sm text-gray-500 mt-1">View campaign content and delivery stats</p>
+              <h1 className="text-2xl font-bold text-white">Campaign Details</h1>
+              <p className="text-sm text-white/70 mt-1">View campaign content and delivery stats</p>
             </div>
           </div>
           <div>
@@ -95,7 +95,7 @@ export default function CampaignDetailsPage() {
         {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-palette-violet" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/30" />
           </div>
         )}
 
@@ -104,56 +104,56 @@ export default function CampaignDetailsPage() {
             {/* Left: Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Subject */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Subject</h2>
-                <p className="text-gray-700">{campaign.subject}</p>
+              <div className="glass-card p-6">
+                <h2 className="text-xl font-semibold text-white mb-2">Subject</h2>
+                <p className="text-white/80">{campaign.subject}</p>
               </div>
 
               {/* Header Image */}
               {campaign.headerImageUrl && (
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <ImageIcon className="h-5 w-5 text-gray-500" /> Header Image
+                <div className="glass-card p-6">
+                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-white/60" /> Header Image
                   </h2>
                   <img
                     src={campaign.headerImageUrl}
                     alt="Header"
-                    className="w-full max-h-80 object-cover rounded-md border"
+                    className="w-full max-h-80 object-cover rounded-md border border-white/20"
                   />
                 </div>
               )}
 
               {/* Content */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Content</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-xl font-semibold text-white mb-4">Content</h2>
                 <div
-                  className="prose max-w-none"
+                  className="prose max-w-none text-white/80"
                   dangerouslySetInnerHTML={{ __html: campaign.messageContent }}
                 />
               </div>
 
               {/* Attachments */}
               {campaign.fileUrls?.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Paperclip className="h-5 w-5 text-gray-500" /> Attachments
+                <div className="glass-card p-6">
+                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                    <Paperclip className="h-5 w-5 text-white/60" /> Attachments
                   </h2>
                   <ul className="space-y-2">
                     {campaign.fileUrls.map((url, index) => (
-                      <li key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                      <li key={index} className="flex items-center justify-between glass-panel p-3 rounded-md">
                         <div className="flex items-center gap-2">
-                          <Paperclip className="h-4 w-4 text-gray-400" />
+                          <Paperclip className="h-4 w-4 text-white/60" />
                           <a
                             href={url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-sm text-blue-600 hover:underline truncate max-w-md"
+                            className="text-sm text-blue-400 hover:underline truncate max-w-md"
                             title={url}
                           >
                             {url.split("/").pop() || `Attachment ${index + 1}`}
                           </a>
                         </div>
-                        <span className="text-xs text-gray-400">Download</span>
+                        <span className="text-xs text-white/60">Download</span>
                       </li>
                     ))}
                   </ul>
@@ -164,46 +164,46 @@ export default function CampaignDetailsPage() {
             {/* Right: Stats */}
             <div className="space-y-6">
               {/* Delivery Stats */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery Statistics</h2>
+              <div className="glass-card p-6">
+                <h2 className="text-xl font-semibold text-white mb-4">Delivery Statistics</h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Total Recipients</span>
+                    <span className="text-white/70">Total Recipients</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{campaign.totalRecipients}</span>
-                      <Mail className="h-4 w-4 text-gray-400" />
+                      <span className="font-medium text-white">{campaign.totalRecipients}</span>
+                      <Mail className="h-4 w-4 text-white/60" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Sent</span>
+                    <span className="text-white/70">Sent</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-green-600">{campaign.sentCount}</span>
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="font-medium text-green-400">{campaign.sentCount}</span>
+                      <CheckCircle className="h-4 w-4 text-green-400" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Failed</span>
+                    <span className="text-white/70">Failed</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-red-600">{campaign.failedCount}</span>
-                      <XCircle className="h-4 w-4 text-red-500" />
+                      <span className="font-medium text-red-400">{campaign.failedCount}</span>
+                      <XCircle className="h-4 w-4 text-red-400" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Created</span>
+                    <span className="text-white/70">Created</span>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span className="font-medium">{new Date(campaign.createdAt).toLocaleString()}</span>
+                      <Calendar className="h-4 w-4 text-white/60" />
+                      <span className="font-medium text-white">{new Date(campaign.createdAt).toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Sent At</span>
+                    <span className="text-white/70">Sent At</span>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span className="font-medium">{campaign.sentAt ? new Date(campaign.sentAt).toLocaleString() : '-'}</span>
+                      <Calendar className="h-4 w-4 text-white/60" />
+                      <span className="font-medium text-white">{campaign.sentAt ? new Date(campaign.sentAt).toLocaleString() : '-'}</span>
                     </div>
                   </div>
                   {campaign.errorMessage && (
-                    <div className="pt-2 text-sm text-red-600">{campaign.errorMessage}</div>
+                    <div className="pt-2 text-sm text-red-400">{campaign.errorMessage}</div>
                   )}
                 </div>
               </div>

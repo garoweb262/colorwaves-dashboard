@@ -204,8 +204,8 @@ export default function NewsletterCampaignsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Newsletter Campaigns</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-white">Newsletter Campaigns</h1>
+            <p className="text-sm text-white/70 mt-1">
               Manage your newsletter campaigns and view their performance
             </p>
           </div>
@@ -220,18 +220,18 @@ export default function NewsletterCampaignsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search campaigns..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input w-full pl-10 pr-4 py-2 rounded-md focus:ring-2 focus:ring-white/30"
                 />
               </div>
             </div>
@@ -241,29 +241,29 @@ export default function NewsletterCampaignsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                className="glass-select w-full px-3 py-2 rounded-md focus:ring-2 focus:ring-white/30"
               >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="sending">Sending</option>
-                <option value="sent">Sent</option>
-                <option value="failed">Failed</option>
+                <option value="all" className="bg-gray-800 text-white">All Status</option>
+                <option value="draft" className="bg-gray-800 text-white">Draft</option>
+                <option value="sending" className="bg-gray-800 text-white">Sending</option>
+                <option value="sent" className="bg-gray-800 text-white">Sent</option>
+                <option value="failed" className="bg-gray-800 text-white">Failed</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Campaigns Table */}
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="glass-table">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-palette-violet"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/30"></div>
             </div>
           ) : currentCampaigns.length === 0 ? (
             <div className="text-center py-12">
-              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
-              <p className="text-gray-500 mb-4">
+              <Mail className="h-12 w-12 text-white/40 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No campaigns found</h3>
+              <p className="text-white/60 mb-4">
                 {searchTerm || statusFilter !== 'all' 
                   ? "No campaigns match your current filters." 
                   : "Get started by creating your first newsletter campaign."}
@@ -275,10 +275,10 @@ export default function NewsletterCampaignsPage() {
           ) : (
             <>
               <Table>
-                <TableHeader>
-                  <TableRow>
+                <TableHeader className="glass-table-header">
+                  <TableRow className="glass-table-row">
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('subject')}
                     >
                       <div className="flex items-center space-x-1">
@@ -287,7 +287,7 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('status')}
                     >
                       <div className="flex items-center space-x-1">
@@ -296,7 +296,7 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('totalRecipients')}
                     >
                       <div className="flex items-center space-x-1">
@@ -305,7 +305,7 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('sentCount')}
                     >
                       <div className="flex items-center space-x-1">
@@ -314,7 +314,7 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('createdAt')}
                     >
                       <div className="flex items-center space-x-1">
@@ -323,7 +323,7 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                       onClick={() => handleSort('sentAt')}
                     >
                       <div className="flex items-center space-x-1">
@@ -331,53 +331,53 @@ export default function NewsletterCampaignsPage() {
                         {getSortIcon('sentAt')}
                       </div>
                     </TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="glass-table-header-cell text-right px-6 py-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {currentCampaigns.map((campaign) => (
-                    <TableRow key={campaign.id || campaign._id}>
-                      <TableCell className="font-medium">
+                    <TableRow key={campaign.id || campaign._id} className="glass-table-row">
+                      <TableCell className="glass-table-cell font-medium px-6 py-4">
                         <div className="max-w-xs truncate" title={campaign.subject}>
                           {campaign.subject}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         {getStatusBadge(campaign.status)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         <div className="flex items-center space-x-1">
                           <span>{campaign.totalRecipients}</span>
-                          <Mail className="h-4 w-4 text-gray-400" />
+                          <Mail className="h-4 w-4 text-white/60" />
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         <div className="flex items-center space-x-1">
-                          <span className="text-green-600">{campaign.sentCount}</span>
-                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="text-green-400">{campaign.sentCount}</span>
+                          <CheckCircle className="h-4 w-4 text-green-400" />
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         <div className="flex items-center space-x-1">
-                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <Calendar className="h-4 w-4 text-white/60" />
                           <span className="text-sm">
                             {new Date(campaign.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         {campaign.sentAt ? (
                           <div className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <Calendar className="h-4 w-4 text-white/60" />
                             <span className="text-sm">
                               {new Date(campaign.sentAt).toLocaleDateString()}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-gray-400">-</span>
+                          <span className="text-white/40">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="glass-table-cell text-right px-6 py-4">
                         <div className="flex items-center justify-end space-x-2">
                           <Button
                             variant="ghost"
@@ -407,7 +407,7 @@ export default function NewsletterCampaignsPage() {
                               setSelectedCampaign(campaign);
                               setIsDeleteModalOpen(true);
                             }}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-400 hover:text-red-300"
                             title="Delete Campaign"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -421,7 +421,7 @@ export default function NewsletterCampaignsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200">
+                <div className="px-6 py-4 border-t border-white/10">
                   <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}

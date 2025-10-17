@@ -33,19 +33,9 @@ export function ServiceViewModal({ service, isOpen, onClose }: ServiceViewModalP
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title="Service Details">
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Service Details</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        
 
         <div className="space-y-6">
           {/* Service Image */}

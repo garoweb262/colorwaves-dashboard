@@ -58,13 +58,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'var(--dashboard-background)' }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Background Grid Lines */}
       <BackgroundGridLines />
       
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-palette-violet/5 via-white to-palette-blue/5" />
-      
+   
       {/* Login Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -72,7 +70,7 @@ export default function LoginPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md mx-4"
       >
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8">
+        <div className="bg-transparent backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8">
           {/* Logo and Header */}
           <div className="flex justify-center items-center  mb-8">
             <Image alt="colorwaves-logo" width={120} height={120} src="/images/logo/ColorWaves_Logo Vertical Black.png" priority />

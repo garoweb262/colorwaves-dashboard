@@ -192,8 +192,8 @@ export default function NewsletterPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Newsletter Subscribers</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-white">Newsletter Subscribers</h1>
+            <p className="text-sm text-white/70 mt-1">
               Manage your newsletter subscribers and view statistics
             </p>
           </div>
@@ -217,57 +217,57 @@ export default function NewsletterPage() {
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="glass-card p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Total Subscribers</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalSubscribers}</p>
+                  <p className="text-sm text-white/70">Total Subscribers</p>
+                  <p className="text-2xl font-bold text-white">{stats.totalSubscribers}</p>
                 </div>
-                <Mail className="h-8 w-8 text-blue-500" />
+                <Mail className="h-8 w-8 text-blue-400" />
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="glass-card p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Active Subscribers</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.activeSubscribers}</p>
+                  <p className="text-sm text-white/70">Active Subscribers</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.activeSubscribers}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-green-400" />
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="glass-card p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Total Campaigns</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalCampaigns}</p>
+                  <p className="text-sm text-white/70">Total Campaigns</p>
+                  <p className="text-2xl font-bold text-white">{stats.totalCampaigns}</p>
                 </div>
-                <Calendar className="h-8 w-8 text-purple-500" />
+                <Calendar className="h-8 w-8 text-purple-400" />
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="glass-card p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Sent Campaigns</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.sentCampaigns}</p>
+                  <p className="text-sm text-white/70">Sent Campaigns</p>
+                  <p className="text-2xl font-bold text-white">{stats.sentCampaigns}</p>
                 </div>
-                <Mail className="h-8 w-8 text-indigo-500" />
+                <Mail className="h-8 w-8 text-indigo-400" />
               </div>
             </div>
           </div>
         )}
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search by email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="glass-input w-full pl-10 pr-4 py-2 rounded-md focus:ring-2 focus:ring-white/30"
                 />
               </div>
             </div>
@@ -275,24 +275,24 @@ export default function NewsletterPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="glass-select px-4 py-2 rounded-md focus:ring-2 focus:ring-white/30"
               >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all" className="bg-gray-800 text-white">All Status</option>
+                <option value="active" className="bg-gray-800 text-white">Active</option>
+                <option value="inactive" className="bg-gray-800 text-white">Inactive</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="glass-table">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow>
+              <TableHeader className="glass-table-header">
+                <TableRow className="glass-table-row">
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                     onClick={() => handleSort('email')}
                   >
                     <div className="flex items-center gap-2">
@@ -300,10 +300,10 @@ export default function NewsletterPage() {
                       {getSortIcon('email')}
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Verified</TableHead>
+                  <TableHead className="glass-table-header-cell px-6 py-4">Status</TableHead>
+                  <TableHead className="glass-table-header-cell px-6 py-4">Verified</TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                     onClick={() => handleSort('subscribedAt')}
                   >
                     <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function NewsletterPage() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="glass-table-header-cell cursor-pointer hover:bg-white/10 px-6 py-4"
                     onClick={() => handleSort('createdAt')}
                   >
                     <div className="flex items-center gap-2">
@@ -320,45 +320,45 @@ export default function NewsletterPage() {
                       {getSortIcon('createdAt')}
                     </div>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="glass-table-header-cell text-right px-6 py-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableRow className="glass-table-row">
+                    <TableCell colSpan={6} className="glass-table-cell text-center py-8 px-6">
                       Loading subscribers...
                     </TableCell>
                   </TableRow>
                 ) : currentSubscribers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableRow className="glass-table-row">
+                    <TableCell colSpan={6} className="glass-table-cell text-center py-8 px-6">
                       No subscribers found
                     </TableCell>
                   </TableRow>
                 ) : (
                   currentSubscribers.map((subscriber) => (
-                    <TableRow key={subscriber.id || subscriber._id}>
-                      <TableCell className="font-medium">{subscriber.email}</TableCell>
-                      <TableCell>
+                    <TableRow key={subscriber.id || subscriber._id} className="glass-table-row">
+                      <TableCell className="glass-table-cell font-medium px-6 py-4">{subscriber.email}</TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         <Badge variant={subscriber.isActive ? "success" : "default"}>
                           {subscriber.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="glass-table-cell px-6 py-4">
                         {subscriber.isVerified ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
+                          <CheckCircle className="h-5 w-5 text-green-400" />
                         ) : (
                           <XCircle className="h-5 w-5 text-gray-400" />
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell className="glass-table-cell text-sm px-6 py-4">
                         {formatDate(subscriber.subscribedAt)}
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell className="glass-table-cell text-sm px-6 py-4">
                         {formatDate(subscriber.createdAt)}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="glass-table-cell text-right px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
@@ -368,7 +368,7 @@ export default function NewsletterPage() {
                               setIsDeleteModalOpen(true);
                             }}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-red-400" />
                           </Button>
                         </div>
                       </TableCell>
@@ -381,7 +381,7 @@ export default function NewsletterPage() {
 
           {/* Pagination */}
           {!isLoading && filteredSubscribers.length > 0 && (
-            <div className="border-t border-gray-200 px-4 py-3">
+            <div className="border-t border-white/10 px-6 py-4">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

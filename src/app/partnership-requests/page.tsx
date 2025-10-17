@@ -148,11 +148,11 @@ export default function PartnershipRequestsPage() {
 
   const getSortIcon = (column: string) => {
     if (sortBy !== column) {
-      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
+      return <ChevronsUpDown className="h-4 w-4 text-white/50" />;
     }
     return sortOrder === 'asc' ? 
-      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
-      <ChevronDown className="h-4 w-4 text-gray-600" />;
+      <ChevronUp className="h-4 w-4 text-white/80" /> : 
+      <ChevronDown className="h-4 w-4 text-white/80" />;
   };
 
   // API handler functions
@@ -260,29 +260,29 @@ export default function PartnershipRequestsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Partnership Requests</h1>
-            <p className="text-gray-600">Manage incoming partnership and collaboration requests</p>
+            <h1 className="text-2xl font-bold text-white">Partnership Requests</h1>
+            <p className="text-white/70">Manage incoming partnership and collaboration requests</p>
           </div>
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-panel p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                 <input
                   type="text"
                   placeholder="Search requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input pl-10 pr-4 py-2 rounded-md"
                 />
               </div>
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-white/20 text-white hover:bg-white/10"
               >
                 <Filter className="h-4 w-4" />
                 <span>Filters</span>
@@ -292,13 +292,13 @@ export default function PartnershipRequestsPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 glass-panel rounded-md">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="glass-select w-full px-3 py-2 rounded-md"
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
@@ -308,11 +308,11 @@ export default function PartnershipRequestsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Partnership Type</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Partnership Type</label>
                 <select
                   value={filters.partnershipType || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, partnershipType: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="glass-select w-full px-3 py-2 rounded-md"
                 >
                   <option value="all">All Types</option>
                   <option value="sponsorship">Sponsorship</option>
@@ -321,11 +321,11 @@ export default function PartnershipRequestsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="glass-select w-full px-3 py-2 rounded-md"
                 >
                   <option value={5}>5 per page</option>
                   <option value={10}>10 per page</option>
@@ -338,13 +338,13 @@ export default function PartnershipRequestsPage() {
         </div>
 
         {/* Requests Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-table overflow-hidden">
           <div className="overflow-x-auto scrollbar-hide">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="glass-table-header">
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10 glass-table-header-cell"
                     onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center space-x-2">
@@ -353,7 +353,7 @@ export default function PartnershipRequestsPage() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10 glass-table-header-cell"
                     onClick={() => handleSort('companyName')}
                   >
                     <div className="flex items-center space-x-2">
@@ -362,7 +362,7 @@ export default function PartnershipRequestsPage() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10 glass-table-header-cell"
                     onClick={() => handleSort('partnershipType')}
                   >
                     <div className="flex items-center space-x-2">
@@ -370,9 +370,9 @@ export default function PartnershipRequestsPage() {
                       {getSortIcon('partnershipType')}
                     </div>
                   </TableHead>
-                  <TableHead>Message</TableHead>
+                  <TableHead className="glass-table-header-cell">Message</TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10 glass-table-header-cell"
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center space-x-2">
@@ -381,7 +381,7 @@ export default function PartnershipRequestsPage() {
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10 glass-table-header-cell"
                     onClick={() => handleSort('createdAt')}
                   >
                     <div className="flex items-center space-x-2">
@@ -389,51 +389,51 @@ export default function PartnershipRequestsPage() {
                       {getSortIcon('createdAt')}
                     </div>
                   </TableHead>
-                  <TableHead className="w-32">Actions</TableHead>
+                  <TableHead className="w-32 glass-table-header-cell">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedData.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell>
+                  <TableRow key={request.id} className="glass-table-row">
+                    <TableCell className="glass-table-cell">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{request.fullName}</p>
-                        <p className="text-sm text-gray-600">{request.email}</p>
-                        <p className="text-xs text-gray-500">{request.phoneNumber}</p>
+                        <p className="text-sm font-medium text-white">{request.fullName}</p>
+                        <p className="text-sm text-white/70">{request.email}</p>
+                        <p className="text-xs text-white/60">{request.phoneNumber}</p>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <p className="text-sm font-medium text-gray-900">{request.companyName}</p>
+                    <TableCell className="glass-table-cell">
+                      <p className="text-sm font-medium text-white">{request.companyName}</p>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="glass-table-cell">
                       <Badge color="blue" size="sm">
                         {request.partnershipType}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="glass-table-cell">
                       <div className="max-w-xs">
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-white/70 line-clamp-2">
                           {request.message || "No message provided"}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="glass-table-cell">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                         {request.status}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-600">
+                    <TableCell className="glass-table-cell">
+                      <span className="text-sm text-white/70">
                         {formatDate(request.createdAt)}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="glass-table-cell">
                       <div className="flex items-center space-x-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => window.open(`/partnership-requests/${request.id}`, '_blank')}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
+                          className="text-palette-gold-600 hover:text-palette-gold-700 hover:bg-white/10"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -445,7 +445,7 @@ export default function PartnershipRequestsPage() {
                             setSelectedRequest(request);
                             setIsReplyModalOpen(true);
                           }}
-                          className="text-palette-blue-600 hover:text-palette-blue-700"
+                          className="text-palette-blue-600 hover:text-palette-blue-700 hover:bg-white/10"
                           title="Reply"
                         >
                           <Reply className="h-4 w-4" />
@@ -457,7 +457,7 @@ export default function PartnershipRequestsPage() {
                             setSelectedRequest(request);
                             setIsStatusModalOpen(true);
                           }}
-                          className="text-palette-green-600 hover:text-palette-green-700"
+                          className="text-palette-green-600 hover:text-palette-green-700 hover:bg-white/10"
                           title="Update Status"
                         >
                           <ToggleLeft className="h-4 w-4" />
@@ -469,7 +469,7 @@ export default function PartnershipRequestsPage() {
                             setSelectedRequest(request);
                             setIsDeleteModalOpen(true);
                           }}
-                          className="text-destructive hover:text-destructive-600"
+                          className="text-destructive hover:text-destructive-600 hover:bg-white/10"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />

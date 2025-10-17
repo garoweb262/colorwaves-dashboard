@@ -138,9 +138,9 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Message Not Found</h2>
-            <p className="text-gray-600 mb-4">The contact message you're looking for doesn't exist.</p>
+          <div className="text-center glass-panel p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-white mb-2">Message Not Found</h2>
+            <p className="text-white/70 mb-4">The contact message you're looking for doesn't exist.</p>
             <Button onClick={() => router.push('/contact-messages')}>
               Back to Contact Messages
             </Button>
@@ -165,8 +165,8 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Contact Message Details</h1>
-              <p className="text-gray-600">View and manage contact message</p>
+              <h1 className="text-2xl font-bold text-white">Contact Message Details</h1>
+              <p className="text-white/70">View and manage contact message</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -183,52 +183,52 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Message Details */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2" />
                 Message Details
               </h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                  <p className="text-lg font-semibold text-gray-900">{message.subject}</p>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Subject</label>
+                  <p className="text-lg font-semibold text-white">{message.subject}</p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                  <div className="bg-gray-50 rounded-md p-4">
-                    <p className="text-gray-900 whitespace-pre-wrap">{message.message}</p>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Message</label>
+                  <div className="glass-panel rounded-md p-4">
+                    <p className="text-white whitespace-pre-wrap">{message.message}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Reply Section */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Reply className="h-5 w-5 mr-2" />
                 Reply to Message
               </h2>
               
               {message.replyMessage ? (
                 <div className="space-y-4">
-                  <div className="bg-green-50 rounded-md p-4">
-                    <h3 className="font-medium text-green-900 mb-2">Previous Reply</h3>
-                    <p className="text-green-800 whitespace-pre-wrap">{message.replyMessage}</p>
+                  <div className="glass-panel bg-green-500/10 border-green-500/20 rounded-md p-4">
+                    <h3 className="font-medium text-green-300 mb-2">Previous Reply</h3>
+                    <p className="text-green-200 whitespace-pre-wrap">{message.replyMessage}</p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white/80 mb-2">
                       Reply Message
                     </label>
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                      className="glass-textarea w-full px-3 py-2 rounded-md"
                       placeholder="Type your reply here..."
                     />
                   </div>
@@ -248,45 +248,45 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Contact Information */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <User className="h-5 w-5 mr-2" />
                 Contact Information
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <User className="h-4 w-4 text-gray-400" />
+                  <User className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{message.name}</p>
-                    <p className="text-xs text-gray-500">Name</p>
+                    <p className="text-sm font-medium text-white">{message.name}</p>
+                    <p className="text-xs text-white/60">Name</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Mail className="h-4 w-4 text-gray-400" />
+                  <Mail className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{message.email}</p>
-                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-white">{message.email}</p>
+                    <p className="text-xs text-white/60">Email</p>
                   </div>
                 </div>
                 
                 {message.phone && (
                   <div className="flex items-center space-x-3">
-                    <Phone className="h-4 w-4 text-gray-400" />
+                    <Phone className="h-4 w-4 text-white/50" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{message.phone}</p>
-                      <p className="text-xs text-gray-500">Phone</p>
+                      <p className="text-sm font-medium text-white">{message.phone}</p>
+                      <p className="text-xs text-white/60">Phone</p>
                     </div>
                   </div>
                 )}
                 
                 {message.company && (
                   <div className="flex items-center space-x-3">
-                    <User className="h-4 w-4 text-gray-400" />
+                    <User className="h-4 w-4 text-white/50" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{message.company}</p>
-                      <p className="text-xs text-gray-500">Company</p>
+                      <p className="text-sm font-medium text-white">{message.company}</p>
+                      <p className="text-xs text-white/60">Company</p>
                     </div>
                   </div>
                 )}
@@ -294,12 +294,12 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
             </div>
 
             {/* Status Management */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Management</h3>
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Status Management</h3>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Current Status</span>
+                  <span className="text-sm font-medium text-white/80">Current Status</span>
                   <Badge
                     color={message.status === 'replied' ? "green" : message.status === 'pending' ? "yellow" : "gray"}
                     size="sm"
@@ -346,26 +346,26 @@ export default function ContactMessageDetailPage({ params }: ContactMessageDetai
             </div>
 
             {/* Timestamps */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Clock className="h-5 w-5 mr-2" />
                 Timestamps
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <Calendar className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Created</p>
-                    <p className="text-xs text-gray-500">{formatDate(message.createdAt)}</p>
+                    <p className="text-sm font-medium text-white">Created</p>
+                    <p className="text-xs text-white/60">{formatDate(message.createdAt)}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                  <Clock className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                    <p className="text-xs text-gray-500">{formatDate(message.updatedAt)}</p>
+                    <p className="text-sm font-medium text-white">Last Updated</p>
+                    <p className="text-xs text-white/60">{formatDate(message.updatedAt)}</p>
                   </div>
                 </div>
               </div>

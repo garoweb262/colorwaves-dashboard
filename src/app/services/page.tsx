@@ -253,14 +253,14 @@ export default function ServicesPage() {
   const filtersContent = (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
         <select
           value={filters.status || 'all'}
           onChange={(e) => {
             const value = e.target.value === 'all' ? null : e.target.value;
             handleFilter('status', value);
           }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+          className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -268,11 +268,11 @@ export default function ServicesPage() {
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+        <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
         <select
           value={pageSize}
           onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+          className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
         >
           <option value={5}>5 per page</option>
           <option value={10}>10 per page</option>
@@ -325,7 +325,7 @@ export default function ServicesPage() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {services.map((service) => (
-            <div key={service.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div key={service.id} className="glass-card hover:glass-card-hover transition-all duration-200">
               {/* Service Image */}
               <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
                 {service.imageUrl ? (
@@ -371,25 +371,26 @@ export default function ServicesPage() {
 
               {/* Service Content */}
               <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">
+                <h3 className="font-semibold text-lg text-white mb-2 line-clamp-1">
                   {service.name}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                <p className="text-white/70 text-sm mb-4 line-clamp-3">
                   {service.description}
                 </p>
 
                 {/* Actions */}
                 <div className="flex items-center justify-between">
+                 
+                  
+                  <div className="flex items-center space-x-1 ml-2">
                   <Button
                     onClick={() => handleViewService(service)}
-                    className="flex-1 bg-primary hover:bg-primary-600 text-primary-foreground"
+                    className="flex items-center space-x-1 ml-2"
                     size="sm"
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    View Details
+                   
                   </Button>
-                  
-                  <div className="flex items-center space-x-1 ml-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -426,9 +427,9 @@ export default function ServicesPage() {
 
         {/* Bulk Actions */}
         {selectedItems.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-700">
+              <span className="text-sm text-blue-300">
                 {selectedItems.length} service(s) selected
               </span>
               <div className="flex items-center space-x-2">

@@ -77,14 +77,14 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+    <header className="glass-navbar px-6 py-4 flex items-center justify-between sticky top-0 z-40">
       {/* Left section */}
       <div className="flex items-center space-x-6">
         <button
           onClick={onMenuToggle}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+          className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden"
         >
-          <Menu className="h-5 w-5 text-gray-600" />
+          <Menu className="h-5 w-5 text-white/70" />
         </button>
 
         {/* Breadcrumbs */}
@@ -95,9 +95,9 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
         {/* Mobile search toggle */}
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors md:hidden"
+          className="p-2 rounded-lg hover:bg-white/10 transition-colors md:hidden"
         >
-          <Search className="h-5 w-5 text-gray-600" />
+          <Search className="h-5 w-5 text-white/70" />
         </button>
       </div>
 
@@ -106,12 +106,12 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
         {/* Dark mode toggle */}
         <button
           onClick={toggleDarkMode}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg hover:bg-white/10 transition-colors"
         >
           {isDarkMode ? (
-            <Sun className="h-5 w-5 text-gray-600" />
+            <Sun className="h-5 w-5 text-white/70" />
           ) : (
-            <Moon className="h-5 w-5 text-gray-600" />
+            <Moon className="h-5 w-5 text-white/70" />
           )}
         </button>
 
@@ -119,9 +119,9 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
         <div className="relative">
           <button
             onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+            className="p-2 rounded-lg hover:bg-white/10 transition-colors relative"
           >
-            <Bell className="h-5 w-5 text-gray-600" />
+            <Bell className="h-5 w-5 text-white/70" />
             {notifications.filter(n => n.unread).length > 0 && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
             )}
@@ -135,29 +135,29 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                className="absolute right-0 mt-2 w-80 glass-modal py-2 z-50"
               >
-                <div className="px-4 py-2 border-b border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                <div className="px-4 py-2 border-b border-white/10">
+                  <h3 className="text-sm font-semibold text-white">Notifications</h3>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
                       className={cn(
-                        "px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer",
-                        notification.unread && "bg-blue-50"
+                        "px-4 py-3 hover:bg-white/10 transition-colors cursor-pointer",
+                        notification.unread && "bg-white/15"
                       )}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-white">
                             {notification.title}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-white/70 mt-1">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-gray-400 mt-2">
+                          <p className="text-xs text-white/50 mt-2">
                             {notification.time}
                           </p>
                         </div>
@@ -168,8 +168,8 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
                     </div>
                   ))}
                 </div>
-                <div className="px-4 py-2 border-t border-gray-200">
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                <div className="px-4 py-2 border-t border-white/10">
+                  <button className="text-sm text-blue-400 hover:text-blue-300 font-medium">
                     View all notifications
                   </button>
                 </div>
@@ -182,12 +182,12 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
         <div className="relative">
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 transition-colors"
           >
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-orange-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">{user?.avatar || "U"}</span>
             </div>
-            <span className="hidden md:block text-sm font-medium text-gray-700">
+            <span className="hidden md:block text-sm font-medium text-white/80">
               {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User"}
             </span>
           </button>
@@ -200,31 +200,31 @@ export function TopNavbar({ onMenuToggle, isSidebarCollapsed, breadcrumbs = [] }
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                className="absolute right-0 mt-2 w-48 glass-modal py-2 z-50"
               >
-                <div className="px-4 py-2 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User"}</p>
-                  <p className="text-xs text-gray-500">{user?.email || "user@example.com"}</p>
-                  <p className="text-xs text-blue-600 font-medium capitalize">{user?.role || "user"}</p>
+                <div className="px-4 py-2 border-b border-white/10">
+                  <p className="text-sm font-medium text-white">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User"}</p>
+                  <p className="text-xs text-white/60">{user?.email || "user@example.com"}</p>
+                  <p className="text-xs text-blue-400 font-medium capitalize">{user?.role || "user"}</p>
                 </div>
                 <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2">
+                  <button className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/10 transition-colors flex items-center space-x-2">
                     <User className="h-4 w-4" />
                     <span>Profile</span>
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2">
+                  <button className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/10 transition-colors flex items-center space-x-2">
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2">
+                  <button className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/10 transition-colors flex items-center space-x-2">
                     <HelpCircle className="h-4 w-4" />
                     <span>Help</span>
                   </button>
                 </div>
-                <div className="border-t border-gray-200 py-1">
+                <div className="border-t border-white/10 py-1">
                   <button 
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-2"
+                    className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/20 transition-colors flex items-center space-x-2"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Sign out</span>

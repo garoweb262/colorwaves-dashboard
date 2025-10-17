@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button, useToast } from "@/amal-ui";
 import { ArrowLeft, Calendar, Users, ExternalLink, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SocialShare } from "@/components/SocialShare";
 import { projectsAPI } from "@/lib/api";
 
 interface Project {
@@ -169,6 +170,13 @@ export default function ProjectDetailPage() {
             Back to Projects
           </Button>
           <div className="flex items-center space-x-2">
+            <SocialShare
+              url={`${window.location.origin}/projects/${project.slug}`}
+              title={project.title}
+              description={project.description}
+              imageUrl={project.imageUrls?.[0]}
+              hashtags={project.technologies}
+            />
             <Button
               variant="outline"
               onClick={handleToggleStatus}
@@ -269,7 +277,7 @@ export default function ProjectDetailPage() {
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{project.description}</p>
+              <p className="text-white leading-relaxed whitespace-pre-line">{project.description}</p>
             </div>
 
             {/* Technologies */}

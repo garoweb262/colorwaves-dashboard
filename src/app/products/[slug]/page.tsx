@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button, useToast, Badge } from "@/amal-ui";
 import { ArrowLeft, Calendar, Tag, Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SocialShare } from "@/components/SocialShare";
 import { crudAPI } from "@/lib/api";
 
 interface Product {
@@ -173,6 +174,13 @@ export default function ProductDetailPage() {
             Back to Products
           </Button>
           <div className="flex items-center space-x-2">
+            <SocialShare
+              url={`${window.location.origin}/products/${product.slug}`}
+              title={product.name}
+              description={product.description}
+              imageUrl={product.imageUrls?.[0]}
+              hashtags={[product.category]}
+            />
             <Button
               variant="outline"
               onClick={handleToggleStatus}

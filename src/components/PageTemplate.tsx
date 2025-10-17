@@ -74,12 +74,12 @@ export function PageTemplate({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-white">{title}</h1>
           {description && (
-            <p className="text-gray-600">{description}</p>
+            <p className="text-white/70">{description}</p>
           )}
           {error && (
-            <div className="mt-2 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+            <div className="mt-2 p-3 bg-red-500/20 border border-red-400/30 text-red-300 rounded-md">
               {error}
             </div>
           )}
@@ -101,17 +101,17 @@ export function PageTemplate({
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
               <input
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                className="glass-input pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
               />
             </div>
             {onToggleFilters && (
@@ -129,14 +129,14 @@ export function PageTemplate({
 
         {/* Filters */}
         {showFilters && filtersContent && (
-          <div className="p-4 bg-gray-50 rounded-md">
+          <div className="p-4 glass-form-section">
             {filtersContent}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="glass-card overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -144,7 +144,7 @@ export function PageTemplate({
         ) : isEmpty ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <p className="text-gray-500 text-lg">{emptyMessage}</p>
+              <p className="text-white/70 text-lg">{emptyMessage}</p>
             </div>
           </div>
         ) : (

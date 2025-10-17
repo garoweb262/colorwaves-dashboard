@@ -36,19 +36,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       
     const variantClasses = {
       primary:
-        "bg-palette-violet text-white hover:bg-palette-indigo focus:ring-palette-violet active:bg-palette-indigo/90",
+        "bg-white/10 backdrop-blur-lg text-white hover:bg-white/15 focus:ring-white/20 active:bg-white/20 border border-white/20",
       secondary:
-        "bg-palette-indigo text-white hover:bg-palette-violet focus:ring-palette-indigo active:bg-palette-violet/90",
+        "bg-white/5 backdrop-blur-md text-white hover:bg-white/10 focus:ring-white/20 active:bg-white/15 border border-white/10",
       accent:
-        "bg-palette-blue text-white hover:bg-palette-sky focus:ring-palette-blue active:bg-palette-sky/90",
+        "bg-white/8 backdrop-blur-md text-white hover:bg-white/12 focus:ring-white/20 active:bg-white/18 border border-white/15",
       ghost:
-        "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 active:bg-gray-200",
+        "bg-transparent text-white/70 hover:bg-white/10 hover:text-white focus:ring-white/20 active:bg-white/15",
       outline:
-        "border border-palette-violet text-palette-violet hover:bg-palette-violet hover:text-white focus:ring-palette-violet active:bg-palette-violet/90",
+        "border border-white/30 text-white hover:bg-white/10 hover:text-white focus:ring-white/20 active:bg-white/15 backdrop-blur-sm",
       destructive:
-        "bg-palette-red text-white hover:bg-palette-red/90 focus:ring-palette-red active:bg-palette-red/80",
+        "bg-red-500/20 backdrop-blur-lg text-red-200 hover:bg-red-500/30 focus:ring-red-400/30 active:bg-red-500/40 border border-red-400/30",
       anchor:
-        "bg-transparent text-palette-violet hover:text-palette-indigo focus:ring-palette-violet",
+        "bg-transparent text-white/70 hover:text-white hover:bg-white/5 focus:ring-white/20",
     };
 
     const sizeClasses = {

@@ -51,10 +51,10 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
         width: isCollapsed ? 70 : 280,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="h-screen bg-white border-r border-gray-200 flex flex-col relative shadow-sm"
+      className="h-screen glass-sidebar flex flex-col relative shadow-sm"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
         {!isCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -62,13 +62,13 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
             transition={{ delay: 0.1 }}
             className="flex items-center space-x-2"
           >
-         <Image src="/images/logo/ColorWaves_Logo Horizontal Black.png" alt="ColorWaves Logo" width={150} height={50} />
+         <Image src="/images/logo/ColorWaves_Logo Horizontal White.png" alt="ColorWaves Logo" width={150} height={50} />
           </motion.div>
         )}
         
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+          className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/70 hover:text-white"
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -93,22 +93,22 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
                     <button
                       onClick={() => toggleExpanded(item.title)}
                       className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200 hover:bg-gray-50",
-                        isItemActive && "bg-blue-50 text-blue-700 border border-blue-200",
+                        "w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200 hover:bg-white/10 text-white/70 hover:text-white",
+                        isItemActive && "bg-white/15 text-white border border-white/20",
                         !isCollapsed && "justify-between"
                       )}
                     >
                       <div className="flex items-center space-x-3">
                         <span className={cn(
-                          "text-gray-600 transition-colors",
-                          isItemActive && "text-blue-600"
+                          "text-white/60 transition-colors",
+                          isItemActive && "text-white"
                         )}>
                           {item.icon}
                         </span>
                         {!isCollapsed && (
                           <span className={cn(
-                            "font-medium text-gray-700",
-                            isItemActive && "text-blue-700"
+                            "font-medium text-white/80",
+                            isItemActive && "text-white"
                           )}>{item.title}</span>
                         )}
                       </div>
@@ -117,7 +117,7 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
                         <motion.div
                           animate={{ rotate: isExpanded ? 90 : 0 }}
                           transition={{ duration: 0.2 }}
-                          className="text-gray-400"
+                          className="text-white/50"
                         >
                           <ChevronRight className="h-4 w-4" />
                         </motion.div>
@@ -139,19 +139,19 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
                               <Link
                                 href={child.href}
                                 className={cn(
-                                  "flex items-center space-x-3 p-2 rounded-lg text-sm transition-all duration-200 hover:bg-gray-50",
-                                  isActive(child.href) && "bg-blue-50 text-blue-700 border border-blue-200"
+                                  "flex items-center space-x-3 p-2 rounded-lg text-sm transition-all duration-200 hover:bg-white/10 text-white/70 hover:text-white",
+                                  isActive(child.href) && "bg-white/15 text-white border border-white/20"
                                 )}
                               >
                                 <span className={cn(
-                                  "text-gray-500",
-                                  isActive(child.href) && "text-blue-600"
+                                  "text-white/50",
+                                  isActive(child.href) && "text-white"
                                 )}>
                                   {child.icon}
                                 </span>
                                 <span className={cn(
-                                  "text-gray-700",
-                                  isActive(child.href) && "text-blue-700"
+                                  "text-white/70",
+                                  isActive(child.href) && "text-white"
                                 )}>{child.title}</span>
                               </Link>
                             </li>
@@ -164,21 +164,21 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-lg transition-all duration-200 hover:bg-gray-50",
-                      isItemActive && "bg-blue-50 text-blue-700 border border-blue-200"
+                      "flex items-center justify-between p-3 rounded-lg transition-all duration-200 hover:bg-white/10 text-white/70 hover:text-white",
+                      isItemActive && "bg-white/15 text-white border border-white/20"
                     )}
                   >
                     <div className="flex items-center space-x-3">
                       <span className={cn(
-                        "text-gray-600 transition-colors",
-                        isItemActive && "text-blue-600"
+                        "text-white/60 transition-colors",
+                        isItemActive && "text-white"
                       )}>
                         {item.icon}
                       </span>
                       {!isCollapsed && (
                         <span className={cn(
-                          "font-medium text-gray-700",
-                          isItemActive && "text-blue-700"
+                          "font-medium text-white/80",
+                          isItemActive && "text-white"
                         )}>{item.title}</span>
                       )}
                     </div>
@@ -202,21 +202,21 @@ export function Sidebar({ isCollapsed, onToggle, userRole = "admin" }: SidebarPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="p-4 border-t border-gray-200"
+          className="p-4 border-t border-white/10"
         >
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 hover:bg-red-50 text-red-600 hover:text-red-700 hover:border hover:border-red-200"
+            className="w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 hover:bg-red-500/20 text-red-300 hover:text-red-200 hover:border hover:border-red-400/30"
           >
             <LogOut className="h-4 w-4" />
             <span className="font-medium">Logout</span>
           </button>
         </motion.div>
       ) : (
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="w-full p-3 rounded-lg transition-all duration-200 hover:bg-red-50 text-red-600 hover:text-red-700 flex items-center justify-center"
+            className="w-full p-3 rounded-lg transition-all duration-200 hover:bg-red-500/20 text-red-300 hover:text-red-200 flex items-center justify-center"
             title="Logout"
           >
             <LogOut className="h-4 w-4" />

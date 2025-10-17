@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, useToast } from "@/amal-ui";
+import { Button, useToast, Input, Textarea, Select } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -233,161 +233,96 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title={team ? "Edit Team Member" : "Add New Team Member"}>
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {team ? "Edit Team Member" : "Add New Team Member"}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* First Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              First Name *
-            </label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.firstName ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter first name"
-            />
-            {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
-            )}
-          </div>
+          {/* Personal Information */}
+          <div className="glass-form-section p-4">
+            <h3 className="text-white font-medium mb-4 border-b border-white/10 pb-2">Personal Information</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="First Name"
+                placeholder="Enter first name"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                error={errors.firstName}
+                required
+                fullWidth
+              />
 
-          {/* Last Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Last Name *
-            </label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange("lastName", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.lastName ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter last name"
-            />
-            {errors.lastName && (
-              <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
-            )}
-          </div>
+              <Input
+                label="Last Name"
+                placeholder="Enter last name"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                error={errors.lastName}
+                required
+                fullWidth
+              />
+            </div>
 
-          {/* Position */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Position *
-            </label>
-            <input
-              type="text"
+            <Input
+              label="Position"
+              placeholder="Enter position"
               value={formData.position}
               onChange={(e) => handleInputChange("position", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.position ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter position"
+              error={errors.position}
+              required
+              fullWidth
             />
-            {errors.position && (
-              <p className="mt-1 text-sm text-red-600">{errors.position}</p>
-            )}
-          </div>
 
-          {/* Bio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bio *
-            </label>
-            <textarea
+            <Textarea
+              label="Bio"
+              placeholder="Enter team member bio"
               value={formData.bio}
               onChange={(e) => handleInputChange("bio", e.target.value)}
+              error={errors.bio}
+              required
+              fullWidth
               rows={4}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.bio ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter team member's bio..."
             />
-            {errors.bio && (
-              <p className="mt-1 text-sm text-red-600">{errors.bio}</p>
-            )}
           </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
+          {/* Contact Information */}
+          <div className="glass-form-section p-4">
+            <h3 className="text-white font-medium mb-4 border-b border-white/10 pb-2">Contact Information</h3>
+            
+            <Input
+              label="Email"
+              placeholder="Enter email address"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.email ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter email address"
+              type="email"
+              fullWidth
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
-          </div>
 
-          {/* LinkedIn */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              LinkedIn URL
-            </label>
-            <input
-              type="url"
+            <Input
+              label="LinkedIn"
+              placeholder="Enter LinkedIn profile URL"
               value={formData.linkedin}
               onChange={(e) => handleInputChange("linkedin", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.linkedin ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="https://linkedin.com/in/username"
-            />
-            {errors.linkedin && (
-              <p className="mt-1 text-sm text-red-600">{errors.linkedin}</p>
-            )}
-          </div>
-
-          {/* Twitter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Twitter URL
-            </label>
-            <input
               type="url"
+              fullWidth
+            />
+
+            <Input
+              label="Twitter"
+              placeholder="Enter Twitter profile URL"
               value={formData.twitter}
               onChange={(e) => handleInputChange("twitter", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.twitter ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="https://twitter.com/username"
+              type="url"
+              fullWidth
             />
-            {errors.twitter && (
-              <p className="mt-1 text-sm text-red-600">{errors.twitter}</p>
-            )}
           </div>
 
           {/* Image Upload */}
-          <div>
+          <div className="glass-form-section p-4">
+            <h3 className="text-white font-medium mb-4 border-b border-white/10 pb-2">Profile Image</h3>
             <ImageUpload
-              label="Team Member Image"
-              description="Upload an image for this team member"
+              label="Upload Profile Image"
+              description="Upload a profile image for this team member"
               currentImage={formData.image}
               onImageSelect={(imageUrl, file) => handleImageSelect(imageUrl, file)}
               onImageRemove={handleImageRemove}
@@ -396,22 +331,20 @@ export function TeamFormModal({ team, isOpen, onClose, onSave }: TeamFormModalPr
           </div>
 
           {/* Order */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Display Order
-            </label>
-            <input
-              type="number"
-              value={formData.order}
+          <div className="glass-form-section p-4">
+            <h3 className="text-white font-medium mb-4 border-b border-white/10 pb-2">Display Settings</h3>
+            <Input
+              label="Display Order"
+              placeholder="Enter display order (0 = first)"
+              value={formData.order.toString()}
               onChange={(e) => handleInputChange("order", parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="Enter display order"
-              min="0"
+              type="number"
+              fullWidth
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

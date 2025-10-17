@@ -243,11 +243,11 @@ export default function FaqsPage() {
 
   const getSortIcon = (column: string) => {
     if (sortBy !== column) {
-      return <ChevronsUpDown className="h-4 w-4 text-gray-400" />;
+      return <ChevronsUpDown className="h-4 w-4 text-white/40" />;
     }
     return sortOrder === 'asc' ? 
-      <ChevronUp className="h-4 w-4 text-gray-600" /> : 
-      <ChevronDown className="h-4 w-4 text-gray-600" />;
+      <ChevronUp className="h-4 w-4 text-white/60" /> : 
+      <ChevronDown className="h-4 w-4 text-white/60" />;
   };
 
   // Pagination
@@ -272,8 +272,8 @@ export default function FaqsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h1>
-            <p className="text-gray-600">Manage FAQ content for your website</p>
+            <h1 className="text-2xl font-bold text-white">Frequently Asked Questions</h1>
+            <p className="text-white/70">Manage FAQ content for your website</p>
           </div>
           <Button
             onClick={handleAddFaq}
@@ -285,17 +285,17 @@ export default function FaqsPage() {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search FAQs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 />
               </div>
               <Button
@@ -311,13 +311,13 @@ export default function FaqsPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 glass-form-section rounded-md">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
@@ -325,11 +325,11 @@ export default function FaqsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value={5}>5 per page</option>
                   <option value={10}>10 per page</option>
@@ -342,48 +342,48 @@ export default function FaqsPage() {
         </div>
 
         {/* FAQs Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto scrollbar-hide">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10"
                     onClick={() => handleSort('question')}
                   >
                     <div className="flex items-center space-x-2">
-                      <span>Question</span>
+                      <span className="text-white">Question</span>
                       {getSortIcon('question')}
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10"
                     onClick={() => handleSort('answer')}
                   >
                     <div className="flex items-center space-x-2">
-                      <span>Answer</span>
+                      <span className="text-white">Answer</span>
                       {getSortIcon('answer')}
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10"
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center space-x-2">
-                      <span>Status</span>
+                      <span className="text-white">Status</span>
                       {getSortIcon('status')}
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-white/10"
                     onClick={() => handleSort('createdAt')}
                   >
                     <div className="flex items-center space-x-2">
-                      <span>Created</span>
+                      <span className="text-white">Created</span>
                       {getSortIcon('createdAt')}
                     </div>
                   </TableHead>
-                  <TableHead className="w-32">Actions</TableHead>
+                  <TableHead className="w-32 text-white">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -391,27 +391,27 @@ export default function FaqsPage() {
                   <TableRow key={faq.id}>
                     <TableCell>
                       <div className="max-w-md">
-                        <p className="text-sm text-gray-900 line-clamp-2">
+                        <p className="text-sm text-white line-clamp-2">
                           {faq.question}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-md">
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-white/70 line-clamp-2">
                           {faq.answer}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        faq.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        faq.status === 'active' ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-gray-500/20 text-gray-300 border border-gray-400/30'
                       }`}>
                         {faq.status === 'active' ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-white/80">
                         {formatDate(faq.createdAt)}
                       </span>
                     </TableCell>
@@ -421,7 +421,7 @@ export default function FaqsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleViewFaq(faq)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
+                          className="text-white/60 hover:text-white"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
@@ -430,7 +430,7 @@ export default function FaqsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditFaq(faq)}
-                          className="text-palette-gold-600 hover:text-palette-gold-700"
+                          className="text-white/60 hover:text-white"
                           title="Edit FAQ"
                         >
                           <Edit className="h-4 w-4" />
@@ -439,7 +439,7 @@ export default function FaqsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleUpdateStatus(faq)}
-                          className="text-palette-blue-600 hover:text-palette-blue-700"
+                          className="text-white/60 hover:text-white"
                           title={faq.status === 'active' ? "Deactivate" : "Activate"}
                         >
                           {faq.status === 'active' ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
@@ -448,7 +448,7 @@ export default function FaqsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteFaq(faq)}
-                          className="text-destructive hover:text-destructive-600"
+                          className="text-red-400 hover:text-red-300"
                           title="Delete FAQ"
                         >
                           <Trash2 className="h-4 w-4" />

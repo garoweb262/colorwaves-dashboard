@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, useToast } from "@/amal-ui";
+import { Button, useToast, Input, Textarea, Select, Checkbox } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -230,111 +230,67 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title={product ? "Edit Product" : "Add New Product"}>
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {product ? "Edit Product" : "Add New Product"}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => {
-                handleInputChange("name", e.target.value);
-                // Auto-generate slug from name if creating new product
-                if (!product) {
-                  const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-                  handleInputChange("slug", slug);
-                }
-              }}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.name ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter product name"
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
-          </div>
+          <Input
+            label="Product Name"
+            placeholder="Enter product name"
+            value={formData.name}
+            onChange={(e) => {
+              handleInputChange("name", e.target.value);
+              // Auto-generate slug from name if creating new product
+              if (!product) {
+                const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                handleInputChange("slug", slug);
+              }
+            }}
+            error={errors.name}
+            required
+            fullWidth
+          />
 
           {/* Product Slug */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Slug *
-            </label>
-            <input
-              type="text"
-              value={formData.slug}
-              onChange={(e) => handleInputChange("slug", e.target.value.toLowerCase())}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.slug ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="product-slug"
-            />
-            {errors.slug && (
-              <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
-            )}
-            <p className="mt-1 text-xs text-gray-500">
-              URL-friendly identifier (lowercase, hyphens only)
-            </p>
-          </div>
+          <Input
+            label="Product Slug"
+            placeholder="product-slug"
+            value={formData.slug}
+            onChange={(e) => handleInputChange("slug", e.target.value.toLowerCase())}
+            error={errors.slug}
+            required
+            helperText="URL-friendly identifier (lowercase, hyphens only)"
+            fullWidth
+          />
 
           {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={4}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.description ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter product description"
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-          </div>
+          <Textarea
+            label="Description"
+            placeholder="Enter product description"
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+            error={errors.description}
+            required
+            rows={4}
+            fullWidth
+          />
 
           {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category *
-            </label>
-            <select
-              value={formData.category}
-              onChange={(e) => handleInputChange("category", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.category ? "border-red-300" : "border-gray-300"
-              }`}
-            >
-              <option value="">Select a category</option>
-              {CATEGORIES.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="mt-1 text-sm text-red-600">{errors.category}</p>
-            )}
-          </div>
+          <Select
+            label="Category"
+            value={formData.category}
+            onChange={(value) => handleInputChange("category", value)}
+            error={errors.category}
+            fullWidth
+            options={[
+              { value: "", label: "Select a category" },
+              ...CATEGORIES.map(category => ({
+                value: category,
+                label: category
+              }))
+            ]}
+          />
 
           {/* Image Upload */}
           <div>
@@ -355,26 +311,16 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
           </div>
 
           {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => handleInputChange("isActive", e.target.checked)}
-                className="h-4 w-4 text-palette-violet focus:ring-palette-violet border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="text-sm text-gray-700">
-                Active (visible to customers)
-              </label>
-            </div>
+          <div className="glass-form-section p-4">
+            <Checkbox
+              label="Active (visible to customers)"
+              checked={formData.isActive}
+              onChange={(checked) => handleInputChange("isActive", checked)}
+            />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

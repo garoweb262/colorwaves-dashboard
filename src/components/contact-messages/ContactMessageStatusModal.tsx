@@ -66,39 +66,30 @@ export function ContactMessageStatusModal({
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md" title="Update Contact Message Status">
       <div className="p-6 h-[60vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Update Contact Message Status</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-            disabled={isSubmitting}
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Contact Message Info */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Contact Message</h3>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">{contactMessage.fullName}</span> -{" "}
-              <span className="font-medium">{contactMessage.subject}</span>
+          <div className="glass-form-section p-4">
+            <h3 className="text-sm font-medium text-white mb-2">Contact Message</h3>
+            <p className="text-sm text-white/80">
+              <span className="font-medium text-white">{contactMessage.fullName}</span> -{" "}
+              <span className="font-medium text-white">{contactMessage.subject}</span>
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-white/70 mt-1">
               {contactMessage.email}
             </p>
           </div>
 
           {/* Current Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Current Status
             </label>
-            <div className="px-3 py-2 bg-gray-100 rounded-md">
-              <span className="text-sm text-gray-600 capitalize">
+            <div className="px-3 py-2 bg-white/10 rounded-md">
+              <span className="text-sm text-white capitalize">
                 {contactMessage.status}
               </span>
             </div>
@@ -106,13 +97,13 @@ export function ContactMessageStatusModal({
 
           {/* New Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               New Status *
             </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+              className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
               disabled={isSubmitting}
             >
               {statusOptions.map((option) => (
@@ -124,18 +115,18 @@ export function ContactMessageStatusModal({
           </div>
 
           {/* Status Description */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Status Descriptions</h4>
-            <div className="space-y-2 text-sm text-blue-800">
-              <p><span className="font-medium">Pending:</span> Message received, awaiting review</p>
-              <p><span className="font-medium">Accepted:</span> Message acknowledged</p>
-              <p><span className="font-medium">Replied:</span> Response sent to sender</p>
-              <p><span className="font-medium">Declined:</span> Message not actionable</p>
+          <div className="glass-form-section p-4">
+            <h4 className="text-sm font-medium text-white mb-2">Status Descriptions</h4>
+            <div className="space-y-2 text-sm text-white/80">
+              <p><span className="font-medium text-white">Pending:</span> Message received, awaiting review</p>
+              <p><span className="font-medium text-white">Accepted:</span> Message acknowledged</p>
+              <p><span className="font-medium text-white">Replied:</span> Response sent to sender</p>
+              <p><span className="font-medium text-white">Declined:</span> Message not actionable</p>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

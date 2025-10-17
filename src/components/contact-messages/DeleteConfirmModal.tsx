@@ -28,24 +28,9 @@ interface DeleteConfirmModalProps {
 
 export function DeleteConfirmModal({ message, isOpen, onClose, onConfirm }: DeleteConfirmModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm" title="Delete Contact Message">
       <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Delete Contact Message</h3>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="p-2"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        
 
         <div className="mb-6">
           <p className="text-gray-600 mb-4">

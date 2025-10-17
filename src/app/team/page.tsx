@@ -275,8 +275,8 @@ export default function TeamPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Team Members</h1>
-            <p className="text-gray-600">Manage your team members and their information</p>
+            <h1 className="text-2xl font-bold text-white">Team Members</h1>
+            <p className="text-white/70">Manage your team members and their information</p>
           </div>
           <Button
             onClick={handleAddTeam}
@@ -288,17 +288,17 @@ export default function TeamPage() {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search team members..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
                 />
               </div>
               <Button
@@ -314,13 +314,13 @@ export default function TeamPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 glass-form-section rounded-md">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
@@ -328,11 +328,11 @@ export default function TeamPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value={6}>6 per page</option>
                   <option value={12}>12 per page</option>
@@ -346,18 +346,18 @@ export default function TeamPage() {
         {/* Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedData.map((team) => (
-            <div key={team.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={team.id} className="glass-card hover:glass-card-hover transition-all duration-200 overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    team.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    team.status === 'ACTIVE' ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-gray-500/20 text-gray-300 border border-gray-400/30'
                   }`}>
                     {team.status === 'ACTIVE' ? "Active" : "Inactive"}
                   </span>
                 </div>
                 
                 <div className="text-center mb-4">
-                  <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
                     {team.image ? (
                       <img 
                         src={team.image} 
@@ -365,24 +365,24 @@ export default function TeamPage() {
                         className="w-20 h-20 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-2xl font-medium text-gray-600">
+                      <span className="text-2xl font-medium text-white">
                         {team.firstName.charAt(0)}{team.lastName.charAt(0)}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-white">
                     {team.firstName} {team.lastName}
                   </h3>
-                  <p className="text-sm text-gray-600">{team.position}</p>
+                  <p className="text-sm text-white/70">{team.position}</p>
                 </div>
                 
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 line-clamp-3">
+                  <p className="text-sm text-white/70 line-clamp-3">
                     {team.bio}
                   </p>
                 </div>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-4">
                   <span>Created: {formatDate(team.createdAt)}</span>
                   {team.order && <span>Order: {team.order}</span>}
                 </div>
@@ -432,7 +432,7 @@ export default function TeamPage() {
             >
               Previous
             </Button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-white/70">
               Page {currentPage} of {totalPages}
             </span>
             <Button
@@ -449,11 +449,11 @@ export default function TeamPage() {
         {/* Empty State */}
         {filteredTeams.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-white/40 mb-4">
               <Plus className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No team members found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-white mb-2">No team members found</h3>
+            <p className="text-white/70 mb-4">
               {searchTerm || Object.values(filters).some(f => f) 
                 ? "Try adjusting your search or filters" 
                 : "Get started by adding your first team member"}

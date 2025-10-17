@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, useToast } from "@/amal-ui";
+import { Button, useToast, Input, Textarea, Select, Checkbox } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -254,104 +254,61 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" title={blog ? "Edit Blog Post" : "Create New Blog Post"}>
       <div className="p-6 h-[90vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {blog ? "Edit Blog Post" : "Create New Blog Post"}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.title ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter blog title"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-            )}
-          </div>
+          <Input
+            label="Title"
+            placeholder="Enter blog title"
+            value={formData.title}
+            onChange={(e) => handleInputChange("title", e.target.value)}
+            error={errors.title}
+            required
+            fullWidth
+          />
 
           {/* Video URL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              YouTube Video Link
-            </label>
-            <input
-              type="url"
-              value={formData.videoUrl}
-              onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-          </div>
+          <Input
+            label="YouTube Video Link"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={formData.videoUrl}
+            onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+            type="url"
+            fullWidth
+          />
 
           {/* Excerpt */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Excerpt
-            </label>
-            <textarea
-              value={formData.excerpt}
-              onChange={(e) => handleInputChange("excerpt", e.target.value)}
-              rows={3}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.excerpt ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter blog excerpt"
-            />
-          </div>
+          <Textarea
+            label="Excerpt"
+            placeholder="Enter blog excerpt"
+            value={formData.excerpt}
+            onChange={(e) => handleInputChange("excerpt", e.target.value)}
+            rows={3}
+            fullWidth
+          />
 
           {/* Content */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Content *
-            </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              rows={8}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.content ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter blog content"
-            />
-            {errors.content && (
-              <p className="mt-1 text-sm text-red-600">{errors.content}</p>
-            )}
-          </div>
+          <Textarea
+            label="Content"
+            placeholder="Enter blog content"
+            value={formData.content}
+            onChange={(e) => handleInputChange("content", e.target.value)}
+            error={errors.content}
+            required
+            rows={8}
+            fullWidth
+          />
 
           {/* Author */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Author
-            </label>
-            <input
-              type="text"
-              value={formData.author}
-              onChange={(e) => handleInputChange("author", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="Enter author name"
-            />
-          </div>
+          <Input
+            label="Author"
+            placeholder="Enter author name"
+            value={formData.author}
+            onChange={(e) => handleInputChange("author", e.target.value)}
+            fullWidth
+          />
 
           {/* Images */}
           <div>
@@ -370,7 +327,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Tags
             </label>
             <div className="flex gap-2 mb-2">
@@ -379,7 +336,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                className="flex-1 glass-input px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 placeholder="Enter tag and press Enter"
               />
               <Button type="button" variant="outline" onClick={addTag}>
@@ -391,13 +348,13 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
                 {formData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-500/20 text-blue-300 border border-blue-400/30"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 text-blue-300 hover:text-blue-200"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -409,7 +366,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
 
           {/* Categories */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Categories
             </label>
             <div className="flex gap-2 mb-2">
@@ -418,7 +375,7 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
                 value={categoryInput}
                 onChange={(e) => setCategoryInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCategory())}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                className="flex-1 glass-input px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 placeholder="Enter category and press Enter"
               />
               <Button type="button" variant="outline" onClick={addCategory}>
@@ -430,13 +387,13 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
                 {formData.categories.map((category, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/20 text-green-300 border border-green-400/30"
                   >
                     {category}
                     <button
                       type="button"
                       onClick={() => removeCategory(category)}
-                      className="ml-2 text-green-600 hover:text-green-800"
+                      className="ml-2 text-green-300 hover:text-green-200"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -448,23 +405,16 @@ export function BlogFormModal({ blog, isOpen, onClose, onSave }: BlogFormModalPr
 
 
           {/* Featured */}
-          <div>
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="isFeatured"
-                checked={formData.isFeatured}
-                onChange={(e) => handleInputChange("isFeatured", e.target.checked)}
-                className="h-4 w-4 text-palette-violet focus:ring-palette-violet border-gray-300 rounded"
-              />
-              <label htmlFor="isFeatured" className="text-sm text-gray-700">
-                Featured (show as featured blog post)
-              </label>
-            </div>
+          <div className="glass-form-section p-4">
+            <Checkbox
+              label="Featured (show as featured blog post)"
+              checked={formData.isFeatured}
+              onChange={(checked) => handleInputChange("isFeatured", checked)}
+            />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

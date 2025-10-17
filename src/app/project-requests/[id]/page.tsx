@@ -144,9 +144,9 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Request Not Found</h2>
-            <p className="text-gray-600 mb-4">The project request you're looking for doesn't exist.</p>
+          <div className="text-center glass-panel p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-white mb-2">Request Not Found</h2>
+            <p className="text-white/70 mb-4">The project request you're looking for doesn't exist.</p>
             <Button onClick={() => router.push('/project-requests')}>
               Back to Project Requests
             </Button>
@@ -171,8 +171,8 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{request.projectTitle}</h1>
-              <p className="text-gray-600">Project request from {request.clientName}</p>
+              <h1 className="text-2xl font-bold text-white">{request.projectTitle}</h1>
+              <p className="text-white/70">Project request from {request.clientName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -192,36 +192,36 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Project Details */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Briefcase className="h-5 w-5 mr-2" />
                 Project Details
               </h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
-                  <p className="text-lg font-semibold text-gray-900">{request.projectTitle}</p>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Project Title</label>
+                  <p className="text-lg font-semibold text-white">{request.projectTitle}</p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <div className="bg-gray-50 rounded-md p-4">
-                    <p className="text-gray-900 whitespace-pre-wrap">{request.projectDescription}</p>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Description</label>
+                  <div className="glass-panel rounded-md p-4">
+                    <p className="text-white whitespace-pre-wrap">{request.projectDescription}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
-                    <p className="text-gray-900 flex items-center">
+                    <label className="block text-sm font-medium text-white/80 mb-1">Budget</label>
+                    <p className="text-white flex items-center">
                       <DollarSign className="h-4 w-4 mr-1" />
                       {request.budget}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Timeline</label>
-                    <p className="text-gray-900 flex items-center">
+                    <label className="block text-sm font-medium text-white/80 mb-1">Timeline</label>
+                    <p className="text-white flex items-center">
                       <ClockIcon className="h-4 w-4 mr-1" />
                       {request.timeline}
                     </p>
@@ -230,7 +230,7 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
 
                 {request.services && request.services.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Required Services</label>
+                    <label className="block text-sm font-medium text-white/80 mb-2">Required Services</label>
                     <div className="flex flex-wrap gap-2">
                       {request.services.map((service, index) => (
                         <Badge key={index} color="blue" size="sm">
@@ -245,8 +245,8 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
 
             {/* Project Images */}
             {request.images && request.images.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="glass-panel p-6">
+                <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                   <ImageIcon className="h-5 w-5 mr-2" />
                   Project Images
                 </h2>
@@ -257,7 +257,7 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
                       <img
                         src={image}
                         alt={`Project image ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        className="w-full h-48 object-cover rounded-lg border border-white/20"
                         onError={(e) => {
                           e.currentTarget.src = '/images/placeholder.jpg';
                         }}
@@ -269,30 +269,30 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
             )}
 
             {/* Reply Section */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Reply className="h-5 w-5 mr-2" />
                 Reply to Request
               </h2>
               
               {request.replyMessage ? (
                 <div className="space-y-4">
-                  <div className="bg-green-50 rounded-md p-4">
-                    <h3 className="font-medium text-green-900 mb-2">Previous Reply</h3>
-                    <p className="text-green-800 whitespace-pre-wrap">{request.replyMessage}</p>
+                  <div className="glass-panel bg-green-500/10 border-green-500/20 rounded-md p-4">
+                    <h3 className="font-medium text-green-300 mb-2">Previous Reply</h3>
+                    <p className="text-green-200 whitespace-pre-wrap">{request.replyMessage}</p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white/80 mb-2">
                       Reply Message
                     </label>
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                      className="glass-textarea w-full px-3 py-2 rounded-md"
                       placeholder="Type your reply here..."
                     />
                   </div>
@@ -311,58 +311,58 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Client Information */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <User className="h-5 w-5 mr-2" />
                 Client Information
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <User className="h-4 w-4 text-gray-400" />
+                  <User className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.clientName}</p>
-                    <p className="text-xs text-gray-500">Client Name</p>
+                    <p className="text-sm font-medium text-white">{request.clientName}</p>
+                    <p className="text-xs text-white/60">Client Name</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Building className="h-4 w-4 text-gray-400" />
+                  <Building className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.companyName}</p>
-                    <p className="text-xs text-gray-500">Company</p>
+                    <p className="text-sm font-medium text-white">{request.companyName}</p>
+                    <p className="text-xs text-white/60">Company</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Mail className="h-4 w-4 text-gray-400" />
+                  <Mail className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.email}</p>
-                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-white">{request.email}</p>
+                    <p className="text-xs text-white/60">Email</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Phone className="h-4 w-4 text-gray-400" />
+                  <Phone className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.phoneNumber}</p>
-                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="text-sm font-medium text-white">{request.phoneNumber}</p>
+                    <p className="text-xs text-white/60">Phone</p>
                   </div>
                 </div>
                 
                 {request.website && (
                   <div className="flex items-center space-x-3">
-                    <Globe className="h-4 w-4 text-gray-400" />
+                    <Globe className="h-4 w-4 text-white/50" />
                     <div>
                       <a 
                         href={request.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                        className="text-sm font-medium text-blue-300 hover:text-blue-200"
                       >
                         {request.website}
                       </a>
-                      <p className="text-xs text-gray-500">Website</p>
+                      <p className="text-xs text-white/60">Website</p>
                     </div>
                   </div>
                 )}
@@ -370,12 +370,12 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
             </div>
 
             {/* Status Management */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Management</h3>
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Status Management</h3>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Current Status</span>
+                  <span className="text-sm font-medium text-white/80">Current Status</span>
                   <Badge
                     color={
                       request.status === 'accepted' ? "green" : 
@@ -415,26 +415,26 @@ export default function ProjectRequestDetailPage({ params }: ProjectRequestDetai
             </div>
 
             {/* Timestamps */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Clock className="h-5 w-5 mr-2" />
                 Timestamps
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <Calendar className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Created</p>
-                    <p className="text-xs text-gray-500">{formatDate(request.createdAt)}</p>
+                    <p className="text-sm font-medium text-white">Created</p>
+                    <p className="text-xs text-white/60">{formatDate(request.createdAt)}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                  <Clock className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                    <p className="text-xs text-gray-500">{formatDate(request.updatedAt)}</p>
+                    <p className="text-sm font-medium text-white">Last Updated</p>
+                    <p className="text-xs text-white/60">{formatDate(request.updatedAt)}</p>
                   </div>
                 </div>
               </div>

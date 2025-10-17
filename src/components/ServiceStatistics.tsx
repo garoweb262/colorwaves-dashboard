@@ -204,8 +204,8 @@ export const ServiceStatistics: React.FC<ServiceStatisticsProps> = ({
 
   if (error) {
     return (
-      <div className={`bg-red-50 border border-red-200 rounded-lg p-4 ${className}`}>
-        <p className="text-red-600 text-sm">Failed to load statistics: {error}</p>
+      <div className={`bg-red-500/20 border border-red-400/30 rounded-lg p-4 ${className}`}>
+        <p className="text-red-300 text-sm">Failed to load statistics: {error}</p>
       </div>
     );
   }
@@ -216,7 +216,7 @@ export const ServiceStatistics: React.FC<ServiceStatisticsProps> = ({
         <div className={`p-2 rounded-lg ${config.bgColor}`}>
           <config.icon className={`h-5 w-5 ${config.color}`} />
         </div>
-        <h2 className="text-lg font-semibold text-gray-900">{config.title} Statistics</h2>
+        <h2 className="text-lg font-semibold text-white">{config.title} Statistics</h2>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

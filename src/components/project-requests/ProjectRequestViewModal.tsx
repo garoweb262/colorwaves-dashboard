@@ -42,30 +42,22 @@ export function ProjectRequestViewModal({ projectRequest, isOpen, onClose }: Pro
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30';
       case 'accepted':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-300 border border-green-400/30';
       case 'replied':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/20 text-blue-300 border border-blue-400/30';
       case 'declined':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/20 text-red-300 border border-red-400/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-300 border border-gray-400/30';
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title="Project Request Details">
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Project Request Details</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        
 
         <div className="space-y-6">
           {/* Status */}

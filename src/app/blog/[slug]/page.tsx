@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button, useToast, Badge } from "@/amal-ui";
 import { ArrowLeft, Calendar, User, Eye, Heart, MessageCircle, Edit, Trash2, ToggleLeft, ToggleRight, Star, Tag, Image as ImageIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SocialShare } from "@/components/SocialShare";
 import { blogsAPI } from "@/lib/api";
 
 interface Blog {
@@ -189,7 +190,7 @@ export default function BlogDetailPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Blog post not found</h2>
+          <h2 className="text-xl font-semibold text-white mb-2">Blog post not found</h2>
           <Button onClick={() => router.push("/blog")}>
             Back to Blog
           </Button>
@@ -211,6 +212,13 @@ export default function BlogDetailPage() {
             Back to Blog
           </Button>
           <div className="flex items-center space-x-2">
+            <SocialShare
+              url={`${window.location.origin}/blog/${blog.slug}`}
+              title={blog.title}
+              description={blog.excerpt}
+              imageUrl={blog.imageUrl}
+              hashtags={blog.tags || []}
+            />
             <Button
               variant="outline"
               onClick={handleToggleFeatured}
@@ -244,7 +252,7 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-card overflow-hidden">
           {/* Featured Image */}
           {blog.imageUrl && (
             <div className="aspect-video bg-gray-100">
@@ -287,11 +295,11 @@ export default function BlogDetailPage() {
                   </Badge>
                 )}
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">{blog.title}</h1>
+              <h1 className="text-3xl font-bold text-white mb-3">{blog.title}</h1>
               {blog.excerpt && (
-                <p className="text-lg text-gray-600 mb-4">{blog.excerpt}</p>
+                <p className="text-lg text-white/70 mb-4">{blog.excerpt}</p>
               )}
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <div className="flex items-center space-x-4 text-sm text-white/60">
                 {blog.author && (
                   <div className="flex items-center space-x-1">
                     <User className="h-4 w-4" />
@@ -322,7 +330,7 @@ export default function BlogDetailPage() {
             {/* Categories */}
             {blog.categories && blog.categories.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Categories</h3>
+                <h3 className="text-sm font-semibold text-white mb-2">Categories</h3>
                 <div className="flex flex-wrap gap-2">
                   {blog.categories.map((category, index) => (
                     <Badge key={index} color="blue" size="sm">
@@ -335,7 +343,7 @@ export default function BlogDetailPage() {
 
             {/* Content */}
             <div className="prose max-w-none mb-8">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <div className="text-white/80 leading-relaxed whitespace-pre-line">
                 {blog.content}
               </div>
             </div>
@@ -343,7 +351,7 @@ export default function BlogDetailPage() {
             {/* Tags */}
             {blog.tags && blog.tags.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Tags</h2>
+                <h2 className="text-xl font-semibold text-white mb-3">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {blog.tags.map((tag, index) => (
                     <Badge key={index} color="purple" size="md">
@@ -356,13 +364,13 @@ export default function BlogDetailPage() {
             )}
 
             {/* Metadata */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="pt-6 border-t border-white/10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-white/60">
                 <div>
-                  <span className="font-medium">Created:</span> {formatDate(blog.createdAt || '')}
+                  <span className="font-medium text-white/80">Created:</span> {formatDate(blog.createdAt || '')}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {formatDate(blog.updatedAt || '')}
+                  <span className="font-medium text-white/80">Last Updated:</span> {formatDate(blog.updatedAt || '')}
                 </div>
               </div>
             </div>

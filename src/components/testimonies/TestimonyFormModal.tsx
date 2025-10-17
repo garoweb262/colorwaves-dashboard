@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, useToast } from "@/amal-ui";
+import { Button, useToast, Input, Textarea, Select } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -217,121 +217,71 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title={testimony ? "Edit Testimony" : "Add New Testimony"}>
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {testimony ? "Edit Testimony" : "Add New Testimony"}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Testimony Content */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Testimony Content *
-            </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              rows={4}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.content ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter the customer's testimony..."
-            />
-            {errors.content && (
-              <p className="mt-1 text-sm text-red-600">{errors.content}</p>
-            )}
-          </div>
+          <Textarea
+            label="Testimony Content"
+            placeholder="Enter the customer's testimony..."
+            value={formData.content}
+            onChange={(e) => handleInputChange("content", e.target.value)}
+            error={errors.content}
+            required
+            rows={4}
+            fullWidth
+          />
 
           {/* Client Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Name *
-            </label>
-            <input
-              type="text"
-              value={formData.clientName}
-              onChange={(e) => handleInputChange("clientName", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.clientName ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter client's name"
-            />
-            {errors.clientName && (
-              <p className="mt-1 text-sm text-red-600">{errors.clientName}</p>
-            )}
-          </div>
+          <Input
+            label="Client Name"
+            placeholder="Enter client's name"
+            value={formData.clientName}
+            onChange={(e) => handleInputChange("clientName", e.target.value)}
+            error={errors.clientName}
+            required
+            fullWidth
+          />
 
           {/* Client Position */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Position *
-            </label>
-            <input
-              type="text"
-              value={formData.clientPosition}
-              onChange={(e) => handleInputChange("clientPosition", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.clientPosition ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter client's position"
-            />
-            {errors.clientPosition && (
-              <p className="mt-1 text-sm text-red-600">{errors.clientPosition}</p>
-            )}
-          </div>
+          <Input
+            label="Client Position"
+            placeholder="Enter client's position"
+            value={formData.clientPosition}
+            onChange={(e) => handleInputChange("clientPosition", e.target.value)}
+            error={errors.clientPosition}
+            required
+            fullWidth
+          />
 
           {/* Client Company */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Company *
-            </label>
-            <input
-              type="text"
-              value={formData.clientCompany}
-              onChange={(e) => handleInputChange("clientCompany", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.clientCompany ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter client's company"
-            />
-            {errors.clientCompany && (
-              <p className="mt-1 text-sm text-red-600">{errors.clientCompany}</p>
-            )}
-          </div>
+          <Input
+            label="Client Company"
+            placeholder="Enter client's company"
+            value={formData.clientCompany}
+            onChange={(e) => handleInputChange("clientCompany", e.target.value)}
+            error={errors.clientCompany}
+            required
+            fullWidth
+          />
 
           {/* Rating */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rating *
-            </label>
-            <select
-              value={formData.rating}
-              onChange={(e) => handleInputChange("rating", Number(e.target.value))}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.rating ? "border-red-300" : "border-gray-300"
-              }`}
-            >
-              <option value={1}>1 Star</option>
-              <option value={2}>2 Stars</option>
-              <option value={3}>3 Stars</option>
-              <option value={4}>4 Stars</option>
-              <option value={5}>5 Stars</option>
-            </select>
-            {errors.rating && (
-              <p className="mt-1 text-sm text-red-600">{errors.rating}</p>
-            )}
-          </div>
+          <Select
+            label="Rating"
+            value={formData.rating.toString()}
+            onChange={(value) => handleInputChange("rating", Number(value))}
+            error={errors.rating}
+            fullWidth
+            options={[
+              { value: "1", label: "1 Star" },
+              { value: "2", label: "2 Stars" },
+              { value: "3", label: "3 Stars" },
+              { value: "4", label: "4 Stars" },
+              { value: "5", label: "5 Stars" }
+            ]}
+          />
 
           {/* Client Image */}
           <div>
@@ -353,7 +303,7 @@ export function TestimonyFormModal({ testimony, isOpen, onClose, onSave }: Testi
 
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

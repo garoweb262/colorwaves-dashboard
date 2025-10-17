@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     siteName: "ColorWaves Dashboard",
     images: [
       {
-        url: `${baseURL}/images/logo/ColorWaves_Logo Horizontal White.png`,
+        url: `${baseURL}/images/about.jpg`,
         width: 1200,
         height: 630,
         alt: "ColorWaves Dashboard",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ColorWaves Dashboard",
     description: "Modern dashboard and content management system for ColorWaves",
-    images: [`${baseURL}/images/logo/ColorWaves_Logo Horizontal White.png`],
+    images: [`${baseURL}/images/about.jpg`],
     creator: "@colorwaves",
   },
   icons: {

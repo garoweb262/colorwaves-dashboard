@@ -43,19 +43,9 @@ export function DeleteConfirmModal({ product, isOpen, onClose, onConfirm }: Dele
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md" title="Delete Product">
       <div className="p-6 h-[60vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Delete Product</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        
 
         <div className="space-y-6">
           {/* Warning */}

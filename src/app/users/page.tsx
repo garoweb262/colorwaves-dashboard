@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Checkbox, Badge, useToast } from "@/amal-ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EnhancedPagination } from "@/components/EnhancedPagination";
-import { Plus, Edit, Trash2, Eye, UserPlus, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
+import { Edit, Trash2, Eye, UserPlus, Search, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ToggleLeft, ToggleRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { UserViewModal } from "@/components/users/UserViewModal";
 import { UserFormModal } from "@/components/users/UserFormModal";
@@ -250,10 +250,10 @@ export default function UsersPage() {
           </span>
         </div>
         <div>
-          <div className="font-medium text-gray-900">
+          <div className="font-medium text-white">
             {fullName || 'Unknown User'}
           </div>
-          <div className="text-sm text-gray-500">{email}</div>
+          <div className="text-sm text-white/70">{email}</div>
         </div>
       </div>
     );
@@ -265,10 +265,10 @@ export default function UsersPage() {
     const role = user.role || 'UNKNOWN';
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-800' :
-        role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
-        role === 'SUPPORT' ? 'bg-green-100 text-green-800' :
-        'bg-gray-100 text-gray-800'
+        role === 'SUPER_ADMIN' ? 'bg-red-500/20 text-red-300 border border-red-400/30' :
+        role === 'ADMIN' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' :
+        role === 'SUPPORT' ? 'bg-green-500/20 text-green-300 border border-green-400/30' :
+        'bg-white/10 text-white/80 border border-white/20'
       }`}>
         {getRoleDisplayName(role)}
       </span>
@@ -281,7 +281,7 @@ export default function UsersPage() {
     const isActive = user.status ?? 'active' ? 'inactive' : 'suspended';
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+        isActive ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-white/10 text-white/80 border border-white/20'
       }`}>
         {isActive ? "Active" : "Inactive"}
       </span>
@@ -426,10 +426,10 @@ export default function UsersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600">Manage system users and their permissions</p>
+            <h1 className="text-2xl font-bold text-white">User Management</h1>
+            <p className="text-white/70">Manage system users and their permissions</p>
             {error && (
-              <div className="mt-2 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+              <div className="mt-2 p-3 bg-red-500/20 border border-red-400/30 text-red-300 rounded-md">
                 {error}
               </div>
             )}
@@ -444,11 +444,11 @@ export default function UsersPage() {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search users..."
@@ -457,7 +457,7 @@ export default function UsersPage() {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1); // Reset to first page when search changes
                   }}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
                 />
               </div>
               <Button
@@ -474,9 +474,9 @@ export default function UsersPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 glass-form-section">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Role</label>
                 <select
                   value={filters.role || 'all'}
                   onChange={(e) => {
@@ -484,7 +484,7 @@ export default function UsersPage() {
                     setFilters((prev: Record<string, any>) => ({ ...prev, role: value }));
                     setCurrentPage(1); // Reset to first page when filter changes
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Roles</option>
                   <option value="SUPER_ADMIN">Super Admin</option>
@@ -494,7 +494,7 @@ export default function UsersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
                   onChange={(e) => {
@@ -502,7 +502,7 @@ export default function UsersPage() {
                     setFilters((prev: Record<string, any>) => ({ ...prev, status: value }));
                     setCurrentPage(1); // Reset to first page when filter changes
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
@@ -510,14 +510,14 @@ export default function UsersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1); // Reset to first page when page size changes
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value={5}>5 per page</option>
                   <option value={10}>10 per page</option>
@@ -530,7 +530,7 @@ export default function UsersPage() {
         </div>
 
         {/* Custom Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto scrollbar-hide">
             <Table>
             <TableHeader>
@@ -542,7 +542,7 @@ export default function UsersPage() {
                   />
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-white/10"
                   onClick={() => handleSort('firstName')}
                 >
                   <div className="flex items-center space-x-2">
@@ -551,7 +551,7 @@ export default function UsersPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-white/10"
                   onClick={() => handleSort('role')}
                 >
                   <div className="flex items-center space-x-2">
@@ -560,7 +560,7 @@ export default function UsersPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-white/10"
                   onClick={() => handleSort('isActive')}
                 >
                   <div className="flex items-center space-x-2">
@@ -569,7 +569,7 @@ export default function UsersPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-white/10"
                   onClick={() => handleSort('lastLogin')}
                 >
                   <div className="flex items-center space-x-2">
@@ -578,7 +578,7 @@ export default function UsersPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-white/10"
                   onClick={() => handleSort('createdAt')}
                 >
                   <div className="flex items-center space-x-2">
@@ -602,12 +602,12 @@ export default function UsersPage() {
                   <TableCell>{renderRoleCell(user)}</TableCell>
                   <TableCell>{renderStatusCell(user)}</TableCell>
                   <TableCell>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-white/80">
                       {user.lastLogin ? formatDate(user.lastLogin) : "Never"}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-white/80">
                       {user.createdAt ? formatDate(user.createdAt) : "Unknown"}
                     </span>
                   </TableCell>
@@ -637,9 +637,9 @@ export default function UsersPage() {
 
         {/* Bulk Actions */}
         {selectedItems.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-700">
+              <span className="text-sm text-blue-300">
                 {selectedItems.length} user(s) selected
               </span>
               <div className="flex items-center space-x-2">

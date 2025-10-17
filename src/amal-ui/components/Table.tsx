@@ -148,12 +148,12 @@ export const Table = React.forwardRef<HTMLDivElement, TableProps>(
         )}
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-200">
+        <div className="overflow-x-auto glass-table">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="glass-table-header">
                 {selectable && (
-                  <th className="border border-gray-200 px-4 py-3 text-left">
+                  <th className="px-4 py-3 text-left glass-table-header-cell">
                     <input
                       type="checkbox"
                       checked={
@@ -161,7 +161,7 @@ export const Table = React.forwardRef<HTMLDivElement, TableProps>(
                         paginatedData.length > 0
                       }
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-white/30 text-white/70 focus:ring-white/50 bg-white/10"
                     />
                   </th>
                 )}
@@ -169,10 +169,10 @@ export const Table = React.forwardRef<HTMLDivElement, TableProps>(
                   <th
                     key={column.key}
                     className={cn(
-                      "border border-gray-200 px-4 py-3 text-left font-medium text-gray-900",
+                      "px-4 py-3 text-left font-medium glass-table-header-cell",
                       sortable &&
                         column.sortable &&
-                        "cursor-pointer hover:bg-gray-100"
+                        "cursor-pointer hover:bg-white/10"
                     )}
                     onClick={() => handleSort(column.key)}
                     style={{ width: column.width }}
@@ -189,7 +189,7 @@ export const Table = React.forwardRef<HTMLDivElement, TableProps>(
               {paginatedData.map((row, rowIndex) => (
                 <motion.tr
                   key={rowIndex}
-                  className="border-b border-gray-200 hover:bg-gray-50"
+                  className="glass-table-row"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
@@ -200,19 +200,19 @@ export const Table = React.forwardRef<HTMLDivElement, TableProps>(
                   }}
                 >
                   {selectable && (
-                    <td className="border border-gray-200 px-4 py-3">
+                    <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedRows.has(String(rowIndex))}
                         onChange={() => handleSelectRow(String(rowIndex))}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-white/30 text-white/70 focus:ring-white/50 bg-white/10"
                       />
                     </td>
                   )}
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className="border border-gray-200 px-4 py-3"
+                      className="px-4 py-3 glass-table-cell"
                     >
                       {column.render
                         ? column.render(row[column.key], row)

@@ -105,7 +105,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
             {/* Modal Content */}
             <motion.div
               className={cn(
-                "relative w-full bg-white rounded-lg shadow-2xl border border-gray-200",
+                "relative w-full glass-modal",
                 sizeClasses[size],
                 className
               )}
@@ -114,16 +114,16 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
             >
               {/* Header */}
               {(title || showCloseButton) && (
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between p-6 border-b border-white/10">
                   {title && (
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-white">
                       {title}
                     </h2>
                   )}
                   {showCloseButton && (
                     <motion.button
                       onClick={onClose}
-                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                      className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >

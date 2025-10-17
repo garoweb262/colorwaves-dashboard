@@ -315,8 +315,8 @@ export default function BlogPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Blog Management</h1>
-            <p className="text-gray-600">Manage blog posts and articles</p>
+            <h1 className="text-2xl font-bold text-white">Blog Management</h1>
+            <p className="text-white/70">Manage blog posts and articles</p>
           </div>
           <Button
             onClick={handleAddBlog}
@@ -328,17 +328,17 @@ export default function BlogPage() {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                 <input
                   type="text"
                   placeholder="Search blog posts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet focus:border-transparent"
+                  className="glass-input pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
                 />
               </div>
               <Button
@@ -354,13 +354,13 @@ export default function BlogPage() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 glass-form-section rounded-md">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={filters.status || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Status</option>
                   <option value="draft">Draft</option>
@@ -369,11 +369,11 @@ export default function BlogPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Featured</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Featured</label>
                 <select
                   value={filters.featured || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, featured: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All</option>
                   <option value="featured">Featured</option>
@@ -381,11 +381,11 @@ export default function BlogPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Category</label>
                 <select
                   value={filters.category || 'all'}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value === 'all' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value="all">All Categories</option>
                   <option value="Technology">Technology</option>
@@ -397,11 +397,11 @@ export default function BlogPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Page Size</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                  className="w-full glass-select px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <option value={6}>6 per page</option>
                   <option value={12}>12 per page</option>
@@ -415,7 +415,7 @@ export default function BlogPage() {
         {/* Blogs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedData.map((blog) => (
-            <div key={blog.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={blog.id} className="glass-card hover:glass-card-hover transition-all duration-200 overflow-hidden">
               <div className="aspect-video bg-gray-100 relative">
                 {blog.imageUrl ? (
                   <img
@@ -451,12 +451,12 @@ export default function BlogPage() {
               
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-white line-clamp-2">
                     {blog.title}
                   </h3>
                 </div>
                 
-                <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                <p className="text-sm text-white/70 mb-3 line-clamp-3">
                   {blog.excerpt || "No excerpt available"}
                 </p>
                 
@@ -467,13 +467,13 @@ export default function BlogPage() {
                     </Badge>
                   ))}
                   {(blog.categories || []).length > 2 && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-white/60">
                       +{(blog.categories || []).length - 2}
                     </span>
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-4">
                   <div className="flex items-center space-x-1">
                     <User className="h-3 w-3" />
                     <span>{blog.author || "Unknown"}</span>
@@ -484,7 +484,7 @@ export default function BlogPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-4">
                   <div className="flex items-center space-x-1">
                     <Heart className="h-3 w-3" />
                     <span>{blog.likeCount || 0}</span>
@@ -495,7 +495,7 @@ export default function BlogPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-4">
                   <span>
                     {blog.publishedAt ? formatDate(blog.publishedAt) : "Not published"}
                   </span>
@@ -564,7 +564,7 @@ export default function BlogPage() {
             >
               Previous
             </Button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-white/70">
               Page {currentPage} of {totalPages}
             </span>
             <Button

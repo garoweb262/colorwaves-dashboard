@@ -12,7 +12,7 @@ interface SelectOption {
 }
 
 interface SelectProps {
-  options: SelectOption[];
+  options?: SelectOption[];
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
@@ -28,7 +28,7 @@ interface SelectProps {
 export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
   (
     {
-      options,
+      options = [],
       value,
       onChange,
       placeholder = "Select an option",
@@ -57,7 +57,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 
     const widthClass = fullWidth ? "w-full" : "";
 
-    const selectedOption = options.find((option) => option.value === value);
+    const selectedOption = options?.find((option) => option.value === value);
 
     const handleSelect = (optionValue: string) => {
       onChange?.(optionValue);
@@ -96,7 +96,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           }}
         >
           {label && (
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               {label}
             </label>
           )}
@@ -107,16 +107,16 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
               onClick={() => !disabled && setIsOpen(!isOpen)}
               disabled={disabled}
               className={cn(
-                "flex w-full border border-gray-300 bg-white px-3 py-2 text-sm text-black transition duration-200 focus:border-palette-violet focus:outline-none focus:ring-1 focus:ring-palette-violet disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:border-gray-600 dark:focus:border-palette-violet dark:focus:ring-palette-violet",
+                "flex w-full glass-select px-3 py-2 text-sm transition duration-200 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:cursor-not-allowed disabled:opacity-50",
                 sizeClasses[size],
                 widthClass,
                 "pr-10",
                 error &&
-                  "border-palette-red focus:border-palette-red focus:ring-palette-red dark:focus:border-palette-red dark:focus:ring-palette-red",
+                  "border-red-400/50 focus:border-red-400/70 focus:ring-red-400/30",
                 className
               )}
             >
-              <span className={selectedOption ? "text-black" : "text-gray-500"}>
+              <span className={selectedOption ? "text-white" : "text-white/50"}>
                 {selectedOption ? selectedOption.label : placeholder}
               </span>
 
@@ -126,7 +126,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                 className="absolute right-3 top-1/2 transform -translate-y-1/2"
               >
                 <ChevronDown
-                  className="h-4 w-4 text-gray-400"
+                  className="h-4 w-4 text-white/60"
                   strokeWidth={1}
                 />
               </motion.div>
@@ -139,18 +139,18 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 shadow-lg max-h-60 overflow-auto"
+                  className="absolute top-full left-0 right-0 z-50 mt-1 glass-modal max-h-60 overflow-auto scrollbar-hide"
                 >
-                  {options.map((option) => (
+                  {options?.map((option) => (
                     <motion.button
                       key={option.value}
                       type="button"
                       onClick={() => handleSelect(option.value)}
                       className={cn(
-                        "w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors",
-                        option.value === value && "bg-orange-50 text-orange-600"
+                        "w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10 transition-colors",
+                        option.value === value && "bg-white/15 text-white"
                       )}
-                      whileHover={{ backgroundColor: "#f3f4f6" }}
+                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                       whileTap={{ scale: 0.98 }}
                     >
                       {option.label}
@@ -165,7 +165,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             <motion.p
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-1 text-sm text-red-600"
+              className="mt-1 text-sm text-red-300"
             >
               {error}
             </motion.p>
@@ -175,7 +175,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             <motion.p
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-1 text-sm text-gray-500"
+              className="mt-1 text-sm text-white/60"
             >
               {helperText}
             </motion.p>

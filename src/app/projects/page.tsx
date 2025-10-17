@@ -257,7 +257,7 @@ export default function ProjectsPage() {
   const filtersContent = (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <label className="block text-sm font-medium text-white mb-1">Status</label>
         <select
           value={filters.status || 'all'}
           onChange={(e) => {
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Page Size</label>
+        <label className="block text-sm font-medium text-white mb-1">Page Size</label>
         <select
           value={pageSize}
           onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -325,7 +325,7 @@ export default function ProjectsPage() {
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {projects.map((project) => (
-            <div key={project.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div key={project.id} className="glass-card hover:glass-card-hover transition-all duration-200">
               {/* Project Image */}
               <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
                 {project.imageUrls && project.imageUrls.length > 0 ? (
@@ -380,16 +380,16 @@ export default function ProjectsPage() {
 
               {/* Project Content */}
               <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">
+                <h3 className="font-semibold text-lg text-white mb-2 line-clamp-1">
                   {project.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                <p className="text-white/70 text-sm mb-3 line-clamp-2">
                   {project.description}
                 </p>
                 
                 <div className="mb-3">
-                  <p className="text-xs text-gray-500 mb-1">Client:</p>
-                  <p className="text-sm font-medium text-gray-700 line-clamp-1">
+                  <p className="text-xs text-white/60 mb-1">Client:</p>
+                  <p className="text-sm font-medium text-white line-clamp-1">
                     {project.client}
                   </p>
                 </div>
@@ -398,12 +398,12 @@ export default function ProjectsPage() {
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-1">
                     {project.technologies.slice(0, 2).map((technology, index) => (
-                      <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                      <span key={index} className="text-xs bg-white/20 text-white px-2 py-1 rounded">
                         {technology}
                       </span>
                     ))}
                     {project.technologies.length > 2 && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-white/60">
                         +{project.technologies.length - 2} more
                       </span>
                     )}
@@ -458,9 +458,9 @@ export default function ProjectsPage() {
 
         {/* Bulk Actions */}
         {selectedItems.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4 mt-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-700">
+              <span className="text-sm text-blue-300">
                 {selectedItems.length} project(s) selected
               </span>
               <div className="flex items-center space-x-2">

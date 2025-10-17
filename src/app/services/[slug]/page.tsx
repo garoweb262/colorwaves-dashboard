@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button, useToast } from "@/amal-ui";
 import { ArrowLeft, Edit, Trash2, ToggleLeft, ToggleRight, Calendar, Clock } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SocialShare } from "@/components/SocialShare";
 import { crudAPI } from "@/lib/api";
 
 interface Service {
@@ -177,11 +178,18 @@ export default function ServiceDetailsPage() {
           </div>
           
           <div className="flex items-center space-x-2">
+            <SocialShare
+              url={`${window.location.origin}/services/${service.slug}`}
+              title={service.name}
+              description={service.description}
+              imageUrl={service.imageUrl}
+              hashtags={['services', 'colorwaves']}
+            />
             <Button
               variant="outline"
               onClick={handleStatusToggle}
               leftIcon={service.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-              className={service.isActive ? "text-green-600 hover:text-green-700" : "text-gray-600 hover:text-gray-700"}
+              className={service.isActive ? "text-green-600 hover:text-green-700" : "text-gray-600 hover:text-white"}
             >
               {service.isActive ? "Deactivate" : "Activate"}
             </Button>
@@ -236,7 +244,7 @@ export default function ServiceDetailsPage() {
             {/* Description */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-white leading-relaxed">
                 {service.description || "No description available for this service."}
               </p>
             </div>

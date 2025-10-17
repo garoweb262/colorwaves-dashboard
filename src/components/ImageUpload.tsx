@@ -166,7 +166,7 @@ export function ImageUpload({
   return (
     <div className={cn("w-full", className)}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-white mb-2">
           {label}
         </label>
       )}
@@ -278,11 +278,11 @@ export function ImageUpload({
                   <Upload className="h-8 w-8 text-blue-500" />
                 </motion.div>
               ) : (
-                <ImageIcon className="h-8 w-8 text-gray-400" />
+                <ImageIcon className="h-8 w-8 text-white" />
               )}
             </div>
             
-            <h3 className="text-sm font-medium text-gray-900 mb-1">
+            <h3 className="text-sm font-medium text-white mb-1">
               {isUploading ? "Uploading..." : label}
             </h3>
             <p className="text-sm text-gray-500 mb-4">

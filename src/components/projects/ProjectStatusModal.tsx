@@ -69,19 +69,9 @@ export function ProjectStatusModal({ project, isOpen, onClose, onUpdateStatus }:
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md" title="Update Project Status">
       <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Update Project Status</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Project Info */}

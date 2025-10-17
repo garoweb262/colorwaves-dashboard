@@ -122,42 +122,42 @@ export default function PartnersPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Partners</h1>
-            <p className="text-gray-600">Manage partners and their logos</p>
+            <h1 className="text-2xl font-bold text-white">Partners</h1>
+            <p className="text-white/70">Manage partners and their logos</p>
           </div>
           <Button onClick={handleAdd} leftIcon={<Plus className="h-4 w-4" />} className="bg-primary hover:bg-primary-600 text-primary-foreground">
             Add Partner
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="glass-card p-4">
           <input
             type="text"
             placeholder="Search partners..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+            className="glass-input w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((p) => (
-            <div key={p.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={p.id} className="glass-card hover:glass-card-hover transition-all duration-200 overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${p.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${p.status === 'ACTIVE' ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-gray-500/20 text-gray-300 border border-gray-400/30'}`}>
                     {p.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <div className="text-center mb-4">
-                  <div className="w-28 h-28 mx-auto mb-3 bg-gray-100 flex items-center justify-center overflow-hidden rounded-md">
+                  <div className="w-28 h-28 mx-auto mb-3 bg-white/20 flex items-center justify-center overflow-hidden rounded-md">
                     {p.imageUrl ? (
                       <img src={p.imageUrl} alt={p.name} className="w-full h-full object-contain" />
                     ) : (
-                      <span className="text-2xl font-medium text-gray-600">{p.name?.charAt(0)}</span>
+                      <span className="text-2xl font-medium text-white">{p.name?.charAt(0)}</span>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">{p.name}</h3>
+                  <h3 className="text-lg font-semibold text-white">{p.name}</h3>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(p)} className="text-palette-gold-600 hover:text-palette-gold-700" title="Edit">

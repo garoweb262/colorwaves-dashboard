@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, useToast } from "@/amal-ui";
+import { Button, useToast, Input, Textarea, Checkbox } from "@/amal-ui";
 import { X } from "lucide-react";
 import { Modal } from "@/amal-ui";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -247,97 +247,56 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title={project ? "Edit Project" : "Add New Project"}>
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {project ? "Edit Project" : "Add New Project"}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Project Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Project Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.title ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter project title"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-            )}
-          </div>
+          <Input
+            label="Project Title"
+            placeholder="Enter project title"
+            value={formData.title}
+            onChange={(e) => handleInputChange("title", e.target.value)}
+            error={errors.title}
+            required
+            fullWidth
+          />
 
           {/* Video URL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              YouTube Video Link
-            </label>
-            <input
-              type="url"
-              value={formData.videoUrl}
-              onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-          </div>
+          <Input
+            label="YouTube Video Link"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={formData.videoUrl}
+            onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+            type="url"
+            fullWidth
+          />
 
           {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={4}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.description ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter project description"
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-          </div>
+          <Textarea
+            label="Description"
+            placeholder="Enter project description"
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+            error={errors.description}
+            required
+            fullWidth
+            rows={4}
+          />
 
           {/* Client */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client *
-            </label>
-            <input
-              type="text"
-              value={formData.client}
-              onChange={(e) => handleInputChange("client", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet ${
-                errors.client ? "border-red-300" : "border-gray-300"
-              }`}
-              placeholder="Enter client name"
-            />
-            {errors.client && (
-              <p className="mt-1 text-sm text-red-600">{errors.client}</p>
-            )}
-          </div>
+          <Input
+            label="Client"
+            placeholder="Enter client name"
+            value={formData.client}
+            onChange={(e) => handleInputChange("client", e.target.value)}
+            error={errors.client}
+            required
+            fullWidth
+          />
 
           {/* Technologies */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Technologies *
             </label>
             <div className="flex space-x-2 mb-2">
@@ -346,7 +305,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
                 value={technologyInput}
                 onChange={(e) => setTechnologyInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                className="flex-1 glass-input px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
                 placeholder="Enter technology and press Enter"
               />
               <Button type="button" onClick={addTechnology} variant="outline">
@@ -357,13 +316,13 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
               {formData.technologies.map((tech, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30"
                 >
                   {tech}
                   <button
                     type="button"
                     onClick={() => removeTechnology(tech)}
-                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    className="ml-1 text-blue-300 hover:text-blue-200"
                   >
                     ×
                   </button>
@@ -371,13 +330,13 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
               ))}
             </div>
             {errors.technologies && (
-              <p className="mt-1 text-sm text-red-600">{errors.technologies}</p>
+              <p className="mt-1 text-sm text-red-300">{errors.technologies}</p>
             )}
           </div>
 
           {/* Image URLs */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white/80 mb-2">
               Project Images *
             </label>
             <ImageUpload
@@ -391,57 +350,47 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
               multiple={true}
             />
             {errors.imageUrls && (
-              <p className="mt-1 text-sm text-red-600">{errors.imageUrls}</p>
+              <p className="mt-1 text-sm text-red-300">{errors.imageUrls}</p>
             )}
           </div>
 
           {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 Start Date
               </label>
               <input
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => handleInputChange("startDate", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                className="w-full glass-input px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 End Date
               </label>
               <input
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => handleInputChange("endDate", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                className="w-full glass-input px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
               />
             </div>
           </div>
 
           {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => handleInputChange("isActive", e.target.checked)}
-                className="h-4 w-4 text-palette-violet focus:ring-palette-violet border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="text-sm text-gray-700">
-                Active (visible to customers)
-              </label>
-            </div>
+          <div className="glass-form-section p-4">
+            <Checkbox
+              label="Active (visible to customers)"
+              checked={formData.isActive}
+              onChange={(checked) => handleInputChange("isActive", checked)}
+            />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

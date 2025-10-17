@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Modal, Input, Select, Button, useToast } from "@/amal-ui";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
@@ -187,7 +186,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
         <form onSubmit={handleSubmit} className="space-y-6 p-1">
           {/* Personal Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
               Personal Information
             </h3>
             
@@ -230,7 +229,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
 
           {/* Role Selection */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
               Role & Permissions
             </h3>
             
@@ -247,7 +246,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
           {/* Password Section - Only for new users */}
           {!isEditing && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+              <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
                 Set Password
               </h3>
               
@@ -261,7 +260,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-white/60 hover:text-white/80"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -282,7 +281,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-white/60 hover:text-white/80"
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -298,7 +297,7 @@ export function UserFormModal({ user, isOpen, onClose, onSave }: UserFormModalPr
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-white/10">
             <Button
               type="button"
               variant="outline"

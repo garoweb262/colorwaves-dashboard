@@ -170,15 +170,15 @@ export function CRUDFormModal({ config, item, isOpen, onClose, onSave, isLoading
 
       case 'checkbox':
         return (
-          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-3 p-4 glass-form-section">
             <Checkbox
               checked={formData[field.key] || false}
               onChange={(checked) => handleInputChange(field.key, checked)}
             />
             <div>
-              <label className="text-sm font-medium text-gray-700">{field.label}</label>
+              <label className="text-sm font-medium text-white/80">{field.label}</label>
               {field.placeholder && (
-                <p className="text-sm text-gray-500">{field.placeholder}</p>
+                <p className="text-sm text-white/60">{field.placeholder}</p>
               )}
             </div>
           </div>

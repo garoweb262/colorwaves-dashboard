@@ -105,7 +105,7 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={cn(
-              "relative w-full bg-white rounded-lg shadow-xl",
+              "relative w-full glass-modal",
               sizeClasses[size],
               className
             )}
@@ -114,20 +114,20 @@ export function Modal({
             {(title || showCloseButton) && (
               <div
                 className={cn(
-                  "flex items-center justify-between p-6 border-b border-gray-200",
+                  "flex items-center justify-between p-6 border-b border-white/10",
                   headerClassName
                 )}
               >
                 {title && (
-                  <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+                  <h2 className="text-lg font-semibold text-white">{title}</h2>
                 )}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-1 rounded-lg hover:bg-white/10 transition-colors"
                     aria-label="Close modal"
                   >
-                    <X className="h-5 w-5 text-gray-500" />
+                    <X className="h-5 w-5 text-white/70" />
                   </button>
                 )}
               </div>

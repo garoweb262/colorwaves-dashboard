@@ -36,35 +36,25 @@ export function TestimonyViewModal({ testimony, isOpen, onClose }: TestimonyView
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" title="Testimony Details">
       <div className="p-6 h-[80vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Testimony Details</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        
 
         <div className="space-y-6">
           {/* Testimony Content */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <div className="text-lg text-gray-900 italic leading-relaxed mb-4">
+          <div className="glass-form-section p-6">
+            <div className="text-lg text-white italic leading-relaxed mb-4">
               "{testimony.content}"
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-semibold text-gray-900">{testimony.clientName}</div>
-                <div className="text-sm text-gray-600">{testimony.clientPosition} at {testimony.clientCompany}</div>
+                <div className="font-semibold text-white">{testimony.clientName}</div>
+                <div className="text-sm text-white/70">{testimony.clientPosition} at {testimony.clientCompany}</div>
               </div>
               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                 testimony.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-green-500/20 text-green-300 border border-green-400/30' 
+                  : 'bg-gray-500/20 text-gray-300 border border-gray-400/30'
               }`}>
                 {testimony.isActive ? "Active" : "Inactive"}
               </div>
@@ -72,26 +62,26 @@ export function TestimonyViewModal({ testimony, isOpen, onClose }: TestimonyView
           </div>
 
           {/* Timestamps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+            <div className="flex items-center space-x-2 text-sm text-white/70">
               <Calendar className="h-4 w-4" />
               <div>
-                <span className="font-medium">Created:</span>
-                <p>{formatDate(testimony.createdAt)}</p>
+                <span className="font-medium text-white">Created:</span>
+                <p className="text-white/70">{formatDate(testimony.createdAt)}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm text-white/70">
               <Edit3 className="h-4 w-4" />
               <div>
-                <span className="font-medium">Last Updated:</span>
-                <p>{formatDate(testimony.updatedAt)}</p>
+                <span className="font-medium text-white">Last Updated:</span>
+                <p className="text-white/70">{formatDate(testimony.updatedAt)}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-white/10">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>

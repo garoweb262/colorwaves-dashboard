@@ -69,35 +69,26 @@ export function ProjectRequestStatusModal({
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md" title="Update Project Request Status">
       <div className="p-6 h-[60vh] overflow-y-auto scrollbar-hide">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Update Project Request Status</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-            disabled={isSubmitting}
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Project Request Info */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Project Request</h3>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">{projectRequest.fullName}</span> -{" "}
-              <span className="font-medium capitalize">{projectRequest.projectType}</span>
+          <div className="glass-form-section p-4">
+            <h3 className="text-sm font-medium text-white mb-2">Project Request</h3>
+            <p className="text-sm text-white/80">
+              <span className="font-medium text-white">{projectRequest.fullName}</span> -{" "}
+              <span className="font-medium text-white capitalize">{projectRequest.projectType}</span>
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-white/70 mt-1">
               Budget: {projectRequest.budgetRange} | Location: {projectRequest.location}
             </p>
           </div>
 
           {/* Current Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Current Status
             </label>
             <div className="px-3 py-2 bg-gray-100 rounded-md">
@@ -109,7 +100,7 @@ export function ProjectRequestStatusModal({
 
           {/* New Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               New Status *
             </label>
             <select

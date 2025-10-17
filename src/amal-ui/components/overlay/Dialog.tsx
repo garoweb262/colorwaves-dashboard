@@ -103,7 +103,7 @@ export const Dialog = React.forwardRef<HTMLDivElement, ModalProps>(
             {/* Dialog Content */}
             <motion.div
               className={cn(
-                "relative w-full bg-white rounded-lg shadow-2xl border border-gray-200",
+                "relative w-full glass-modal",
                 sizeClasses[size],
                 className
               )}

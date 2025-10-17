@@ -140,9 +140,9 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Request Not Found</h2>
-            <p className="text-gray-600 mb-4">The partnership request you're looking for doesn't exist.</p>
+          <div className="text-center glass-panel p-6 rounded-lg">
+            <h2 className="text-xl font-semibold text-white mb-2">Request Not Found</h2>
+            <p className="text-white/70 mb-4">The partnership request you're looking for doesn't exist.</p>
             <Button onClick={() => router.push('/partnership-requests')}>
               Back to Partnership Requests
             </Button>
@@ -167,8 +167,8 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Partnership Request</h1>
-              <p className="text-gray-600">Partnership request from {request.fullName}</p>
+              <h1 className="text-2xl font-bold text-white">Partnership Request</h1>
+              <p className="text-white/70">Partnership request from {request.fullName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -188,32 +188,32 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Partnership Details */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Handshake className="h-5 w-5 mr-2" />
                 Partnership Details
               </h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Partnership Type</label>
-                  <p className="text-lg font-semibold text-gray-900">{request.partnershipType}</p>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Partnership Type</label>
+                  <p className="text-lg font-semibold text-white">{request.partnershipType}</p>
                 </div>
                 
                 {request.message && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                    <div className="bg-gray-50 rounded-md p-4">
-                      <p className="text-gray-900 whitespace-pre-wrap">{request.message}</p>
+                    <label className="block text-sm font-medium text-white/80 mb-1">Message</label>
+                    <div className="glass-panel rounded-md p-4">
+                      <p className="text-white whitespace-pre-wrap">{request.message}</p>
                     </div>
                   </div>
                 )}
 
                 {request.description && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <div className="bg-gray-50 rounded-md p-4">
-                      <p className="text-gray-900 whitespace-pre-wrap">{request.description}</p>
+                    <label className="block text-sm font-medium text-white/80 mb-1">Description</label>
+                    <div className="glass-panel rounded-md p-4">
+                      <p className="text-white whitespace-pre-wrap">{request.description}</p>
                     </div>
                   </div>
                 )}
@@ -221,22 +221,22 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
             </div>
 
             {/* Reply Section */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Reply className="h-5 w-5 mr-2" />
                 Reply to Request
               </h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     Reply Message
                   </label>
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-palette-violet"
+                    className="glass-textarea w-full px-3 py-2 rounded-md"
                     placeholder="Type your reply here..."
                   />
                 </div>
@@ -254,54 +254,54 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Contact Information */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <User className="h-5 w-5 mr-2" />
                 Contact Information
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <User className="h-4 w-4 text-gray-400" />
+                  <User className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.fullName}</p>
-                    <p className="text-xs text-gray-500">Full Name</p>
+                    <p className="text-sm font-medium text-white">{request.fullName}</p>
+                    <p className="text-xs text-white/60">Full Name</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Building className="h-4 w-4 text-gray-400" />
+                  <Building className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.companyName}</p>
-                    <p className="text-xs text-gray-500">Company</p>
+                    <p className="text-sm font-medium text-white">{request.companyName}</p>
+                    <p className="text-xs text-white/60">Company</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Mail className="h-4 w-4 text-gray-400" />
+                  <Mail className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.email}</p>
-                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-white">{request.email}</p>
+                    <p className="text-xs text-white/60">Email</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Phone className="h-4 w-4 text-gray-400" />
+                  <Phone className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{request.phoneNumber}</p>
-                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="text-sm font-medium text-white">{request.phoneNumber}</p>
+                    <p className="text-xs text-white/60">Phone</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Status Management */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Management</h3>
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Status Management</h3>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Current Status</span>
+                  <span className="text-sm font-medium text-white/80">Current Status</span>
                   <Badge
                     color={
                       request.status === 'replied' ? "green" : 
@@ -351,26 +351,26 @@ export default function PartnershipRequestDetailPage({ params }: PartnershipRequ
             </div>
 
             {/* Timestamps */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="glass-panel p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                 <Clock className="h-5 w-5 mr-2" />
                 Timestamps
               </h3>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <Calendar className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Created</p>
-                    <p className="text-xs text-gray-500">{formatDate(request.createdAt)}</p>
+                    <p className="text-sm font-medium text-white">Created</p>
+                    <p className="text-xs text-white/60">{formatDate(request.createdAt)}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                  <Clock className="h-4 w-4 text-white/50" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                    <p className="text-xs text-gray-500">{formatDate(request.updatedAt)}</p>
+                    <p className="text-sm font-medium text-white">Last Updated</p>
+                    <p className="text-xs text-white/60">{formatDate(request.updatedAt)}</p>
                   </div>
                 </div>
               </div>

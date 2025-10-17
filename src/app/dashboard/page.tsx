@@ -123,13 +123,13 @@ export default function DashboardPage() {
     return (
       <DashboardRouteGuard>
         <DashboardLayout breadcrumbs={breadcrumbs}>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Dashboard</h2>
-            <p className="text-red-600">{error}</p>
+          <div className="glass-panel border-red-400/30 bg-red-500/10 p-6">
+            <h2 className="text-lg font-semibold text-red-300 mb-2">Error Loading Dashboard</h2>
+            <p className="text-red-200">{error}</p>
             <Button
               onClick={() => window.location.reload()}
               variant="outline"
-              className="mt-4"
+              className="mt-4 border-red-400/50 text-red-200 hover:bg-red-500/20"
             >
               Retry
             </Button>
@@ -141,59 +141,61 @@ export default function DashboardPage() {
 
   return (
     <DashboardRouteGuard>
-      <DashboardLayout breadcrumbs={breadcrumbs}>
-        <div className="space-y-6">
-          {/* Header Section */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-2">
-                Welcome back! Here's what's happening with your business today.
-              </p>
+        <DashboardLayout breadcrumbs={breadcrumbs}>
+          <div className="space-y-6">
+            {/* Header Section */}
+            <div className="glass-panel p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                  <p className="text-white/70 mt-2">
+                    Welcome back! Here's what's happening with your business today.
+                  </p>
+                </div>
+               
+              </div>
             </div>
-           
-          </div>
 
-          {/* Key Metrics Cards */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Metrics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {keyMetrics.map((metric, index) => (
-                <StatisticsCard
-                key={metric.title}
-                  title={metric.title}
-                  value={metric.value}
-                  icon={metric.icon}
-                  color={metric.color}
-                  bgColor={metric.bgColor}
-                  isLoading={isLoading}
-                />
-              ))}
-                </div>
-          </div>
-
-          {/* Request Metrics */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Requests & Messages</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {requestMetrics.map((metric, index) => (
-                <StatisticsCard
+            {/* Key Metrics Cards */}
+            <div className="glass-panel p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Key Metrics</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {keyMetrics.map((metric, index) => (
+                  <StatisticsCard
                   key={metric.title}
-                  title={metric.title}
-                  value={metric.value}
-                  change={metric.pending ? `${metric.pending} pending` : undefined}
-                  changeType={metric.pending > 0 ? "negative" : "neutral"}
-                  icon={metric.icon}
-                  color={metric.color}
-                  bgColor={metric.bgColor}
-                  isLoading={isLoading}
-                />
-                  ))}
-                </div>
-          </div>
+                    title={metric.title}
+                    value={metric.value}
+                    icon={metric.icon}
+                    color={metric.color}
+                    bgColor={metric.bgColor}
+                    isLoading={isLoading}
+                  />
+                ))}
+              </div>
+            </div>
 
-        </div>
-      </DashboardLayout>
+            {/* Request Metrics */}
+            <div className="glass-panel p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Requests & Messages</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {requestMetrics.map((metric, index) => (
+                  <StatisticsCard
+                    key={metric.title}
+                    title={metric.title}
+                    value={metric.value}
+                    change={metric.pending ? `${metric.pending} pending` : undefined}
+                    changeType={metric.pending > 0 ? "negative" : "neutral"}
+                    icon={metric.icon}
+                    color={metric.color}
+                    bgColor={metric.bgColor}
+                    isLoading={isLoading}
+                  />
+                    ))}
+              </div>
+            </div>
+
+          </div>
+        </DashboardLayout>
     </DashboardRouteGuard>
   );
 }

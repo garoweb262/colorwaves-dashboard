@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "./UserContext";
 import { setGlobalLogoutHandler } from "@/lib/api";
 
@@ -24,6 +24,7 @@ export function LogoutProvider({ children }: LogoutProviderProps) {
   const [logoutMessage, setLogoutMessage] = useState("");
   const { logout } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Set up the global logout handler for API interceptor
   useEffect(() => {
@@ -31,6 +32,27 @@ export function LogoutProvider({ children }: LogoutProviderProps) {
   }, []);
 
   const showLogoutModal = (message?: string) => {
+    // Don't show logout modal on authentication-related pages
+    const authRoutes = [
+      '/',
+      '/login',
+      '/forgot-password',
+      '/verify-otp',
+      '/reset-password',
+      '/get-started'
+    ];
+    
+    // Check for both direct routes and locale-based routes (e.g., /en/login, /ar/login)
+    const isAuthRoute = authRoutes.some(route => {
+      return pathname === route || 
+             pathname.startsWith(route) ||
+             pathname.match(/^\/[a-z]{2}\/(login|forgot-password|verify-otp|reset-password|get-started)/);
+    });
+    
+    if (isAuthRoute) {
+      return;
+    }
+    
     setLogoutMessage(message || "Your session has expired. Please log in again to continue.");
     setIsLogoutModalOpen(true);
   };
