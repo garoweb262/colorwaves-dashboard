@@ -89,7 +89,7 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     }
 
     // Validate images
-    if (formData.imageUrls.length === 0 && uploadedImageFiles.length === 0) {
+    if (formData.imageUrls.filter(url => url.startsWith('http://') || url.startsWith('https://')).length === 0 && uploadedImageFiles.length === 0) {
       newErrors.imageUrls = "At least one image is required";
     }
 
@@ -111,7 +111,12 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     setIsSubmitting(true);
 
     try {
-      let finalImageUrls = [...formData.imageUrls];
+      // Filter out blob URLs from existing imageUrls (keep only real URLs)
+      const existingRealUrls = formData.imageUrls.filter(url => 
+        url.startsWith('http://') || url.startsWith('https://')
+      );
+      
+      let finalImageUrls = [...existingRealUrls];
 
       // If there are new image files to upload, upload them first
       if (uploadedImageFiles.length > 0) {

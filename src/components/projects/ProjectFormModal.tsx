@@ -98,7 +98,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
       newErrors.technologies = "At least one technology is required";
     }
 
-    if (formData.imageUrls.length === 0 && uploadedImageFiles.length === 0) {
+    if (formData.imageUrls.filter(url => url.startsWith('http://') || url.startsWith('https://')).length === 0 && uploadedImageFiles.length === 0) {
       newErrors.imageUrls = "At least one image is required";
     }
 
@@ -116,7 +116,12 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
     setIsSubmitting(true);
 
     try {
-      let finalImageUrls = [...formData.imageUrls];
+      // Filter out blob URLs from existing imageUrls (keep only real URLs)
+      const existingRealUrls = formData.imageUrls.filter(url => 
+        url.startsWith('http://') || url.startsWith('https://')
+      );
+      
+      let finalImageUrls = [...existingRealUrls];
 
       // Upload multiple images if there are new files
       if (uploadedImageFiles.length > 0) {
