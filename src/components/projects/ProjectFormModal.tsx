@@ -109,6 +109,11 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent double submission
+    if (isSubmitting || isUploadingImages) {
+      return;
+    }
+    
     if (!validateForm()) {
       return;
     }
@@ -170,7 +175,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
           throw new Error("Failed to update project");
         }
       } else {
-        // Create via API
+        // Create project data and pass to parent component
         const createData = {
           title: formData.title,
           description: formData.description,
@@ -182,23 +187,10 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }: ProjectFo
           isActive: formData.isActive,
           videoUrl: formData.videoUrl || undefined
         } as any;
-        const response = await projectsAPI.createProject(createData);
-        if (response.success) {
-          onSave(response.data as Project);
-        } else {
-          throw new Error("Failed to create project");
-        }
+        
+        // Pass the data to parent component to handle API call
+        onSave(createData as Project);
       }
-      
-      // Show success toast
-      addToast({
-        variant: "success",
-        title: project ? "Project Updated" : "Project Created",
-        description: project 
-          ? `Project "${formData.title}" has been updated successfully.`
-          : `Project "${formData.title}" has been created successfully.`,
-        duration: 4000
-      });
     } catch (error) {
       console.error("Error saving project:", error);
       

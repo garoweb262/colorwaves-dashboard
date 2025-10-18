@@ -1,191 +1,140 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { cn, getSpacing } from "../../utilities";
-import { useMotionGradient, useMotionState } from "../../utilities/motion";
+import { createPortal } from "react-dom";
+import { cn } from "../../utilities";
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
+interface SelectOption { value: string; label: string; }
 
 interface SelectProps {
-  options?: SelectOption[];
-  value?: string;
-  onChange?: (value: string) => void;
-  placeholder?: string;
   label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
   error?: string;
-  helperText?: string;
-  size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
   disabled?: boolean;
   className?: string;
 }
 
-export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
-  (
-    {
-      options = [],
-      value,
-      onChange,
-      placeholder = "Select an option",
-      label,
-      error,
-      helperText,
-      size = "md",
-      fullWidth = false,
-      disabled = false,
-      className,
-    },
-    ref
-  ) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const { handleMouseMove, background } = useMotionGradient({
-      radius: 100,
-      color: "#f97316", // Orange accent color
-    });
-    const { visible, setVisible } = useMotionState();
+export function Select({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = "Select option",
+  error,
+  fullWidth = true,
+  disabled = false,
+  className,
+}: SelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [portalContainer, setPortalContainer] = useState<Element | null>(null);
 
-    const sizeClasses = {
-      sm: `h-8 px-3 text-sm ${getSpacing("xs")}`,
-      md: `h-10 px-4 text-base ${getSpacing("sm")}`,
-      lg: `h-12 px-6 text-lg ${getSpacing("md")}`,
+  useEffect(() => setPortalContainer(document.body), []);
+
+  // compute position
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
+
+  // NOTE: check both triggerRef and menuRef on mousedown so clicks inside the portal do NOT close prematurely
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const clickedTrigger = triggerRef.current && triggerRef.current.contains(target);
+      const clickedMenu = menuRef.current && menuRef.current.contains(target);
+
+      if (!clickedTrigger && !clickedMenu) {
+        setIsOpen(false);
+      }
     };
 
-    const widthClass = fullWidth ? "w-full" : "";
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, []);
 
-    const selectedOption = options?.find((option) => option.value === value);
+  const selected = options.find((o) => o.value === value);
 
-    const handleSelect = (optionValue: string) => {
-      onChange?.(optionValue);
-      setIsOpen(false);
-    };
+  return (
+    <div className={cn("relative", fullWidth && "w-full", className)}>
+      {label && <label className="block text-sm font-medium text-white mb-2">{label}</label>}
 
-    const BottomGradient = () => {
-      return (
-        <>
-          <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/select:opacity-100" />
-          <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/select:opacity-100" />
-        </>
-      );
-    };
-
-    return (
-      <motion.div
-        ref={ref}
-        style={{
-          background: visible ? background : "transparent",
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-        className="group/select relative p-[2px] transition duration-300"
+      <div
+        ref={triggerRef}
+        className={cn(
+          "flex items-center justify-between px-3 py-2 rounded-lg border bg-transparent text-white cursor-pointer transition-all duration-150",
+          disabled ? "opacity-60 cursor-not-allowed border-gray-600" : "border-gray-600 hover:border-gray-400",
+          error && "border-red-500"
+        )}
+        onClick={() => !disabled && setIsOpen((s) => !s)}
       >
-        <motion.div
-          className="relative"
-          initial={false}
-          animate={{ scale: 1 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{
-            type: "spring",
-            stiffness: 400,
-            damping: 25,
-          }}
-        >
-          {label && (
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              {label}
-            </label>
-          )}
+        <span className={cn("text-sm", !value && "text-gray-400")}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+      </div>
 
-          <div className="relative">
-            <motion.button
-              type="button"
-              onClick={() => !disabled && setIsOpen(!isOpen)}
-              disabled={disabled}
-              className={cn(
-                "flex w-full glass-select px-3 py-2 text-sm transition duration-200 focus:outline-none focus:ring-1 focus:ring-white/20 disabled:cursor-not-allowed disabled:opacity-50",
-                sizeClasses[size],
-                widthClass,
-                "pr-10",
-                error &&
-                  "border-red-400/50 focus:border-red-400/70 focus:ring-red-400/30",
-                className
-              )}
-            >
-              <span className={selectedOption ? "text-white" : "text-white/50"}>
-                {selectedOption ? selectedOption.label : placeholder}
-              </span>
-
+      {portalContainer &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
               <motion.div
-                animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                ref={menuRef}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.12 }}
+                className="z-[9999] bg-[#0f1720] border border-gray-700 rounded-lg shadow-lg overflow-auto"
+                style={{
+                  position: "absolute",
+                  top: menuPosition.top,
+                  left: menuPosition.left,
+                  width: menuPosition.width,
+                }}
               >
-                <ChevronDown
-                  className="h-4 w-4 text-white/60"
-                  strokeWidth={1}
-                />
-              </motion.div>
-            </motion.button>
-
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute top-full left-0 right-0 z-50 mt-1 glass-modal max-h-60 overflow-auto scrollbar-hide"
-                >
-                  {options?.map((option) => (
-                    <motion.button
-                      key={option.value}
-                      type="button"
-                      onClick={() => handleSelect(option.value)}
+                {options.length === 0 ? (
+                  <div className="px-4 py-2 text-sm text-white/60">No options</div>
+                ) : (
+                  options.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={(e) => {
+                        // stopPropagation not strictly necessary because we check menuRef on mousedown,
+                        // but it's harmless and prevents any parent click handlers.
+                        e.stopPropagation();
+                        onChange(opt.value);
+                        setIsOpen(false);
+                      }}
                       className={cn(
-                        "w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10 transition-colors",
-                        option.value === value && "bg-white/15 text-white"
+                        "px-4 py-2 text-sm cursor-pointer select-none",
+                        value === opt.value ? "bg-gray-800 text-white" : "text-white/80 hover:bg-gray-700"
                       )}
-                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                      whileTap={{ scale: 0.98 }}
                     >
-                      {option.label}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      {opt.label}
+                    </div>
+                  ))
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          portalContainer
+        )}
 
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-1 text-sm text-red-300"
-            >
-              {error}
-            </motion.p>
-          )}
-
-          {helperText && !error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-1 text-sm text-white/60"
-            >
-              {helperText}
-            </motion.p>
-          )}
-
-          <BottomGradient />
-        </motion.div>
-      </motion.div>
-    );
-  }
-);
-
-Select.displayName = "Select";
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+}

@@ -16,6 +16,8 @@ interface Product {
   imageUrls: string[];
   category: string;
   isActive: boolean;
+  benefits: string[];
+  features: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -28,19 +30,20 @@ interface ProductFormModalProps {
 }
 
 const CATEGORIES = [
-  "Paints Line",
-  "Other Solutions"
+  "Premium Line",
+  "Standard Line"
 ];
 
 export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFormModalProps) {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
-    slug: "",
     description: "",
     imageUrls: [] as string[],
     category: "",
-    isActive: true
+    isActive: true,
+    benefits: [] as string[],
+    features: [] as string[]
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,20 +54,22 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
     if (product) {
       setFormData({
         name: product.name,
-        slug: product.slug,
         description: product.description,
         imageUrls: product.imageUrls || [],
         category: product.category,
-        isActive: product.isActive
+        isActive: product.isActive,
+        benefits: product.benefits || [],
+        features: product.features || []
       });
     } else {
       setFormData({
         name: "",
-        slug: "",
         description: "",
         imageUrls: [],
         category: "",
-        isActive: true
+        isActive: true,
+        benefits: [],
+        features: []
       });
     }
     setErrors({});
@@ -76,12 +81,6 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
 
     if (!formData.name.trim()) {
       newErrors.name = "Product name is required";
-    }
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = "Product slug is required";
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = "Slug must contain only lowercase letters, numbers, and hyphens";
     }
 
     if (!formData.description.trim()) {
@@ -103,6 +102,11 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting || isUploadingImages) {
+      return;
+    }
     
     if (!validateForm()) {
       return;
@@ -151,11 +155,12 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
 
       const productData = {
         name: formData.name,
-        slug: formData.slug,
         description: formData.description,
         imageUrls: finalImageUrls,
         category: formData.category,
-        isActive: formData.isActive
+        isActive: formData.isActive,
+        benefits: formData.benefits,
+        features: formData.features
       };
 
       let savedProduct: Product;
@@ -244,28 +249,9 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
             label="Product Name"
             placeholder="Enter product name"
             value={formData.name}
-            onChange={(e) => {
-              handleInputChange("name", e.target.value);
-              // Auto-generate slug from name if creating new product
-              if (!product) {
-                const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-                handleInputChange("slug", slug);
-              }
-            }}
+            onChange={(e) => handleInputChange("name", e.target.value)}
             error={errors.name}
             required
-            fullWidth
-          />
-
-          {/* Product Slug */}
-          <Input
-            label="Product Slug"
-            placeholder="product-slug"
-            value={formData.slug}
-            onChange={(e) => handleInputChange("slug", e.target.value.toLowerCase())}
-            error={errors.slug}
-            required
-            helperText="URL-friendly identifier (lowercase, hyphens only)"
             fullWidth
           />
 
@@ -296,6 +282,40 @@ export function ProductFormModal({ product, isOpen, onClose, onSave }: ProductFo
               }))
             ]}
           />
+
+          {/* Benefits */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Benefits
+            </label>
+            <Textarea
+              placeholder="Enter benefits (one per line)"
+              value={formData.benefits.join('\n')}
+              onChange={(e) => handleInputChange("benefits", e.target.value.split('\n').filter(item => item.trim()))}
+              rows={3}
+              fullWidth
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Enter each benefit on a new line
+            </p>
+          </div>
+
+          {/* Features */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Features
+            </label>
+            <Textarea
+              placeholder="Enter features (one per line)"
+              value={formData.features.join('\n')}
+              onChange={(e) => handleInputChange("features", e.target.value.split('\n').filter(item => item.trim()))}
+              rows={3}
+              fullWidth
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Enter each feature on a new line
+            </p>
+          </div>
 
           {/* Image Upload */}
           <div>

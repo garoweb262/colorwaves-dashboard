@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/amal-ui";
 import { 
   Share2, 
@@ -24,12 +24,27 @@ interface SocialShareProps {
 export function SocialShare({ url, title, description, imageUrl, hashtags = [] }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || '');
   const encodedImageUrl = encodeURIComponent(imageUrl || '');
   const hashtagString = hashtags.map(tag => `#${tag}`).join(' ');
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
@@ -57,25 +72,26 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
         leftIcon={<Share2 className="h-4 w-4" />}
+        className="border-white/20 text-white/80 hover:bg-white/10 hover:text-white"
       >
         Share
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 min-w-[200px]">
-          <div className="space-y-2">
+        <div className="absolute top-full left-0 mt-2 glass-card p-4 z-[9999] min-w-[240px]">
+          <div className="space-y-3">
             {/* Copy Link */}
             <Button
               variant="ghost"
               size="sm"
               onClick={handleCopyLink}
-              className="w-full justify-start"
-              leftIcon={copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+              className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10"
+              leftIcon={copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
             >
               {copied ? 'Copied!' : 'Copy Link'}
             </Button>
@@ -86,7 +102,7 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
                 variant="ghost"
                 size="sm"
                 onClick={() => handleShare('facebook')}
-                className="w-full justify-start text-blue-600 hover:bg-blue-50"
+                className="w-full justify-start text-blue-300 hover:bg-blue-400/20 hover:text-blue-200"
                 leftIcon={<Facebook className="h-4 w-4" />}
               >
                 Facebook
@@ -96,7 +112,7 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
                 variant="ghost"
                 size="sm"
                 onClick={() => handleShare('twitter')}
-                className="w-full justify-start text-blue-400 hover:bg-blue-50"
+                className="w-full justify-start text-blue-300 hover:bg-blue-400/20 hover:text-blue-200"
                 leftIcon={<Twitter className="h-4 w-4" />}
               >
                 Twitter
@@ -106,7 +122,7 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
                 variant="ghost"
                 size="sm"
                 onClick={() => handleShare('linkedin')}
-                className="w-full justify-start text-blue-700 hover:bg-blue-50"
+                className="w-full justify-start text-blue-300 hover:bg-blue-400/20 hover:text-blue-200"
                 leftIcon={<Linkedin className="h-4 w-4" />}
               >
                 LinkedIn
@@ -116,7 +132,7 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
                 variant="ghost"
                 size="sm"
                 onClick={() => handleShare('whatsapp')}
-                className="w-full justify-start text-green-600 hover:bg-green-50"
+                className="w-full justify-start text-green-300 hover:bg-green-400/20 hover:text-green-200"
                 leftIcon={<MessageCircle className="h-4 w-4" />}
               >
                 WhatsApp
@@ -126,7 +142,7 @@ export function SocialShare({ url, title, description, imageUrl, hashtags = [] }
                 variant="ghost"
                 size="sm"
                 onClick={() => handleShare('email')}
-                className="w-full justify-start text-gray-600 hover:bg-gray-50 col-span-2"
+                className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white col-span-2"
                 leftIcon={<Mail className="h-4 w-4" />}
               >
                 Email

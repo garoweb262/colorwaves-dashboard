@@ -14,6 +14,8 @@ interface Product {
   imageUrls: string[];
   category: string;
   isActive: boolean;
+  benefits: string[];
+  features: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -364,7 +364,7 @@ export default function TestimoniesPage() {
                 
                 <div className="mb-4">
                   <div className="text-4xl text-white/30 mb-2">"</div>
-                  <p className="text-sm text-white/70 line-clamp-4 italic">
+                  <p className="text-sm text-white/70 italic">
                     {testimony.content}
                   </p>
                   <div className="text-4xl text-white/30 text-right mt-2">"</div>

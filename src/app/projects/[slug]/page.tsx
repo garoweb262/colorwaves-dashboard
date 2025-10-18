@@ -138,7 +138,10 @@ export default function ProjectDetailPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="glass-card p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mx-auto"></div>
+            <p className="text-white/80 mt-4 text-center">Loading project details...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -148,10 +151,13 @@ export default function ProjectDetailPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Project not found</h2>
-          <Button onClick={() => router.push("/projects")}>
-            Back to Projects
-          </Button>
+          <div className="glass-card p-8 max-w-md mx-auto">
+            <h2 className="text-xl font-semibold text-white mb-4">Project not found</h2>
+            <p className="text-white/80 mb-6">The project you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={() => router.push("/projects")}>
+              Back to Projects
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -161,49 +167,54 @@ export default function ProjectDetailPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/projects")}
-            leftIcon={<ArrowLeft className="h-4 w-4" />}
-          >
-            Back to Projects
-          </Button>
-          <div className="flex items-center space-x-2">
-            <SocialShare
-              url={`${window.location.origin}/projects/${project.slug}`}
-              title={project.title}
-              description={project.description}
-              imageUrl={project.imageUrls?.[0]}
-              hashtags={project.technologies}
-            />
+        <div className="glass-card p-6">
+          <div className="flex items-center justify-between">
             <Button
-              variant="outline"
-              onClick={handleToggleStatus}
-              leftIcon={project.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+              variant="ghost"
+              onClick={() => router.push("/projects")}
+              leftIcon={<ArrowLeft className="h-4 w-4" />}
+              className="text-white/80 hover:text-white hover:bg-white/10"
             >
-              {project.isActive ? "Deactivate" : "Activate"}
+              Back to Projects
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleEdit}
-              leftIcon={<Edit className="h-4 w-4" />}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDelete}
-              leftIcon={<Trash2 className="h-4 w-4" />}
-              className="text-destructive hover:text-destructive-600"
-            >
-              Delete
-            </Button>
+            <div className="flex items-center space-x-2">
+              <SocialShare
+                url={`${window.location.origin}/projects/${project.slug}`}
+                title={project.title}
+                description={project.description}
+                imageUrl={project.imageUrls?.[0]}
+                hashtags={project.technologies}
+              />
+              <Button
+                variant="outline"
+                onClick={handleToggleStatus}
+                leftIcon={project.isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                className="border-white/20 text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                {project.isActive ? "Deactivate" : "Activate"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleEdit}
+                leftIcon={<Edit className="h-4 w-4" />}
+                className="border-white/20 text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDelete}
+                leftIcon={<Trash2 className="h-4 w-4" />}
+                className="border-red-400/50 text-red-300 hover:bg-red-400/10 hover:text-red-200"
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-card overflow-hidden">
           {/* Project Images */}
           {project.imageUrls && project.imageUrls.length > 0 && (
             <div className="relative">
@@ -224,7 +235,7 @@ export default function ProjectDetailPage() {
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
+                      className={`w-2 h-2 rounded-full transition-all backdrop-blur-sm ${
                         index === currentImageIndex ? 'bg-white w-8' : 'bg-white/50'
                       }`}
                     />
@@ -252,8 +263,8 @@ export default function ProjectDetailPage() {
           <div className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.title}</h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <h1 className="text-3xl font-bold text-white mb-2">{project.title}</h1>
+                <div className="flex items-center space-x-4 text-sm text-white/70">
                   <div className="flex items-center space-x-1">
                     <Users className="h-4 w-4" />
                     <span>Client: {project.client}</span>
@@ -267,8 +278,8 @@ export default function ProjectDetailPage() {
                   )}
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              <span className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
+                project.isActive ? 'bg-green-400/20 text-green-300 border border-green-400/30' : 'bg-gray-400/20 text-gray-300 border border-gray-400/30'
               }`}>
                 {project.isActive ? "Active" : "Inactive"}
               </span>
@@ -276,19 +287,19 @@ export default function ProjectDetailPage() {
 
             {/* Description */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-              <p className="text-white leading-relaxed whitespace-pre-line">{project.description}</p>
+              <h2 className="text-xl font-semibold text-white mb-3">Description</h2>
+              <p className="text-white/80 leading-relaxed whitespace-pre-line">{project.description}</p>
             </div>
 
             {/* Technologies */}
             {project.technologies && project.technologies.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Technologies Used</h2>
+                <h2 className="text-xl font-semibold text-white mb-3">Technologies Used</h2>
                 <div className="flex flex-wrap gap-2">
                   {project.technologies.map((tech, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-blue-400/20 text-blue-300 border border-blue-400/30 rounded-full text-sm font-medium backdrop-blur-sm"
                     >
                       {tech}
                     </span>
@@ -300,14 +311,14 @@ export default function ProjectDetailPage() {
             {/* Image Gallery */}
             {project.imageUrls && project.imageUrls.length > 1 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Gallery</h2>
+                <h2 className="text-xl font-semibold text-white mb-3">Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {project.imageUrls.map((imageUrl, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex ? 'border-blue-500 scale-105' : 'border-gray-200 hover:border-gray-300'
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all backdrop-blur-sm ${
+                        index === currentImageIndex ? 'border-blue-400 bg-blue-400/20 scale-105' : 'border-white/20 hover:border-white/40 bg-white/5'
                       }`}
                     >
                       <img
@@ -325,13 +336,13 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Metadata */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="pt-6 border-t border-white/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-white/70">
                 <div>
-                  <span className="font-medium">Created:</span> {formatDate(project.createdAt)}
+                  <span className="font-medium text-white/90">Created:</span> {formatDate(project.createdAt)}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {formatDate(project.updatedAt)}
+                  <span className="font-medium text-white/90">Last Updated:</span> {formatDate(project.updatedAt)}
                 </div>
               </div>
             </div>

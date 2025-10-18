@@ -17,6 +17,8 @@ interface Product {
   imageUrls: string[];
   category: string;
   isActive: boolean;
+  benefits: string[];
+  features: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -142,7 +144,10 @@ export default function ProductDetailPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="glass-card p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mx-auto"></div>
+            <p className="text-white/80 mt-4 text-center">Loading product details...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -152,10 +157,13 @@ export default function ProductDetailPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Product not found</h2>
-          <Button onClick={() => router.push("/products")}>
-            Back to Products
-          </Button>
+          <div className="glass-card p-8 max-w-md mx-auto">
+            <h2 className="text-xl font-semibold text-white mb-4">Product not found</h2>
+            <p className="text-white/80 mb-6">The product you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={() => router.push("/products")}>
+              Back to Products
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -207,7 +215,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="glass-card overflow-hidden">
           {/* Product Images */}
           {product.imageUrls && product.imageUrls.length > 0 && (
             <div className="relative">
@@ -227,7 +235,7 @@ export default function ProductDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
@@ -235,13 +243,13 @@ export default function ProductDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                     
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-black/50 text-white text-sm px-3 py-1 rounded-full">
+                      <span className="bg-black/50 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full">
                         {currentImageIndex + 1} / {product.imageUrls.length}
                       </span>
                     </div>
@@ -255,7 +263,7 @@ export default function ProductDetailPage() {
           <div className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">{product.name}</h1>
                 <div className="flex items-center space-x-2 mt-2">
                   <Badge color="purple" size="md">
                     {product.category}
@@ -269,21 +277,51 @@ export default function ProductDetailPage() {
 
             {/* Description */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{product.description}</p>
+              <h2 className="text-xl font-semibold text-white mb-3">Description</h2>
+              <p className="text-white/80 leading-relaxed whitespace-pre-line">{product.description}</p>
             </div>
+
+            {/* Benefits */}
+            {product.benefits && product.benefits.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-white mb-3">Benefits</h2>
+                <ul className="space-y-2">
+                  {product.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start space-x-3 text-white/80">
+                      <span className="text-green-400 mt-1">✓</span>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Features */}
+            {product.features && product.features.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-white mb-3">Features</h2>
+                <ul className="space-y-2">
+                  {product.features.map((feature, index) => (
+                    <li key={index} className="flex items-start space-x-3 text-white/80">
+                      <span className="text-blue-400 mt-1">•</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Image Gallery Thumbnails */}
             {product.imageUrls && product.imageUrls.length > 1 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">All Images</h2>
+                <h2 className="text-xl font-semibold text-white mb-3">All Images</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {product.imageUrls.map((imageUrl, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all backdrop-blur-sm ${
+                        index === currentImageIndex ? 'border-blue-400 bg-blue-400/20' : 'border-white/20 hover:border-white/40 bg-white/5'
                       }`}
                     >
                       <img
@@ -301,13 +339,13 @@ export default function ProductDetailPage() {
             )}
 
             {/* Metadata */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="pt-6 border-t border-white/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-white/70">
                 <div>
-                  <span className="font-medium">Created:</span> {formatDate(product.createdAt)}
+                  <span className="font-medium text-white/90">Created:</span> {formatDate(product.createdAt)}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {formatDate(product.updatedAt)}
+                  <span className="font-medium text-white/90">Last Updated:</span> {formatDate(product.updatedAt)}
                 </div>
               </div>
             </div>
